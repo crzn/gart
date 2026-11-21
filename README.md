@@ -1,57 +1,121 @@
-# Gart
+# 🎯 Gart
 
-Self-hosted live quiz platform for a company, a school or a club, running entirely on the **Cloudflare Free plan** ($0 infrastructure). Players join from their phones with a PIN, the host runs the game and a projector screen shows questions and results. Open source, AGPL-3.0.
+**Живі квізи для вашої команди, школи чи клубу. Самохостинг на безкоштовному плані Cloudflare: $0 за інфраструктуру.**
 
-**You only need a Cloudflare account and a browser.** Install it from the [install page](https://crzn.github.io/gart/) (no software on your computer), update it later from the admin panel. The interface is Ukrainian by default, English is included.
+[![Ліцензія: AGPL-3.0](https://img.shields.io/badge/ліцензія-AGPL--3.0-blue.svg)](LICENSE)
+[![Cloudflare](https://img.shields.io/badge/працює%20на-Cloudflare%20Free-F38020.svg)](https://www.cloudflare.com/plans/)
+[![React](https://img.shields.io/badge/веб-React%20%2B%20Tailwind-61DAFB.svg)](apps/web)
+[![Hono](https://img.shields.io/badge/API-Hono%20Worker-E36002.svg)](apps/worker)
+[![PR вітаються](https://img.shields.io/badge/PR-вітаються-brightgreen.svg)](CONTRIBUTING.md)
 
-**Status: 0.12.1. All planned phases are built, plus install from the browser (0.8.1), updates from the admin panel (0.8.2) and presentation polish for the host screen and projector (0.9.0): QR code to join, original music and sound effects, animation, and import of quizzes from gart.json files, made by an AI assistant (0.10.0).** A full game with 120 simulated players passes locally; it has not been run on real Cloudflare yet, and neither has the browser installer, so 120 concurrent players and the installer are not yet confirmed on the real service. See [CHANGELOG.md](CHANGELOG.md) for exactly what works today.
+🌐 **Мови:** Українська · [English](README.en.md)
 
-## What works in this build
+> **Знай. Дій. Перемагай!** 🏆
 
-- **Presentation (0.9.0), host screen and projector only:** QR code to join, original background music and effects made in the browser (three variants, listening page at `/listen`), animations (respecting "reduce motion"). Participants' phones stay silent and plain.
-- **Updates from the admin panel** (0.8.2): the owner sees new releases, what changed, and updates or goes back to an earlier release with a button; packages are signed and verified before anything is installed.
-- **Browser installer** (0.8.1) and a local wizard (Windows, macOS, Linux): sign in with Cloudflare OAuth, create/reuse the D1 database, apply migrations, generate secrets, build, deploy, health-check. Actions: Install, Update, Repair, Backup, Uninstall.
-- Cloudflare Worker (Hono) serving the web app via Workers Static Assets, with `/api/health`, a WebSocket/Durable Object round-trip check, and setup status.
-- Complete D1 schema and seed data (13 tables, 6 quiz templates).
-- Shared, tested game rules: deterministic scoring, game state machine, nickname rules, PIN generation, ranking, settings schema, WebSocket protocol validation.
-- Responsive Ukrainian/English web shell (React, Tailwind).
-- **Administrator accounts (phase 2):** first owner created by the installer, sign-in/sign-out, roles (owner/admin/editor), password change, session list and revocation, administrator management, login rate limiting, CSRF protection, audit log, automatic tuning of password hashing to the account's CPU limit.
-- **Quiz editor and branding (phase 3):** templates, questions with images, game settings, statuses, duplication, runtime branding (colours, logo, background, messages).
+Гравці заходять з телефонів за PIN-кодом або QR, ведучий керує грою, а проєктор показує питання й результати. Потрібні лише акаунт Cloudflare і браузер. Інтерфейс українською за замовчуванням, англійська вже є. 🇺🇦
 
-## What is not built yet
+**Статус: 0.12.1.** Повна гра зі 120 імітованими гравцями проходить локально. Реальний тест навантаження на Cloudflare ще попереду, тож 120 одночасних гравців на живому сервісі поки не підтверджені. Що саме працює сьогодні, дивіться в [CHANGELOG.md](CHANGELOG.md).
 
-quiz import/export; unused-image cleanup; Cloudflare Analytics API integration.
+---
 
-## Install
+## ✨ Можливості
 
-**From the browser, nothing to install on your computer:** follow the install page (GitHub Pages of this repository, `https://<owner>.github.io/<repo>/`) or section 2b of the **[Administrator Guide](docs/ADMIN-GUIDE.en.md)** ([українською](docs/ADMIN-GUIDE.uk.md)). You need a free Cloudflare account and an API token.
+- 📱 **Приєднання з телефона** — PIN або QR-код, нікнейм і аватар. Без акаунтів і застосунків для гравців.
+- 🖥️ **Екран для проєктора** — велике питання, варіанти, діаграма відповідей, рейтинг і подіум; усе масштабується під екран, без анімацій.
+- 🎛️ **Пульт ведучого** — старт, пауза, закриття питання, рейтинг, завершення; кнопки в нижній панелі під рукою.
+- 🎵 **Власна музика й ефекти** — створені в браузері, у трьох варіантах (Сопілка, Цимбали, Гопак), зі сторінкою прослуховування `/listen`. Звук лише на екрані ведучого й проєктора, телефони мовчать.
+- 🧠 **Редактор вікторин** — шаблони, питання з картинками, налаштування гри (час, бали, бонус за швидкість), обкладинка й опис.
+- 🤖 **Квізи від ШІ** — завантажте до 5 файлів `gart.json` одночасно; шаблон із коментарями для ШІ скачується одним кліком.
+- 🎨 **Брендування** — логотип, назва компанії, слоган, кольори, фон, вітальне й фінальне повідомлення.
+- 👥 **Ролі** — власник, адміністратор, редактор; журнал дій, сесії, обмеження частоти спроб входу.
+- 📊 **Монітор використання** — скільки безкоштовних лімітів Cloudflare вичерпано сьогодні й що буде за наступну гру.
+- 🔄 **Оновлення кнопкою** — підписані пакети, перевірка підпису перед встановленням, відкат на попередній випуск.
+- 🧰 **Установка з браузера** — без ПЗ на вашому комп'ютері; є й локальний майстер для Windows, macOS і Linux.
+- 🔒 **Приватність** — сторінка `/privacy`, автоочищення результатів за строком, видалення гри одним кліком.
 
-Advanced, with Node.js 22.12+ on your computer (local wizard):
+## 🏗️ Архітектура
+
+Монорепозиторій на TypeScript. Веб-застосунок (React) віддається через Workers Static Assets, API працює на одному Cloudflare Worker (Hono). Кожна гра живе в Durable Object із SQLite і WebSocket, а довгі дані (вікторини, результати, зображення) лежать у D1. Чиста логіка гри (рахунок, автомат станів, правила нікнеймів, рейтинг, протокол) винесена в `packages/shared` і тестується окремо.
+
+Докладніше: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DECISIONS.md](docs/DECISIONS.md) і [docs/ROADMAP.md](docs/ROADMAP.md).
+
+## 🏠 Встановлення за кілька хвилин
+
+**З браузера, нічого не встановлюючи:** відкрийте [сторінку встановлення](https://crzn.github.io/gart/) і пройдіть кроки. Знадобиться безкоштовний акаунт Cloudflare та API-токен.
 
 ```
 bash install.sh                                          # macOS / Linux
 powershell -ExecutionPolicy Bypass -File .\install.ps1   # Windows
 ```
 
-## Develop
+Другий варіант потребує Node.js 22.12+ на вашому комп'ютері. Повний посібник: [Посібник адміністратора](docs/ADMIN-GUIDE.uk.md) · [English](docs/ADMIN-GUIDE.en.md).
+
+## 🚀 Локальна розробка
+
+### Вимоги
+
+- Node.js 22.12 або новіший
+- npm 10 або новіший
+
+### Налаштування кількома командами
 
 ```
 npm install
-npm run check          # typecheck + tests + build
-npm run dev:worker     # Worker on :8787 (local D1; run `npm run db:migrate:local -w apps/worker` once)
-npm run dev:web        # Vite on :5173, proxies /api to the Worker
+cp apps/worker/.dev.vars.example apps/worker/.dev.vars   # локальні секрети, не для продакшну
+npm run db:migrate:local -w apps/worker                  # один раз: локальна D1
+npm run dev:worker                                       # Worker на :8787
+npm run dev:web                                          # Vite на :5173, /api іде на Worker
 ```
 
-Layout: `apps/web` (React), `apps/worker` (Hono + Durable Object), `packages/shared` (pure logic used by both), `migrations/`, `installer/`, `config/cloudflare-limits.json` (the only place quotas live), `docs/`.
+## 🔧 Змінні середовища
 
-## Documents
+| Змінна | Обов'язкова | Призначення |
+| --- | --- | --- |
+| `SESSION_SECRET` | ✅ | Підпис сесій адміністраторів |
+| `WS_TICKET_SECRET` | ✅ | Підпис одноразових квитків для WebSocket |
+| `SETUP_TOKEN` | ✅ | Одноразовий токен створення першого власника |
+| `KDF_ITERATIONS` | — | Складність хешування паролів; встановлювач підбирає її під ліміт CPU вашого акаунта |
 
-[Architecture and plan](docs/ARCHITECTURE.md) · [Decisions](docs/DECISIONS.md) · [Security](docs/SECURITY.md) · [Admin guide EN](docs/ADMIN-GUIDE.en.md) · [UK](docs/ADMIN-GUIDE.uk.md)
+Установка генерує секрети за вас. Локальні значення з `.dev.vars.example` ніколи не використовуйте в продакшні.
 
-## Contributing and security
+## 📜 Команди
 
-[CONTRIBUTING.md](CONTRIBUTING.md) explains how to help; vulnerabilities are reported privately, see [SECURITY.md](SECURITY.md).
+| Команда | Що робить |
+| --- | --- |
+| `npm run check` | Типи, тести й збірка: усе, що має пройти перед комітом |
+| `npm run dev:worker` | Локальний Worker із симульованою D1 |
+| `npm run dev:web` | Веб-застосунок із гарячим перезавантаженням |
+| `npm run test` | Юніт-тести (vitest) |
+| `npm run install:wizard` | Локальний майстер: установка, оновлення, відновлення, резервна копія, видалення |
+| `npm run release:check` | Перевіряє, що випуск готовий до публікації |
+| `npm run release:package` | Збирає підписаний пакет випуску |
+| `npm run signing-key` | Створює ключ підпису випусків |
 
-## License
+## 🗂️ Структура проєкту
 
-GNU AGPL-3.0-only. See [LICENSE](LICENSE).
+```
+apps/
+  web/            # React + Tailwind: гра, проєктор, ведучий, адмінка
+  worker/         # Hono API + Durable Objects (кімната гри, оновлення, ліміти)
+  installer-web/  # Установка з браузера
+packages/
+  shared/         # Чиста логіка й схеми, спільні для web і worker
+  deploy-engine/  # Розгортання на Cloudflare з коду
+migrations/       # Схема D1 і початкові дані
+installer/        # Локальний майстер встановлення
+config/           # Ліміти безкоштовного плану Cloudflare (єдине місце з квотами)
+docs/             # Архітектура, рішення, безпека, посібники
+tests/e2e/        # Браузерні тести на справжньому Worker
+```
+
+## 🚢 Випуски та CI
+
+Випуск публікується тегом `vX.Y.Z`: GitHub Actions збирає підписаний пакет (`gart-package.json` і `gart-installer.json`) і додає його до релізу. Власник отримує оновлення з адмінки: підпис пакета перевіряється до встановлення, нові міграції бази застосовуються автоматично, а в разі потреби можна повернутися до попереднього випуску. Для автоматичних оновлень із GitHub підключіть репозиторій до Cloudflare Workers Builds; кроки є в [Посібнику адміністратора](docs/ADMIN-GUIDE.uk.md).
+
+## 🤝 Як долучитися
+
+Ідеї, виправлення й переклади вітаються. Прочитайте [CONTRIBUTING.md](CONTRIBUTING.md), перш ніж відкривати pull request, і запустіть `npm run check`. Вразливості повідомляйте приватно за інструкцією в [SECURITY.md](SECURITY.md).
+
+## 📄 Ліцензія
+
+[GNU AGPL-3.0-only](LICENSE). Ви можете запускати, змінювати й ділитися Gart; якщо ви надаєте змінену версію користувачам по мережі, ви надаєте їм і її вихідний код.
