@@ -1,3 +1,4 @@
+import { maybePurge } from "../repositories/retention";
 import {
   ChangePasswordSchema, LoginSchema, checkPassword, normalizeEmail, parseKdfIterations, type AdminView,
 } from "@gart/shared";
@@ -53,6 +54,7 @@ authRoutes.post("/login", async (c) => {
   const token = randomToken();
   const times = newSessionTimes(now);
   await deleteExpiredSessions(c.env.DB, now);
+  await maybePurge(c.env.DB, now);
   await createSession(c.env.DB, {
     id: randomId(),
     adminId: admin.id,

@@ -115,6 +115,7 @@ export function PlayPage() {
                 ))}
               </div>
             </fieldset>
+            <p className="text-center text-xs text-ink-muted"><a href="/privacy" target="_blank" rel="noreferrer" className="underline underline-offset-2">{t("priv.title")}</a></p>
             {state.error && state.error !== "unknown_player" ? <ErrorNote>{errText(state.error)}</ErrorNote> : null}
             <Button type="submit" busy={joining && !state.error} disabled={nickname.trim().length < 2} className="w-full !py-3.5 !text-base">{t("play.join")}</Button>
           </form>

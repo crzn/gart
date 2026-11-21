@@ -1,4 +1,4 @@
-import { Download, Play, Trophy, XCircle } from "lucide-react";
+import { Download, Play, Trash2, Trophy, XCircle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../api";
@@ -35,6 +35,12 @@ export function GamesTab() {
     } catch (e) { setError(t(errorKey(e))); }
   }
 
+  async function remove(g: Game) {
+    if (!window.confirm(t("games.confirmDelete"))) return;
+    try { await api(`/api/games/${g.id}`, { method: "DELETE" }); setOpen(null); await load(); }
+    catch (e) { setError(t(errorKey(e))); }
+  }
+
   function exportCsv() {
     if (!open) return;
     const rows = [["rank", "nickname", "points", "correct"], ...open.people.map((p) => [p.final_rank, p.nickname, p.total_points, p.correct_count])];
@@ -57,7 +63,7 @@ export function GamesTab() {
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div><h2 className="text-xl font-bold">{open.game.title}</h2><p className="text-sm text-ink-muted">PIN {open.game.pin} · {fmt(open.game.startedAt ?? open.game.createdAt)} · {t("play.players")}: {open.people.length}</p></div>
-            <div className="flex gap-2"><Button variant="ghost" onClick={exportCsv} disabled={open.people.length === 0}><Download className="size-4" aria-hidden />CSV</Button><Button variant="ghost" onClick={() => setOpen(null)}>{t("games.back")}</Button></div>
+            <div className="flex gap-2"><Button variant="ghost" onClick={exportCsv} disabled={open.people.length === 0}><Download className="size-4" aria-hidden />CSV</Button><Button variant="ghost" onClick={() => void remove(open.game)} data-testid="delete-game"><Trash2 className="size-4" aria-hidden />{t("games.delete")}</Button><Button variant="ghost" onClick={() => setOpen(null)}>{t("games.back")}</Button></div>
           </div>
           {open.people.length === 0 ? <p className="mt-4 text-sm text-ink-muted">{t("games.noResults")}</p> : (
             <table className="mt-4 w-full text-sm">

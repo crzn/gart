@@ -12,3 +12,4 @@ export * from "./quiz";
 export * from "./game";
 export * from "./usage";
 export * from "./interchange";
+export * from "./privacy";

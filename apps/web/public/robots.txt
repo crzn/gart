@@ -1,0 +1,3 @@
+# Gart is a private quiz tool: nothing here is meant for search engines or AI training.
+User-agent: *
+Disallow: /

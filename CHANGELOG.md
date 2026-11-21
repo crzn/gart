@@ -2,6 +2,14 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.12.1] - 2026-11-22: privacy and hardening (from the security scan)
+
+### Added
+- **Privacy policy page** at `/privacy` (Ukrainian and English), linked in the footer and on the player's join form. It states what is stored (players, administrators, IP addresses), for how long, which third parties are involved (none besides the hosting) and how to ask for deletion. The owner adds a contact and a free note in **Settings → Privacy**.
+- **Data retention.** Finished games (nicknames, answers, scores) are deleted automatically after 30 days, 90 days or 1 year (default), or kept until deleted by hand. A shorter period takes effect when saved; otherwise the clean-up runs at most once a day on a sign-in or a new game (no scheduled trigger needed).
+- **Delete game** button in the game results (administrators and owner): erases the game with all nicknames and answers.
+- `Strict-Transport-Security` on pages and API answers; `robots.txt` that disallows everything, a `noindex` tag and an `X-Robots-Tag` header (a private tool should not be indexed or used for AI training).
+
 ## [0.12.0] - 2026-11-21: design pass
 
 ### Changed

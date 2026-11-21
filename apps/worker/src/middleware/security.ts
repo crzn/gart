@@ -18,6 +18,7 @@ export const apiSecurity: MiddlewareHandler<AppEnv> = async (c, next) => {
   await next();
   // Routes that opt in to caching (public images, branding) set their own Cache-Control first.
   if (!c.res.headers.has("Cache-Control")) c.header("Cache-Control", "no-store");
+  c.header("Strict-Transport-Security", "max-age=31536000");
   c.header("X-Content-Type-Options", "nosniff");
   c.header("Referrer-Policy", "no-referrer");
 };

@@ -11,6 +11,7 @@ import { SetupPage } from "./pages/SetupPage";
 import { JoinPage } from "./pages/JoinPage";
 import { PlayPage } from "./pages/PlayPage";
 import { HostPage, ScreenPage } from "./pages/HostPage";
+import { PrivacyPage } from "./pages/PrivacyPage";
 
 /** AGPL-3.0 section 13: everyone who uses the site over a network can get the source code it runs. */
 const SOURCE_URL = "https://github.com/crzn/gart";
@@ -69,6 +70,7 @@ export function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/setup" element={<SetupPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/listen" element={<Suspense fallback={null}><ListenPage /></Suspense>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -76,6 +78,7 @@ export function App() {
       {projector ? null : (
         <footer className={`mx-auto w-full ${admin ? "max-w-6xl" : "max-w-5xl"} px-4 pb-6 text-center text-xs text-ink-muted sm:px-6`}>
           {t("footer.text")}{" "}
+          <NavLink to="/privacy" className="underline underline-offset-2 hover:text-ink">{t("priv.link")}</NavLink>{" · "}
           <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-ink">{t("footer.source")}</a>
         </footer>
       )}

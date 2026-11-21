@@ -96,6 +96,7 @@ Optional Turnstile; abuse tests and a load run against a real deployment.
 | A tampered or fake release | Nothing is installed before the ECDSA signature and every file hash are verified with the public key built into the application. The version inside the signed manifest must equal the requested release. |
 | A release that removes data | Migrations are flagged when they contain `DROP`, `DELETE`, renames and the like; the update stops and asks for explicit confirmation. A D1 Time Travel recovery point is recorded and shown before migrations run. |
 | Rollback to a version that does not match the stored layout | Refused when the installed Durable Object migration tag is unknown to the older package. |
+| Personal data piles up | Nicknames, answers and scores of finished games are deleted after the period the owner chooses (default one year; piggybacked on sign-ins and new games, no scheduled trigger), and an administrator can erase any finished game at once. The public `/privacy` page states what is kept. IP addresses are used only for rate limiting; sessions keep a hash. |
 | Compromised signing key | Anyone holding the signing key can publish a package that every installation accepts. Keep the key only in the repository secret and in a password manager; rotating it means shipping a new application version through the installer. |
 | Test-only variables (`RELEASE_*`, `CF_API_BASE`) | Never set by the installer or the update. Whoever can set variables on the Worker already controls it. |
 

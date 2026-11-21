@@ -1,7 +1,8 @@
 import { GAME_LIMITS, SAFE_MODE_MAX_PLAYERS, buildGameSnapshot, generatePin, playabilityProblems, roleAtLeast } from "@gart/shared";
 import { Hono } from "hono";
 import { z } from "zod";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth, requireRole } from "../middleware/auth";
+import { maybePurge } from "../repositories/retention";
 import type { AppEnv } from "../middleware/context";
 import { writeAudit } from "../repositories/audit";
 import { getQuiz } from "../repositories/quizzes";
@@ -48,6 +49,7 @@ async function loadControlled(c: { env: AppEnv["Bindings"]; get: (k: "auth") => 
 
 gameRoutes.post("/", async (c) => {
   const auth = c.get("auth");
+  await maybePurge(c.env.DB, Date.now());
   const body = await readJson(c, CreateGameSchema);
   if (!body.ok) return body.res;
   const limited = await rateLimitHit(c.env, rlKey.gameCreate(auth.adminId), LIMITS.gameCreatePerAdmin);
@@ -121,6 +123,17 @@ gameRoutes.post("/:id/ticket", async (c) => {
   if (!["LOBBY", "QUESTION_ACTIVE", "QUESTION_RESULTS", "LEADERBOARD", "FINISHED"].includes(r.row.status)) return c.json({ error: "game_over" }, 409);
   const ticket = await signTicket(c.env.WS_TICKET_SECRET, { g: r.row.id, r: body.data.role, a: auth.adminId, e: Date.now() + GAME_LIMITS.ticketTtlMs });
   return c.json({ ticket, pin: r.row.pin, expiresInSec: GAME_LIMITS.ticketTtlMs / 1000 });
+});
+
+/** Erases a finished or cancelled game with its players and answers (a person asked to be forgotten, or the owner tidies up). */
+gameRoutes.delete("/:id", requireRole("admin"), async (c) => {
+  const id = c.req.param("id");
+  const row = await c.env.DB.prepare("SELECT status FROM game_sessions WHERE id = ?").bind(id).first<{ status: string }>();
+  if (!row) return c.json({ error: "not_found" }, 404);
+  if (!["FINISHED", "CANCELLED"].includes(row.status)) return c.json({ error: "game_not_over" }, 409);
+  await c.env.DB.prepare("DELETE FROM game_sessions WHERE id = ?").bind(id).run();
+  await writeAudit(c.env.DB, { adminId: c.get("auth").adminId, action: "game.deleted", entity: "game", entityId: id });
+  return c.json({ ok: true });
 });
 
 gameRoutes.post("/:id/cancel", async (c) => {

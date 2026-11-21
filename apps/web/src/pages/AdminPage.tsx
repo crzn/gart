@@ -11,6 +11,7 @@ import { useLang, type MessageKey } from "../i18n";
 import { AccountTab } from "./admin/AccountTab";
 import { AdminsTab } from "./admin/AdminsTab";
 import { BrandingTab } from "./admin/BrandingTab";
+import { PrivacyTab } from "./admin/PrivacyTab";
 import { GamesTab } from "./admin/GamesTab";
 import { QuizzesTab } from "./admin/QuizzesTab";
 import { UpdatesTab } from "./admin/UpdatesTab";
@@ -18,7 +19,7 @@ import { UsageTab } from "./admin/UsageTab";
 import { AdminStatusPage } from "./AdminStatusPage";
 
 type Tab = "quizzes" | "games" | "settings" | "account";
-type Sub = "status" | "updates" | "admins" | "usage" | "branding";
+type Sub = "status" | "updates" | "admins" | "usage" | "branding" | "privacy";
 
 /** Everything about "me" in one menu: the Gart-wide sound switch (anyone may use it), language, sign out. */
 function UserMenu({ name, role, onLogout }: { name: string; role: string; onLogout: () => void }) {
@@ -93,6 +94,7 @@ export function AdminPage() {
     { id: "admins", label: "tab.admins", icon: Users, show: true },
     { id: "usage", label: "tab.usage", icon: Gauge, show: true },
     { id: "branding", label: "tab.branding", icon: Palette, show: true },
+    { id: "privacy", label: "tab.privacy", icon: ShieldCheck, show: true },
   ];
   const pill = (active: boolean) => `inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium ${active ? "bg-white/15" : "text-ink-muted hover:bg-white/10"}`;
 
@@ -130,6 +132,7 @@ export function AdminPage() {
             {sub === "admins" && <AdminsTab me={me} />}
             {sub === "usage" && <UsageTab />}
             {sub === "branding" && <BrandingTab />}
+            {sub === "privacy" && <PrivacyTab />}
           </div>
         </div>
       ) : null}
