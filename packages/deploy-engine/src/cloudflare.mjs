@@ -120,6 +120,16 @@ export class CloudflareClient {
   async attachCustomDomain(accountId, name, hostname) {
     return this.call("PUT", `/accounts/${accountId}/workers/scripts/${name}/domains/records`, { json: { origins: [{ hostname }], override_existing_origin: false, override_existing_dns_record: false } });
   }
+  /** The D1 database a Worker is bound to (used by the in-app updater, which is given only the Worker's name).
+   * @param {string} accountId @param {string} name @returns {Promise<{ uuid: string, name: string } | null>} */
+  async getWorkerDatabase(accountId, name) {
+    const settings = await this.call("GET", `/accounts/${accountId}/workers/scripts/${name}/settings`);
+    const binding = (settings?.bindings ?? []).find((/** @type {{ type: string }} */ b) => b.type === "d1");
+    const id = binding?.id ?? binding?.database_id;
+    if (!id) return null;
+    const db = await this.call("GET", `/accounts/${accountId}/d1/database/${id}`);
+    return { uuid: String(id), name: String(db?.name ?? "") };
+  }
   /** Time Travel bookmark of a D1 database (used as a recovery point before an update). @param {string} accountId @param {string} dbId */
   async d1Bookmark(accountId, dbId) {
     return /** @type {{ bookmark: string }} */ (await this.call("GET", `/accounts/${accountId}/d1/database/${dbId}/time_travel/bookmark`));

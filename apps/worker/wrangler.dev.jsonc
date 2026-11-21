@@ -13,12 +13,14 @@
   "durable_objects": {
     "bindings": [
       { "name": "GAME_ROOM", "class_name": "GameRoom" },
-      { "name": "RATE_LIMITER", "class_name": "RateLimiter" }
+      { "name": "RATE_LIMITER", "class_name": "RateLimiter" },
+      { "name": "UPDATER", "class_name": "Updater" }
     ]
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["GameRoom"] },
-    { "tag": "v2", "new_sqlite_classes": ["RateLimiter"] }
+    { "tag": "v2", "new_sqlite_classes": ["RateLimiter"] },
+    { "tag": "v3", "new_sqlite_classes": ["Updater"] }
   ],
   "d1_databases": [
     {

@@ -1,4 +1,4 @@
-import { BookOpenCheck, KeyRound, LogOut, Gauge, Palette, Radio, Server, Users } from "lucide-react";
+import { BookOpenCheck, DownloadCloud, KeyRound, LogOut, Gauge, Palette, Radio, Server, Users } from "lucide-react";
 import { useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { roleAtLeast } from "@gart/shared";
@@ -10,10 +10,11 @@ import { AdminsTab } from "./admin/AdminsTab";
 import { BrandingTab } from "./admin/BrandingTab";
 import { GamesTab } from "./admin/GamesTab";
 import { QuizzesTab } from "./admin/QuizzesTab";
+import { UpdatesTab } from "./admin/UpdatesTab";
 import { UsageTab } from "./admin/UsageTab";
 import { AdminStatusPage } from "./AdminStatusPage";
 
-type Tab = "quizzes" | "games" | "usage" | "branding" | "status" | "account" | "admins";
+type Tab = "quizzes" | "games" | "usage" | "branding" | "status" | "updates" | "account" | "admins";
 
 export function AdminPage() {
   const { t } = useLang();
@@ -31,6 +32,7 @@ export function AdminPage() {
     { id: "usage", label: "tab.usage", icon: Gauge, show: roleAtLeast(me.role, "admin") },
     { id: "branding", label: "tab.branding", icon: Palette, show: roleAtLeast(me.role, "admin") },
     { id: "status", label: "tab.status", icon: Server, show: true },
+    { id: "updates", label: "tab.updates", icon: DownloadCloud, show: me.role === "owner" },
     { id: "account", label: "tab.account", icon: KeyRound, show: true },
     { id: "admins", label: "tab.admins", icon: Users, show: roleAtLeast(me.role, "admin") },
   ];
@@ -66,6 +68,7 @@ export function AdminPage() {
       {tab === "usage" && <UsageTab />}
       {tab === "branding" && roleAtLeast(me.role, "admin") && <BrandingTab />}
       {tab === "status" && <AdminStatusPage />}
+      {tab === "updates" && me.role === "owner" && <UpdatesTab />}
       {tab === "account" && <AccountTab />}
       {tab === "admins" && roleAtLeast(me.role, "admin") && <AdminsTab me={me} />}
     </div>

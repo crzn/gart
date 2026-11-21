@@ -35,8 +35,8 @@ describe("deploy engine against a fake Cloudflare API", () => {
     expect(r.migrationsApplied).toEqual(manifest.migrations.map((m) => m.name));
     const w = fake.state.workers.get("gart");
     expect(w.secretNames.sort()).toEqual(["SESSION_SECRET", "SETUP_TOKEN", "WS_TICKET_SECRET"]);
-    expect(w.metadata.migrations.new_tag).toBe("v2");
-    expect(w.metadata.migrations.steps).toEqual([{ new_sqlite_classes: ["GameRoom"] }, { new_sqlite_classes: ["RateLimiter"] }]);
+    expect(w.metadata.migrations.new_tag).toBe("v3");
+    expect(w.metadata.migrations.steps).toEqual([{ new_sqlite_classes: ["GameRoom"] }, { new_sqlite_classes: ["RateLimiter"] }, { new_sqlite_classes: ["Updater"] }]);
     expect(w.metadata.assets.config.run_worker_first).toEqual(["/api/*", "/ws/*"]);
     expect(w.workersDev).toBe(true);
     expect(w.domain).toBe("quiz.example.com");
@@ -62,6 +62,19 @@ describe("deploy engine against a fake Cloudflare API", () => {
     expect(w.metadata.keep_bindings).toContain("secret_text");
     expect(w.metadata.migrations).toBeUndefined();
     expect(w.secretNames).toContain("SESSION_SECRET");
+  });
+
+  it("an update does not touch the workers.dev address setting", async () => {
+    const before = fake.state.workers.get("gart").workersDev;
+    const steps = [];
+    await deploy({ client: client(), accountId: "acc1", pkg, manifest, workerName: "gart", databaseName: "gart-db", mode: "update", onProgress: (p) => steps.push(`${p.step}:${p.status}`) });
+    expect(fake.state.workers.get("gart").workersDev).toBe(before);
+    expect(steps).toContain("address:skipped");
+  });
+
+  it("finds the database a Worker is bound to", async () => {
+    const found = await client().getWorkerDatabase("acc1", "gart");
+    expect(found?.name).toBe("gart-db");
   });
 
   it("a failing migration stops the update with a clear error", async () => {

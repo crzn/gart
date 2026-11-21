@@ -10,6 +10,9 @@ import { JoinPage } from "./pages/JoinPage";
 import { PlayPage } from "./pages/PlayPage";
 import { HostPage, ScreenPage } from "./pages/HostPage";
 
+/** AGPL-3.0 section 13: everyone who uses the site over a network can get the source code it runs. */
+const SOURCE_URL = "https://github.com/crzn/gart";
+
 function navClass({ isActive }: { isActive: boolean }): string {
   return [
     "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors",
@@ -88,6 +91,12 @@ export function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      {projector ? null : (
+        <footer className="mx-auto w-full max-w-5xl px-4 pb-6 text-center text-xs text-ink-muted sm:px-6">
+          {t("footer.text")}{" "}
+          <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-ink">{t("footer.source")}</a>
+        </footer>
+      )}
     </div>
   );
 }

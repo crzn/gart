@@ -189,6 +189,22 @@ GitHub Release (public)             Administrator's Cloudflare account
 - **Setup page** (`/setup` in the web app): the installer sends the administrator there with the one-time token in the URL fragment; the password is typed on the new site and never passes through the installer.
 - **Tests:** engine against a fake Cloudflare API that really runs the migrations on SQLite and checks request shapes (`tests/fakes/fake-cloudflare.mjs`); browser test of the whole wizard through the real bootstrap Worker (`tests/e2e/web-installer.e2e.mjs`). The real Cloudflare API has not been exercised yet.
 
+## 7b. In-app updates (0.8.2)
+
+```
+Admin panel (owner) ── /api/updates/* ──► Worker ──► Updater Durable Object ("main")
+                                                      ├─ stores: encrypted token, last release list, run progress
+                                                      ├─ check:  GitHub releases API (cached 30 min)
+                                                      └─ alarm:  download gart-package.json → verify signature + hashes
+                                                                 → deploy engine (mode "update") → Cloudflare API
+```
+
+- `routes/updates.ts` (owner only, rate-limited, audited) is a thin wrapper; all state lives in `durable/Updater.ts`.
+- The run is an alarm, so it survives the request that started it and gets the Durable Object CPU budget. The browser polls `GET /api/updates`; when the new code starts serving, the unfinished run is recognised as done because the running version equals the target.
+- Steps: download, verify, then the engine's steps (database, migrations, assets, worker). Address and domain are never touched on update.
+- A migration flagged as destructive stops the run in the `confirm` phase until the owner acknowledges it. Rollback to a package whose Durable Object migration list does not contain the installed tag is refused.
+- Test: `tests/e2e/web-updates.e2e.mjs` (real Worker, fake Cloudflare and GitHub, real browser).
+
 ## 8. Usage Monitor methodology
 
 Three clearly separated layers in the UI:

@@ -1,11 +1,14 @@
 # Gart
 
-Self-hosted live quiz platform for one company, running entirely on the **Cloudflare Free plan** ($0 infrastructure). Open source, AGPL-3.0.
+Self-hosted live quiz platform for a company, a school or a club, running entirely on the **Cloudflare Free plan** ($0 infrastructure). Players join from their phones with a PIN, the host runs the game and a projector screen shows questions and results. Open source, AGPL-3.0.
 
-**Status: 0.8.1. All 8 planned phases are built; install from the browser was added in 0.8.1; presentation polish (QR code, sound, animation for the host screen and projector) is planned for 0.9.0, see [docs/ROADMAP.md](docs/ROADMAP.md).** A full game with 120 simulated players passes locally; it has not been run on real Cloudflare yet, and neither has the browser installer, so 120 concurrent players and the installer are not yet confirmed on the real service. See [CHANGELOG.md](CHANGELOG.md) for exactly what works today.
+**You only need a Cloudflare account and a browser.** Install it from the [install page](https://crzn.github.io/gart/) (no software on your computer), update it later from the admin panel. The interface is Ukrainian by default, English is included.
+
+**Status: 0.8.2. All 8 planned phases are built; install from the browser was added in 0.8.1 and updates from the admin panel in 0.8.2; presentation polish (QR code, sound, animation for the host screen and projector) is planned for 0.9.0, see [docs/ROADMAP.md](docs/ROADMAP.md).** A full game with 120 simulated players passes locally; it has not been run on real Cloudflare yet, and neither has the browser installer, so 120 concurrent players and the installer are not yet confirmed on the real service. See [CHANGELOG.md](CHANGELOG.md) for exactly what works today.
 
 ## What works in this build
 
+- **Updates from the admin panel** (0.8.2): the owner sees new releases, what changed, and updates or goes back to an earlier release with a button; packages are signed and verified before anything is installed.
 - **Browser installer** (0.8.1) and a local wizard (Windows, macOS, Linux): sign in with Cloudflare OAuth, create/reuse the D1 database, apply migrations, generate secrets, build, deploy, health-check. Actions: Install, Update, Repair, Backup, Uninstall.
 - Cloudflare Worker (Hono) serving the web app via Workers Static Assets, with `/api/health`, a WebSocket/Durable Object round-trip check, and setup status.
 - Complete D1 schema and seed data (13 tables, 6 quiz templates).
@@ -16,7 +19,7 @@ Self-hosted live quiz platform for one company, running entirely on the **Cloudf
 
 ## What is not built yet
 
-QR code for joining, sound and animation (0.9.0); updates from the admin panel (0.8.2); quiz import/export; unused-image cleanup; Cloudflare Analytics API integration.
+QR code for joining, sound and animation (0.9.0); quiz import/export; unused-image cleanup; Cloudflare Analytics API integration.
 
 ## Install
 
@@ -43,6 +46,10 @@ Layout: `apps/web` (React), `apps/worker` (Hono + Durable Object), `packages/sha
 ## Documents
 
 [Architecture and plan](docs/ARCHITECTURE.md) · [Decisions](docs/DECISIONS.md) · [Security](docs/SECURITY.md) · [Admin guide EN](docs/ADMIN-GUIDE.en.md) · [UK](docs/ADMIN-GUIDE.uk.md)
+
+## Contributing and security
+
+[CONTRIBUTING.md](CONTRIBUTING.md) explains how to help; vulnerabilities are reported privately, see [SECURITY.md](SECURITY.md).
 
 ## License
 

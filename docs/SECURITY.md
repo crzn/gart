@@ -86,6 +86,18 @@ Optional Turnstile; abuse tests and a load run against a real deployment.
 - The installer cannot verify account plan details by lookup; it relies on resource creation succeeding, so an unavailable resource is reported as an error rather than pre-checked.
 - Anyone who can run commands on the computer used for installation and is signed in to Wrangler can administer the Cloudflare resources. Run `npx wrangler logout` when finished on a shared computer.
 
+## In-app updates (0.8.2)
+
+| Risk | Protection |
+|---|---|
+| Someone gets the Cloudflare token kept for updates | Stored only inside the `Updater` Durable Object, encrypted with AES-GCM (key derived from the installation's `SESSION_SECRET`, fresh random IV). Never returned by any API. The owner can delete it at any time. A test scans the stored data for the plain token. |
+| A non-owner starts an update | Every updates route requires the **owner** role; sign-in, CSRF header and rate limits apply. Connecting, disconnecting and starting an update are written to the audit log. |
+| A tampered or fake release | Nothing is installed before the ECDSA signature and every file hash are verified with the public key built into the application. The version inside the signed manifest must equal the requested release. |
+| A release that removes data | Migrations are flagged when they contain `DROP`, `DELETE`, renames and the like; the update stops and asks for explicit confirmation. A D1 Time Travel recovery point is recorded and shown before migrations run. |
+| Rollback to a version that does not match the stored layout | Refused when the installed Durable Object migration tag is unknown to the older package. |
+| Compromised signing key | Anyone holding the signing key can publish a package that every installation accepts. Keep the key only in the repository secret and in a password manager; rotating it means shipping a new application version through the installer. |
+| Test-only variables (`RELEASE_*`, `CF_API_BASE`) | Never set by the installer or the update. Whoever can set variables on the Worker already controls it. |
+
 ## Reporting
 
-Report vulnerabilities privately to the project maintainer before public disclosure.
+Report vulnerabilities privately; see [SECURITY.md](../SECURITY.md) in the repository root.

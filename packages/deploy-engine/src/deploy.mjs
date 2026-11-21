@@ -157,7 +157,9 @@ export async function deploy(o) {
     await client.uploadWorker(accountId, workerName, metadata, manifest.mainModule, blobBytes(pkg, manifest.worker.sha256));
   });
 
-  await run("address", async () => { await client.enableWorkersDev(accountId, workerName); });
+  // An update never touches the address settings: the administrator may have turned workers.dev off on purpose.
+  if (mode === "install") await run("address", async () => { await client.enableWorkersDev(accountId, workerName); });
+  else emit({ step: "address", status: "skipped" });
   if (o.hostname) await run("domain", async () => { await client.attachCustomDomain(accountId, workerName, o.hostname ?? ""); });
   else emit({ step: "domain", status: "skipped" });
 

@@ -113,8 +113,6 @@ export function AdminStatusPage() {
             </ul>
           )}
         </div>
-
-        <p className="mt-6 rounded-2xl bg-white/5 p-4 text-sm text-ink-muted">{t("admin.phaseNote")}</p>
       </div>
     </section>
   );

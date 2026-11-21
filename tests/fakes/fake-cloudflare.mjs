@@ -51,6 +51,14 @@ export function startFakeCloudflare({ port = 0, subdomain = "acme", bucketSize =
           return ok(res, [{ results: [], success: true }]);
         } catch (e) { return err(res, 400, 7500, `SQL error: ${e.message}`); }
       }
+      if ((m = path.match(/^\/accounts\/acc1\/d1\/database\/([^/]+)$/)) && req.method === "GET") {
+        const d = state.databases.get(m[1]); if (!d) return err(res, 404, 7404, "database not found");
+        return ok(res, { uuid: d.uuid, name: d.name });
+      }
+      if ((m = path.match(/^\/accounts\/acc1\/workers\/scripts\/([^/]+)\/settings$/)) && req.method === "GET") {
+        const w = state.workers.get(m[1]); if (!w) return err(res, 404, 10007, "no such worker");
+        return ok(res, { bindings: w.metadata.bindings.map((b) => (b.type === "secret_text" ? { type: b.type, name: b.name } : b)) });
+      }
       if ((m = path.match(/^\/accounts\/acc1\/d1\/database\/([^/]+)\/time_travel\/bookmark$/))) return ok(res, { bookmark: "00000001-00000002-00004e2f-abc" });
 
       if ((m = path.match(/^\/accounts\/acc1\/workers\/services\/([^/]+)$/)) && req.method === "GET") {

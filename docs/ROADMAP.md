@@ -12,7 +12,7 @@ Goal: installing Gart is a short guided process that needs only a Cloudflare acc
 - **Microsite** (GitHub Pages) with step-by-step instructions, the copyable bootstrap script and the token-creation link.
 - The local wizard stays as an advanced path and is not developed further.
 
-## 0.8.2: updates from the admin panel, public repository
+## 0.8.2: updates from the admin panel, public repository (built)
 - "Updates" tab: reads the latest public release, shows what is new, button for the owner runs the same deploy engine (in a Durable Object, 30 s CPU per step), with rollback to the previous version. Needs the same Cloudflare API token, stored encrypted.
 - Repository ready for publication: no installation-specific `wrangler.jsonc`, source-code link in the footer (AGPL), README for outsiders, CONTRIBUTING, vulnerability reporting.
 

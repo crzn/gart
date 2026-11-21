@@ -1,10 +1,22 @@
 # Changelog
 
-## Unreleased
-
-- The deploy script builds the Worker config from the build variables `GART_WORKER_NAME`, `GART_D1_NAME`, `GART_D1_ID`; `apps/worker/wrangler.jsonc` is git-ignored, so the repository carries nothing installation-specific.
-
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
+
+## [0.8.2] - 2026-11-21
+
+### Added
+- **Updates tab** (owner only): checks the public GitHub releases, shows what is new, updates with one button and can install an earlier release. The work runs in a new Durable Object (`Updater`, migration `v3`) that downloads the release package, verifies its signature and file hashes, and then uses the same deploy engine as the installer. Progress and the Time Travel recovery point are shown; a migration that removes data needs a separate confirmation.
+- The Cloudflare token for updates is stored encrypted (AES-GCM, key derived from the installation's `SESSION_SECRET`), can be deleted at any time, and is never returned by the API.
+- The deploy script builds the Worker config from the build variables `GART_WORKER_NAME`, `GART_D1_NAME`, `GART_D1_ID`; `apps/worker/wrangler.jsonc` is git-ignored, so the repository carries nothing installation-specific.
+- Source-code link in the footer (AGPL-3.0 section 13), CONTRIBUTING, vulnerability reporting policy, README for outsiders.
+
+### Changed
+- An update through the engine no longer touches the workers.dev address setting.
+- Removed the leftover "editor and live games will appear in later phases" note from the system status page.
+
+### Notes
+- A copy installed before 0.8.2 does not have the Updates tab yet: update it once with the installer or the GitHub build, after that it can update itself.
+- Restoring an earlier release works for 0.8.2 and later (earlier ones lack the Updater storage layout).
 
 ## [0.8.1] - 2026-11-21: install from the browser
 

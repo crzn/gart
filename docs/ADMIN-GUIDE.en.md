@@ -166,6 +166,14 @@ Do not run it in the middle of a working day if a real game is planned: it uses 
 
 ## 9. Updating Gart
 
+### From the admin panel (owner, simplest)
+
+Open **Admin → Updates**. The first time, create a Cloudflare token (the tab shows the steps: Workers Scripts → Edit, D1 → Edit, Account Settings → Read, for your account), enter the Worker's name and paste the token. The token is stored encrypted on your own site and you can delete it from the same tab at any time.
+
+Press **Check for updates**: the tab shows the newest release and what is new. **Update** downloads the signed package, verifies it, applies new database migrations and publishes the new code; keep the page open until it says "Done", then reload it. If a release removes data, you are asked to confirm first. The same tab can install an earlier release (database changes stay; they only add data). A copy installed before 0.8.2 has no Updates tab yet: update it once by one of the methods below.
+
+### Other ways
+
 1. Run **Backup**.
 2. Unzip the new version **over** the old folder (keep the hidden `.gart` folder and `apps/worker/wrangler.jsonc` if present).
 3. Run the installer and choose **Update**.

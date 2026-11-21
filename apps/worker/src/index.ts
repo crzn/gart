@@ -5,6 +5,7 @@ import { APP_VERSION } from "./env";
 import { adminRoutes } from "./routes/admins";
 import { authRoutes } from "./routes/auth";
 import { brandingRoutes } from "./routes/branding";
+import { updateRoutes } from "./routes/updates";
 import { usageRoutes } from "./routes/usage";
 import { gameRoutes } from "./routes/games";
 import { mediaRoutes } from "./routes/media";
@@ -14,6 +15,7 @@ import { wsRoutes } from "./routes/ws";
 
 export { GameRoom } from "./GameRoom";
 export { RateLimiter } from "./durable/RateLimiter";
+export { Updater } from "./durable/Updater";
 
 const app = new Hono<AppEnv>();
 
@@ -53,6 +55,7 @@ app.route("/api/quizzes", quizRoutes);
 app.route("/api/branding", brandingRoutes);
 app.route("/api/games", gameRoutes);
 app.route("/api/usage", usageRoutes);
+app.route("/api/updates", updateRoutes);
 app.route("/api/media", mediaRoutes);
 
 // Live games. The route applies the client IP (normally set by the /api security middleware).
