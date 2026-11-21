@@ -45,7 +45,7 @@ export function BrandingTab() {
           <Field id="bn" label={t("brand.company")} maxLength={60} value={b.companyName} onChange={(e) => set({ companyName: e.target.value })} />
           <div>
             <label htmlFor="bp" className="mb-1.5 block text-sm font-medium">{t("brand.logoPlacement")}</label>
-            <select id="bp" value={b.logoPlacement} onChange={(e) => set({ logoPlacement: e.target.value as Branding["logoPlacement"] })} className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm">
+            <select id="bp" value={b.logoPlacement} onChange={(e) => set({ logoPlacement: e.target.value as Branding["logoPlacement"] })} className="w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2.5 text-sm">
               <option value="top-left">{t("brand.left")}</option>
               <option value="top-center">{t("brand.center")}</option>
               <option value="top-right">{t("brand.right")}</option>

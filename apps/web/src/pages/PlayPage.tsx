@@ -103,7 +103,7 @@ export function PlayPage() {
             <div>
               <label htmlFor="nick" className="mb-1.5 block text-sm font-medium">{t("play.nickname")}</label>
               <input id="nick" value={nickname} maxLength={20} autoComplete="off" autoFocus required onChange={(e) => setNickname(e.target.value)}
-                className="w-full rounded-2xl border border-surface-border bg-black/30 px-4 py-3 text-lg outline-none focus:border-brand" />
+                className="w-full rounded-2xl border border-slate-500 bg-slate-950/70 px-4 py-3 text-lg outline-none focus:border-accent focus:ring-2 focus:ring-accent/40" />
               <p className="mt-1.5 text-xs text-ink-muted">{t("play.nicknameHint")}</p>
             </div>
             <fieldset>

@@ -577,5 +577,9 @@
   "tab.settings": "Settings",
   "sound.gart": "Gart sound",
   "sound.gartOn": "on",
-  "sound.gartOff": "off"
+  "sound.gartOff": "off",
+  "pager.label": "List pages",
+  "pager.prev": "Previous",
+  "pager.next": "Next",
+  "pager.page": "Page"
 }

@@ -1,12 +1,13 @@
-import { BookOpenCheck, DownloadCloud, KeyRound, LogOut, Gauge, Palette, Radio, Server, Settings, Users, Volume2, VolumeX } from "lucide-react";
-import { useState } from "react";
+import { BookOpenCheck, ChevronDown, DownloadCloud, KeyRound, LogOut, Gauge, Palette, Radio, Server, Settings, ShieldCheck, Users, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { roleAtLeast, type Branding } from "@gart/shared";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { useBranding } from "../branding";
+import { mediaUrl } from "../image";
+import { LanguageSwitcher } from "../LanguageSwitcher";
 import { useLang, type MessageKey } from "../i18n";
-import { Button } from "../ui";
 import { AccountTab } from "./admin/AccountTab";
 import { AdminsTab } from "./admin/AdminsTab";
 import { BrandingTab } from "./admin/BrandingTab";
@@ -19,25 +20,52 @@ import { AdminStatusPage } from "./AdminStatusPage";
 type Tab = "quizzes" | "games" | "settings" | "account";
 type Sub = "status" | "updates" | "admins" | "usage" | "branding";
 
-/** The Gart-wide sound switch: every signed-in user sees whether sound is on, and may change it. */
-function SoundIndicator() {
+/** Everything about "me" in one menu: the Gart-wide sound switch (anyone may use it), language, sign out. */
+function UserMenu({ name, role, onLogout }: { name: string; role: string; onLogout: () => void }) {
   const { t } = useLang();
   const { branding, set } = useBranding();
+  const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", esc); };
+  }, [open]);
   async function toggle() {
     setBusy(true);
     try {
       const { branding: b } = await api<{ branding: Branding }>("/api/branding/sound", { method: "PUT", body: { soundEnabled: !branding.soundEnabled } });
       set(b);
-    } catch { /* the indicator stays as it was */ } finally { setBusy(false); }
+    } catch { /* the switch stays as it was */ } finally { setBusy(false); }
   }
   const on = branding.soundEnabled;
   return (
-    <button type="button" onClick={() => void toggle()} disabled={busy} aria-pressed={on} data-testid="gart-sound" title={t("brand.soundHint")}
-      className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20 disabled:opacity-60">
-      {on ? <Volume2 className="size-4" aria-hidden /> : <VolumeX className="size-4" aria-hidden />}
-      {t("sound.gart")}: {on ? t("sound.gartOn") : t("sound.gartOff")}
-    </button>
+    <div className="relative" ref={ref}>
+      <button type="button" aria-haspopup="true" aria-expanded={open} data-testid="user-menu" onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20">
+        {on ? <Volume2 className="size-4 text-accent" aria-label={`${t("sound.gart")}: ${t("sound.gartOn")}`} /> : <VolumeX className="size-4 text-ink-muted" aria-label={`${t("sound.gart")}: ${t("sound.gartOff")}`} />}
+        <span className="hidden max-w-40 truncate sm:inline">{name}</span>
+        <ChevronDown className="size-4" aria-hidden />
+      </button>
+      {open ? (
+        <div role="menu" className="absolute right-0 z-20 mt-2 w-72 space-y-3 rounded-2xl border border-slate-600 bg-slate-900 p-4 text-sm shadow-2xl">
+          <div><p className="font-semibold">{name}</p><p className="text-ink-muted">{role}</p></div>
+          <button type="button" role="menuitem" onClick={() => void toggle()} disabled={busy} aria-pressed={on} data-testid="gart-sound" title={t("brand.soundHint")}
+            className="flex w-full items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-left hover:bg-white/20 disabled:opacity-60">
+            {on ? <Volume2 className="size-4" aria-hidden /> : <VolumeX className="size-4" aria-hidden />}
+            {t("sound.gart")}: {on ? t("sound.gartOn") : t("sound.gartOff")}
+          </button>
+          <LanguageSwitcher />
+          <button type="button" role="menuitem" onClick={onLogout} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left hover:bg-white/10">
+            <LogOut className="size-4" aria-hidden />{t("auth.logout")}
+          </button>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -68,43 +96,45 @@ export function AdminPage() {
   ];
   const pill = (active: boolean) => `inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium ${active ? "bg-white/15" : "text-ink-muted hover:bg-white/10"}`;
 
+  const brand = useBranding().branding;
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div role="tablist" aria-label={t("nav.admin")} className="flex flex-wrap gap-1">
+      <header className="mb-6 flex items-center gap-3 border-b border-surface-border pb-3">
+        <div className="flex shrink-0 items-center gap-2">
+          {brand.logoMediaId ? <img src={mediaUrl(brand.logoMediaId)} alt="" className="size-9 rounded-lg object-contain" /> : <div className="grid size-9 place-items-center rounded-lg bg-brand" aria-hidden><ShieldCheck className="size-5 text-white" /></div>}
+          <span className="hidden text-lg font-bold lg:inline">{brand.companyName || t("app.name")}</span>
+        </div>
+        <div role="tablist" aria-label={t("nav.admin")} className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
           {tabs.filter((x) => x.show).map(({ id, label, icon: Icon }) => (
-            <button key={id} role="tab" type="button" aria-selected={tab === id} onClick={() => setTab(id)} className={pill(tab === id)}>
+            <button key={id} role="tab" type="button" aria-selected={tab === id} onClick={() => setTab(id)} className={`${pill(tab === id)} shrink-0`}>
               <Icon className="size-4" aria-hidden />
               {t(label)}
             </button>
           ))}
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-sm">
-          <SoundIndicator />
-          <span className="text-ink-muted">{me.displayName} · {t(`role.${me.role}` as MessageKey)}</span>
-          <Button variant="ghost" onClick={() => void logout()}>
-            <LogOut className="size-4" aria-hidden />
-            {t("auth.logout")}
-          </Button>
-        </div>
-      </div>
+        <UserMenu name={me.displayName} role={t(`role.${me.role}` as MessageKey)} onLogout={() => void logout()} />
+      </header>
       {tab === "settings" && canSettings ? (
-        <div role="tablist" aria-label={t("tab.settings")} className="mb-6 flex flex-wrap gap-1 border-b border-surface-border pb-3">
-          {subs.filter((x) => x.show).map(({ id, label, icon: Icon }) => (
-            <button key={id} role="tab" type="button" aria-selected={sub === id} onClick={() => setSub(id)} className={pill(sub === id)}>
-              <Icon className="size-4" aria-hidden />
-              {t(label)}
-            </button>
-          ))}
+        <div className="grid gap-6 md:grid-cols-[13rem_minmax(0,1fr)]">
+          <div role="tablist" aria-orientation="vertical" aria-label={t("tab.settings")} className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
+            {subs.filter((x) => x.show).map(({ id, label, icon: Icon }) => (
+              <button key={id} role="tab" type="button" aria-selected={sub === id} onClick={() => setSub(id)} className={`${pill(sub === id)} shrink-0 md:w-full`}>
+                <Icon className="size-4" aria-hidden />
+                {t(label)}
+              </button>
+            ))}
+          </div>
+          <div className="min-w-0">
+            {sub === "status" && <AdminStatusPage />}
+            {sub === "updates" && me.role === "owner" && <UpdatesTab />}
+            {sub === "admins" && <AdminsTab me={me} />}
+            {sub === "usage" && <UsageTab />}
+            {sub === "branding" && <BrandingTab />}
+          </div>
         </div>
       ) : null}
       {tab === "quizzes" && <QuizzesTab me={me} />}
       {tab === "games" && <GamesTab />}
-      {tab === "settings" && canSettings && sub === "status" && <AdminStatusPage />}
-      {tab === "settings" && canSettings && sub === "updates" && me.role === "owner" && <UpdatesTab />}
-      {tab === "settings" && canSettings && sub === "admins" && <AdminsTab me={me} />}
-      {tab === "settings" && canSettings && sub === "usage" && <UsageTab />}
-      {tab === "settings" && canSettings && sub === "branding" && <BrandingTab />}
       {tab === "account" && <AccountTab />}
     </div>
   );

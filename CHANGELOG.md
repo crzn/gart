@@ -2,6 +2,18 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.12.0] - 2026-11-21: design pass
+
+### Changed
+- **Projector.** Everything scales with the screen height: a much larger question and answers, results bars, ranking and podium; the whole screen is used instead of the top half. The final ranking shows the rest of the places in two columns.
+- **Phone.** The joining form and the question screen keep their layout; the question uses the new muted colours. The result and the final screens are new: answer texts wrap instead of being cut off, no column of dashes in the ranking.
+- **Projector lobby.** The PIN is plain text under the QR code; the title, picture, players and QR code carry the screen.
+- **Answer colours** are muted (violet, blue, ochre, pink) with a shape on each. Red and green are kept for the verdict only.
+- **Admin.** A single header row: logo, tabs, and a user menu (name, Gart sound, language, sign out). Settings has a side panel. The public "Join" link is gone from the admin header. Input fields have a visible border and focus ring. The page is wider.
+- **Host screen.** Controls sit in a bar fixed at the bottom with larger buttons.
+- **Paginator** on the lists of quizzes and games (ten per page).
+- The ranking no longer shows a column of dashes before anyone has moved.
+
 ## [0.11.0] - 2026-11-21: Settings menu and roles
 
 ### Changed

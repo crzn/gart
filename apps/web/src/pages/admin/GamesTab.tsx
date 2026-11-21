@@ -6,7 +6,7 @@ import { errorKey } from "../../errors";
 import { csvCell, safeFileName } from "../../game/csv";
 import { Avatar } from "../../game/parts";
 import { useLang, type MessageKey } from "../../i18n";
-import { Button, Card, ErrorNote } from "../../ui";
+import { Button, Card, ErrorNote, Pager, usePaged } from "../../ui";
 
 interface Game { id: string; title: string; pin: string; status: string; createdAt: string; startedAt: string | null; finishedAt: string | null; participants?: number }
 interface Person { id: string; nickname: string; avatar: string; final_rank: number; total_points: number; correct_count: number }
@@ -19,6 +19,7 @@ export function GamesTab() {
   const navigate = useNavigate();
   const [games, setGames] = useState<Game[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const paged = usePaged(games ?? []);
   const [open, setOpen] = useState<{ game: Game; people: Person[]; questions: QStat[] } | null>(null);
 
   const load = useCallback(async () => {
@@ -88,8 +89,8 @@ export function GamesTab() {
       <p className="mt-1 text-sm text-ink-muted">{t("games.hint")}</p>
       {error ? <div className="mt-3"><ErrorNote>{error}</ErrorNote></div> : null}
       {games === null ? <p className="mt-4 text-sm text-ink-muted">{t("admin.loading")}</p> : games.length === 0 ? <p className="mt-4 text-sm text-ink-muted">{t("games.empty")}</p> : (
-        <ul className="mt-4 divide-y divide-white/10">
-          {games.map((g) => (
+        <><ul className="mt-4 divide-y divide-white/10">
+          {paged.rows.map((g) => (
             <li key={g.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
               <div className="min-w-0">
                 <p className="truncate font-medium">{g.title}</p>
@@ -104,6 +105,7 @@ export function GamesTab() {
             </li>
           ))}
         </ul>
+          <Pager page={paged.page} pages={paged.pages} setPage={paged.setPage} /></>
       )}
     </Card>
   );

@@ -92,7 +92,7 @@ Sign in at your app address → **Administration**.
 
 **Pictures.** Choose a file (PNG, JPEG, WebP or GIF). The browser shrinks and compresses it automatically before uploading (limit 200 KB per picture after compression; total storage 150 MB). Identical pictures are stored once.
 
-**Menu.** At the top: **Quizzes, Games, Settings, My account**. **Settings** (owner and administrators) holds System status, Updates (owner only), Administrators, Usage and Branding. An editor sees only Quizzes, Games and My account. In the header every role sees **"Gart sound: on/off"** and can switch it.
+**Menu.** At the top: **Quizzes, Games, Settings, My account**. **Settings** (owner and administrators) holds System status, Updates (owner only), Administrators, Usage and Branding. An editor sees only Quizzes, Games and My account. On the right of the header is the **user menu**: name, **"Gart sound: on/off"** (any role can switch it; the speaker icon is visible even when the menu is closed), language and sign out. Settings has a side panel with its sections.
 
 **Branding tab** (administrators and owners). Company name, logo and its position, four colours, background image and welcome and final messages. A preview is shown on the right, and a warning appears when the contrast with white text is too low. Branding applies immediately to the whole app.
 

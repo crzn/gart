@@ -17,7 +17,7 @@ export function SoundControl({ audio }: { audio: HostAudio }) {
             <input type="range" min={0} max={1} step={0.05} value={audio.volume} onChange={(e) => audio.setVolume(Number(e.target.value))} className="w-28 accent-amber-400" />
           </label>
           <label className="inline-flex items-center gap-2"><span className="text-ink-muted">{t("sound.music")}</span>
-            <select value={audio.variant} onChange={(e) => audio.setVariant(e.target.value as typeof VARIANTS[number])} className="rounded-lg border border-surface-border bg-black/20 px-2 py-1">
+            <select value={audio.variant} onChange={(e) => audio.setVariant(e.target.value as typeof VARIANTS[number])} className="rounded-lg border border-slate-500 bg-slate-950/70 px-2 py-1">
               {VARIANTS.map((v) => <option key={v} value={v}>{t(`sound.variant.${v}` as MessageKey)}</option>)}
             </select>
           </label>

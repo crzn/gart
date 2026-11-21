@@ -15,21 +15,21 @@ export function Avatar({ id, size = "md" }: { id: string; size?: "sm" | "md" | "
   return <span aria-hidden className={`inline-grid shrink-0 place-items-center rounded-full bg-white/15 ${cls}`}>{EMOJI[id] ?? "🙂"}</span>;
 }
 
-/** Answer colours always come with a shape, so colour is never the only cue. */
+/** Muted answer colours (no red or green: those are kept for the verdict) always come with a shape, so colour is never the only cue. */
 export const OPTION_STYLE = [
-  { bg: "bg-red-600", ring: "ring-red-300", Icon: Triangle },
-  { bg: "bg-blue-600", ring: "ring-blue-300", Icon: Diamond },
-  { bg: "bg-amber-600", ring: "ring-amber-300", Icon: Circle },
-  { bg: "bg-emerald-600", ring: "ring-emerald-300", Icon: Square },
+  { bg: "bg-[#6d28d9]", ring: "ring-violet-300", Icon: Triangle },
+  { bg: "bg-[#0369a1]", ring: "ring-sky-300", Icon: Diamond },
+  { bg: "bg-[#a16207]", ring: "ring-amber-300", Icon: Circle },
+  { bg: "bg-[#be185d]", ring: "ring-pink-300", Icon: Square },
 ] as const;
 
 export function OptionLabel({ option, index, big = false }: { option: PublicOption; index: number; big?: boolean }) {
   const st = OPTION_STYLE[index % 4]!;
   return (
-    <span className="flex min-w-0 items-center gap-3 text-left">
-      <st.Icon aria-hidden className={`${big ? "size-9" : "size-6"} shrink-0 fill-current`} />
-      {option.imageId ? <img src={mediaUrl(option.imageId)} alt="" className={`${big ? "h-24" : "h-14"} rounded-lg object-contain`} /> : null}
-      <span className={`${big ? "text-3xl" : "text-lg"} min-w-0 break-words font-semibold`}>{option.text}</span>
+    <span className={`flex min-w-0 items-center gap-3 text-left`}>
+      <st.Icon aria-hidden className={`${big ? "size-[3.2vmin]" : "size-6"} shrink-0 fill-current`} />
+      {option.imageId ? <img src={mediaUrl(option.imageId)} alt="" className={`${big ? "h-[9vmin]" : "h-14"} rounded-lg object-contain`} /> : null}
+      <span className={`${big ? "text-[3.4vmin] leading-tight" : "text-lg"} min-w-0 break-words font-semibold`}>{option.text}</span>
     </span>
   );
 }
@@ -55,14 +55,16 @@ export function Movement({ value }: { value: number }) {
 
 /** The ranking table. */
 export function Board({ entries, meId, big = false }: { entries: LeaderboardEntry[]; meId?: string; big?: boolean }) {
+  // Before anyone has moved (the first ranking) a column of dashes says nothing, so it is left out.
+  const moved = entries.some((e) => e.movement !== 0);
   return (
-    <ol className="space-y-2">
+    <ol className={big && entries.length > 3 ? "grid grid-cols-2 gap-x-[2vmin] gap-y-[1.2vmin]" : big ? "space-y-[1.2vmin]" : "space-y-2"}>
       {entries.map((e) => (
-        <li key={e.playerId} className={`flex items-center gap-3 rounded-2xl px-4 ${big ? "py-3 text-2xl" : "py-2"} ${e.playerId === meId ? "bg-brand/40 ring-2 ring-accent" : "bg-white/10"}`}>
+        <li key={e.playerId} className={`flex items-center gap-3 rounded-2xl px-4 ${big ? "py-[1.2vmin] text-[3vmin]" : "py-2"} ${e.playerId === meId ? "bg-brand/40 ring-2 ring-accent" : "bg-white/10"}`}>
           <span className="w-8 text-center font-bold tabular-nums">{e.rank}</span>
-          <Avatar id={e.avatar} size={big ? "md" : "sm"} />
+          <Avatar id={e.avatar} size={big ? "lg" : "sm"} />
           <span className="min-w-0 flex-1 truncate font-medium">{e.nickname}</span>
-          <Movement value={e.movement} />
+          {moved ? <Movement value={e.movement} /> : null}
           <span className="w-20 text-right font-mono font-bold tabular-nums">{e.points}</span>
         </li>
       ))}
@@ -70,20 +72,20 @@ export function Board({ entries, meId, big = false }: { entries: LeaderboardEntr
   );
 }
 
-export function Podium({ top }: { top: LeaderboardEntry[] }) {
+export function Podium({ top, big = false }: { top: LeaderboardEntry[]; big?: boolean }) {
   const order = [top[1], top[0], top[2]];
-  const heights = ["h-24", "h-36", "h-16"];
+  const heights = big ? ["h-[15vmin]", "h-[22vmin]", "h-[10vmin]"] : ["h-24", "h-36", "h-16"];
   const medals = ["bg-gradient-to-b from-slate-200 to-slate-400", "bg-gradient-to-b from-amber-200 to-amber-400", "bg-gradient-to-b from-orange-400 to-amber-700"]; // silver, gold, bronze
   return (
     <div className="flex items-end justify-center gap-3" aria-hidden={top.length === 0}>
       {order.map((e, i) => e ? (
-        <div key={e.playerId} className={`flex w-28 flex-col items-center gap-1 text-center sm:w-36`}>
-          <Avatar id={e.avatar} size="lg" />
-          <p className="w-full truncate text-sm font-semibold">{e.nickname}</p>
-          <p className="font-mono text-sm text-ink-muted">{e.points}</p>
-          <div className={`${heights[i]} grid w-full place-items-center rounded-t-2xl ${medals[i]} text-3xl font-black text-slate-900 shadow-lg`}>{e.rank}</div>
+        <div key={e.playerId} className={`flex flex-col items-center gap-1 text-center ${big ? "w-[26vmin]" : "w-28 sm:w-36"}`}>
+          <Avatar id={e.avatar} size={big ? "xl" : "lg"} />
+          <p className={`w-full truncate font-semibold ${big ? "text-[3vmin]" : "text-sm"}`}>{e.nickname}</p>
+          <p className={`font-mono text-ink-muted ${big ? "text-[2.6vmin]" : "text-sm"}`}>{e.points}</p>
+          <div className={`${heights[i]} grid w-full place-items-center rounded-t-2xl ${medals[i]} ${big ? "text-[6vmin]" : "text-3xl"} font-black text-slate-900 shadow-lg`}>{e.rank}</div>
         </div>
-      ) : <div key={i} className="w-28 sm:w-36" />)}
+      ) : <div key={i} className={big ? "w-[26vmin]" : "w-28 sm:w-36"} />)}
     </div>
   );
 }
@@ -92,7 +94,7 @@ export function Podium({ top }: { top: LeaderboardEntry[] }) {
 export function Distribution({ options, results, big = false }: { options: PublicOption[]; results: ResultsData; big?: boolean }) {
   const max = Math.max(1, ...Object.values(results.distribution));
   return (
-    <ul className="space-y-3">
+    <ul className={big ? "space-y-[2.4vmin]" : "space-y-3"}>
       {options.map((o, i) => {
         const n = results.distribution[o.id] ?? 0;
         const ok = results.correctOptionId === o.id;
@@ -100,15 +102,15 @@ export function Distribution({ options, results, big = false }: { options: Publi
         const st = OPTION_STYLE[i % 4]!;
         return (
           <li key={o.id} className={`flex items-center gap-3 ${dim ? "opacity-50" : ""}`}>
-            <span className={`grid ${big ? "size-14" : "size-10"} shrink-0 place-items-center rounded-xl ${st.bg}`}><st.Icon aria-hidden className="size-5 fill-current" /></span>
+            <span className={`grid ${big ? "size-[8vmin]" : "size-10"} shrink-0 place-items-center rounded-xl ${st.bg}`}><st.Icon aria-hidden className="size-5 fill-current" /></span>
             <div className="min-w-0 flex-1">
-              <div className={`flex items-center gap-2 ${big ? "text-2xl" : "text-base"}`}>
-                <span className="truncate font-medium">{o.text}</span>
+              <div className={`flex items-center gap-2 ${big ? "text-[3.2vmin]" : "text-base"}`}>
+                <span className={`font-medium ${big ? "truncate" : "break-words"}`}>{o.text}</span>
                 {ok ? <Check className="size-5 shrink-0 text-emerald-300" aria-label="✓" /> : null}
               </div>
-              <div className="mt-1 h-4 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${ok ? "bg-emerald-400" : "bg-white/50"}`} style={{ width: `${(n / max) * 100}%` }} /></div>
+              <div className={`mt-1 overflow-hidden ${big ? "h-[2.6vmin]" : "h-4"} rounded-full bg-white/10`}><div className={`h-full rounded-full ${ok ? "bg-emerald-400" : "bg-white/50"}`} style={{ width: `${(n / max) * 100}%` }} /></div>
             </div>
-            <span className={`w-10 text-right font-mono font-bold tabular-nums ${big ? "text-3xl" : ""}`}>{n}</span>
+            <span className={`text-right font-mono font-bold tabular-nums ${big ? "w-[8vmin] text-[4vmin]" : "w-10"}`}>{n}</span>
           </li>
         );
       })}
@@ -126,12 +128,12 @@ export function Verdict({ ok, children }: { ok: boolean; children: ReactNode }) 
 }
 
 /** The quiz's cover and its description: what the game is about, shown to everyone before it starts. */
-export function QuizIntro({ cover, description, big = false }: { cover?: string | undefined; description?: string | undefined; big?: boolean }) {
+export function QuizIntro({ cover, description, big = false, compact = false }: { cover?: string | undefined; description?: string | undefined; big?: boolean; compact?: boolean }) {
   if (!cover && !description) return null;
   return (
     <div className={`mx-auto flex w-full flex-col items-center gap-3 ${big ? "max-w-3xl" : "max-w-md"}`}>
-      {cover ? <img src={mediaUrl(cover)} alt="" className={`w-full rounded-2xl object-cover ${big ? "max-h-72" : "max-h-48"}`} /> : null}
-      {description ? <p className={`text-center text-ink-muted ${big ? "text-2xl" : "text-sm"}`}>{description}</p> : null}
+      {cover ? <img src={mediaUrl(cover)} alt="" className={`w-full rounded-2xl object-cover ${big ? "max-h-[22vh]" : compact ? "max-h-32" : "max-h-48"}`} /> : null}
+      {description ? <p className={`text-center text-ink-muted ${big ? "text-[2.6vmin]" : "text-sm"}`}>{description}</p> : null}
     </div>
   );
 }
@@ -142,11 +144,11 @@ export function BrandBar({ big = false }: { big?: boolean }) {
   if (!b.logoMediaId && !b.companyName && !b.tagline) return null;
   return (
     <div className={`flex items-center justify-center gap-4 ${big ? "" : "flex-col text-center"}`} data-testid="brand-bar">
-      {b.logoMediaId ? <img src={mediaUrl(b.logoMediaId)} alt="" className={`${big ? "h-16" : "h-12"} w-auto max-w-[40%] object-contain`} /> : null}
+      {b.logoMediaId ? <img src={mediaUrl(b.logoMediaId)} alt="" className={`${big ? "h-[7vmin]" : "h-12"} w-auto max-w-[40%] object-contain`} /> : null}
       {b.companyName || b.tagline ? (
         <div className={big ? "text-left" : ""}>
-          {b.companyName ? <p className={`font-bold leading-tight ${big ? "text-3xl" : "text-lg"}`}>{b.companyName}</p> : null}
-          {b.tagline ? <p className={`text-ink-muted ${big ? "text-xl" : "text-sm"}`}>{b.tagline}</p> : null}
+          {b.companyName ? <p className={`font-bold leading-tight ${big ? "text-[3.4vmin]" : "text-lg"}`}>{b.companyName}</p> : null}
+          {b.tagline ? <p className={`text-ink-muted ${big ? "text-[2.4vmin]" : "text-sm"}`}>{b.tagline}</p> : null}
         </div>
       ) : null}
     </div>

@@ -63,7 +63,7 @@ export function UsageTab() {
   }
 
   if (!data) return <p className="text-sm text-ink-muted">{error ?? t("admin.loading")}</p>;
-  const input = "w-full rounded-xl border border-surface-border bg-black/30 px-3 py-2 text-sm outline-none focus:border-brand";
+  const input = "w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/40";
 
   return (
     <div className="space-y-6">

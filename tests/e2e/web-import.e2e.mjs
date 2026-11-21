@@ -100,6 +100,16 @@ try {
   await page.getByRole("button", { name: "До списку" }).click();
 
   // The server checks too, whatever the browser did.
+  // Paginator: more than ten quizzes are split into pages.
+  for (let i = 0; i < 12; i++) await call("POST", "/api/quizzes", { title: `Масова вікторина ${i}` }, login.cookie);
+  await page.goto(`${BASE}/admin`); await page.waitForSelector("[role=tablist]");
+  await page.getByText("Усі вікторини").waitFor(); await page.getByTestId("pager").waitFor({ timeout: 8000 }).catch(() => {});
+  check("a long quiz list shows a paginator", (await page.getByTestId("pager").count()) === 1);
+  const pageOne = await page.locator("ul.divide-y > li").count();
+  check("the first page holds ten quizzes", pageOne === 10, String(pageOne));
+  await page.getByRole("button", { name: "Далі" }).click();
+  const two = await page.locator("ul.divide-y > li").count(); check("the second page holds the rest", two > 0 && two <= 10, String(two));
+  await page.getByRole("button", { name: "Назад" }).click();
   check("the server refuses a bad file by itself", (await call("POST", "/api/quizzes/import", { format: "gart.quiz", version: 1, quiz: { title: "x" }, questions: [] }, login.cookie)).status === 400);
   check("import needs a signed-in user", (await call("POST", "/api/quizzes/import", tpl)).status === 401);
   rmSync(dir, { recursive: true, force: true }); rmSync(tplPath, { force: true });

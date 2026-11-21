@@ -83,7 +83,7 @@ export function AdminsTab({ me }: { me: AdminView }) {
                           aria-label={t("admins.role")}
                           value={a.role}
                           onChange={(e) => void patch(a.id, { role: e.target.value })}
-                          className="rounded-lg border border-surface-border bg-black/30 px-2 py-1"
+                          className="rounded-lg border border-slate-500 bg-slate-950/70 px-2 py-1"
                         >
                           {assignable.map((r) => <option key={r} value={r}>{t(`role.${r}` as MessageKey)}</option>)}
                         </select>
@@ -111,7 +111,7 @@ export function AdminsTab({ me }: { me: AdminView }) {
           <Field id="n-pass" type="password" label={t("admins.tempPassword")} autoComplete="new-password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
           <div>
             <label htmlFor="n-role" className="mb-1.5 block text-sm font-medium">{t("admins.role")}</label>
-            <select id="n-role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm">
+            <select id="n-role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Role })} className="w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2.5 text-sm">
               {assignable.map((r) => <option key={r} value={r}>{t(`role.${r}` as MessageKey)}</option>)}
             </select>
           </div>

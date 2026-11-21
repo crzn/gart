@@ -85,7 +85,7 @@ try {
   await page.waitForSelector("[role=status]");
   check("password change succeeds", true);
 
-  await page.click("text=EN");
+  await page.getByTestId("user-menu").click(); await page.getByRole("button", { name: "en", exact: true }).click();
   check("language switch to English works", (await page.textContent("body")).includes("Change password"));
   await page.click("button:has-text('Sign out')");
   await page.waitForURL("**/login");

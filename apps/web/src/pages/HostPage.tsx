@@ -86,7 +86,7 @@ export function HostPage() {
   const errText = state.error ? ((t(`ws.err.${state.error}` as MessageKey) as string | undefined) ?? t("ws.err.unknown")) : null;
 
   return (
-    <section className="w-full space-y-5">
+    <section className="w-full space-y-5 pb-24">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-ink-muted">{game.title} · PIN {game.pin}{state.conn === "reconnecting" ? ` · ${t("play.reconnecting")}` : ""}</p>
         <a href={`/screen/${id}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20"><MonitorPlay className="size-4" aria-hidden />{t("host.projector")}</a>
@@ -96,7 +96,8 @@ export function HostPage() {
       <Card><LiveView state={state} joinUrl={joinUrl} fx onKick={s === "LOBBY" ? kick : undefined} /></Card>
       {errText ? <ErrorNote>{errText}</ErrorNote> : null}
       {snap ? (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-slate-600 bg-slate-950/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-testid="host-controls">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 [&_button]:!px-5 [&_button]:!py-3 [&_button]:!text-base">
           {s === "LOBBY" && <>
             <Button onClick={() => send({ t: "host.start" })} disabled={snap.playerCount < 1}><Play className="size-4" aria-hidden />{t("host.start")}</Button>
             {snap.playerCount < 1 ? <span className="text-sm text-ink-muted">{t("host.needPlayer")}</span> : null}
@@ -118,6 +119,7 @@ export function HostPage() {
               : <Button variant="ghost" onClick={() => setConfirmEnd(true)}>{t("host.end")}</Button>
           )}
         </div>
+        </div>
       ) : null}
     </section>
   );
@@ -135,7 +137,7 @@ export function ScreenPage() {
   if (state.error === "replaced") return <Notice title={t("host.replaced")} />;
   return (
     <section className="w-full" data-testid="screen">
-      {state.snap && state.snap.state !== "LOBBY" ? <p className="mb-4 text-right text-xl text-ink-muted">{t("host.joinAt")} {location.host} · PIN <b className="font-mono text-ink">{game.pin}</b></p> : null}
+      {state.snap && state.snap.state !== "LOBBY" ? <p className="mb-4 text-right text-[2.2vmin] text-ink-muted">{t("host.joinAt")} {location.host} · PIN <b className="font-mono text-ink">{game.pin}</b></p> : null}
       <div className="mb-4"><BrandBar big /></div>
       <LiveView state={state} big fx joinUrl={location.host} />
       <div className="fixed bottom-4 right-4 opacity-60 hover:opacity-100 focus-within:opacity-100"><SoundControl audio={audio} /></div>

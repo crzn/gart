@@ -94,7 +94,7 @@ export function QuizEditor({ id, onClose }: { id: string; onClose(): void }) {
         <Button variant="ghost" onClick={onClose}><ArrowLeft className="size-4" aria-hidden />{t("quiz.back")}</Button>
         <div className="flex items-center gap-3 text-sm">
           <span className="text-ink-muted">{t("quiz.status")}:</span>
-          <select aria-label={t("quiz.status")} value={quiz.status} onChange={(e) => void patch({ status: e.target.value })} className="rounded-lg border border-surface-border bg-black/30 px-2 py-1.5">
+          <select aria-label={t("quiz.status")} value={quiz.status} onChange={(e) => void patch({ status: e.target.value })} className="rounded-lg border border-slate-500 bg-slate-950/70 px-2 py-1.5">
             {(["draft", "active", "archived"] as const).map((s) => <option key={s} value={s}>{t(`status.${s}` as MessageKey)}</option>)}
           </select>
         </div>
@@ -110,12 +110,12 @@ export function QuizEditor({ id, onClose }: { id: string; onClose(): void }) {
           <div className="sm:col-span-2">
             <label htmlFor="md" className="mb-1.5 block text-sm font-medium">{t("quiz.description")}</label>
             <p id="md-hint" className="mb-1.5 text-xs text-ink-muted">{t("quiz.descriptionHint")}</p>
-            <textarea id="md" aria-describedby="md-hint" rows={2} maxLength={QUIZ_LIMITS.descriptionMax} value={meta.description} onChange={(e) => setMeta({ ...meta, description: e.target.value })} className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm" />
+            <textarea id="md" aria-describedby="md-hint" rows={2} maxLength={QUIZ_LIMITS.descriptionMax} value={meta.description} onChange={(e) => setMeta({ ...meta, description: e.target.value })} className="w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2.5 text-sm" />
           </div>
           <Field id="mg" label={t("quiz.tags")} value={meta.tags} onChange={(e) => setMeta({ ...meta, tags: e.target.value })} />
           <div>
             <label htmlFor="mdf" className="mb-1.5 block text-sm font-medium">{t("quiz.difficulty")}</label>
-            <select id="mdf" value={quiz.difficulty ?? ""} onChange={(e) => void patch({ difficulty: e.target.value || null })} className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm">
+            <select id="mdf" value={quiz.difficulty ?? ""} onChange={(e) => void patch({ difficulty: e.target.value || null })} className="w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2.5 text-sm">
               <option value="">—</option>
               {(["easy", "medium", "hard"] as const).map((x) => <option key={x} value={x}>{t(`diff.${x}` as MessageKey)}</option>)}
             </select>

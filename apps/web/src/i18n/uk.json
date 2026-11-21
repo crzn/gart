@@ -577,5 +577,9 @@
   "tab.settings": "Налаштування",
   "sound.gart": "Звук Гарта",
   "sound.gartOn": "увімкнено",
-  "sound.gartOff": "вимкнено"
+  "sound.gartOff": "вимкнено",
+  "pager.label": "Сторінки списку",
+  "pager.prev": "Назад",
+  "pager.next": "Далі",
+  "pager.page": "Сторінка"
 }

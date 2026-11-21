@@ -67,7 +67,7 @@ export function QuestionForm({ quizId, question, onSaved, onCancel }: { quizId: 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="qtype" className="mb-1.5 block text-sm font-medium">{t("q.type")}</label>
-          <select id="qtype" value={d.type} onChange={(e) => changeType(e.target.value as QuestionType)} className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm">
+          <select id="qtype" value={d.type} onChange={(e) => changeType(e.target.value as QuestionType)} className="w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2.5 text-sm">
             <option value="single">{t("q.single")}</option>
             <option value="truefalse">{t("q.truefalse")}</option>
           </select>
@@ -76,7 +76,7 @@ export function QuestionForm({ quizId, question, onSaved, onCancel }: { quizId: 
       </div>
       <div>
         <label htmlFor="qtext" className="mb-1.5 block text-sm font-medium">{t("q.text")} <span className="text-ink-muted">({d.text.length}/{QUIZ_LIMITS.questionTextMax})</span></label>
-        <textarea id="qtext" required maxLength={QUIZ_LIMITS.questionTextMax} rows={2} value={d.text} onChange={(e) => set({ text: e.target.value })} className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm" />
+        <textarea id="qtext" required maxLength={QUIZ_LIMITS.questionTextMax} rows={2} value={d.text} onChange={(e) => set({ text: e.target.value })} className="w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2.5 text-sm" />
       </div>
       <fieldset>
         <legend className="mb-2 text-sm font-medium">{t("q.options")}</legend>
@@ -87,7 +87,7 @@ export function QuestionForm({ quizId, question, onSaved, onCancel }: { quizId: 
               <input
                 aria-label={`${t("q.option")} ${i + 1}`} required maxLength={QUIZ_LIMITS.optionTextMax} value={o.text} readOnly={d.type === "truefalse"}
                 onChange={(e) => setOpt(i, { text: e.target.value })}
-                className="min-w-0 flex-1 rounded-xl border border-surface-border bg-black/20 px-3 py-2 text-sm"
+                className="min-w-0 flex-1 rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2 text-sm"
               />
               {d.type === "single" && (
                 <>
@@ -108,7 +108,7 @@ export function QuestionForm({ quizId, question, onSaved, onCancel }: { quizId: 
       </div>
       <div>
         <label htmlFor="qexp" className="mb-1.5 block text-sm font-medium">{t("q.explanation")}</label>
-        <textarea id="qexp" maxLength={QUIZ_LIMITS.explanationMax} rows={2} value={d.explanation} onChange={(e) => set({ explanation: e.target.value })} className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm" />
+        <textarea id="qexp" maxLength={QUIZ_LIMITS.explanationMax} rows={2} value={d.explanation} onChange={(e) => set({ explanation: e.target.value })} className="w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2.5 text-sm" />
       </div>
       {error ? <ErrorNote>{error}</ErrorNote> : null}
       <div className="flex gap-3">

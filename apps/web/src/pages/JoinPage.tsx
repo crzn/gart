@@ -53,7 +53,7 @@ export function JoinPage() {
               placeholder="000000"
               aria-describedby="pin-hint"
               aria-invalid={submitted && !valid}
-              className="w-full rounded-2xl border border-surface-border bg-black/30 px-4 py-4 text-center font-mono text-3xl tracking-[0.4em] text-ink placeholder:text-white/20"
+              className="w-full rounded-2xl border border-slate-500 bg-slate-950/70 px-4 py-4 text-center font-mono text-3xl tracking-[0.4em] text-ink placeholder:text-white/20"
             />
             <p id="pin-hint" className="mt-2 text-xs text-ink-muted">
               {t("join.pinHint")}

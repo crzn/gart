@@ -5,7 +5,7 @@ import { QuizSettingsSchema, roleAtLeast, type AdminView, type ProjectedRow, typ
 import { api, ApiError } from "../../api";
 import { errorKey } from "../../errors";
 import { useLang, type MessageKey } from "../../i18n";
-import { Button, Card, ErrorNote, Field } from "../../ui";
+import { Button, Card, ErrorNote, Field, Pager, usePaged } from "../../ui";
 import { QuizEditor } from "./QuizEditor";
 import { ImportCard } from "./ImportCard";
 import { ConcernList } from "./UsagePanels";
@@ -52,6 +52,7 @@ export function QuizzesTab({ me }: { me: AdminView }) {
   const [quizzes, setQuizzes] = useState<QuizSummary[] | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
+  const paged = usePaged(quizzes ?? []);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [templateId, setTemplateId] = useState("");
@@ -103,7 +104,7 @@ export function QuizzesTab({ me }: { me: AdminView }) {
           <Field id="qt" label={t("quiz.title")} required maxLength={100} value={title} onChange={(e) => setTitle(e.target.value)} />
           <div>
             <label htmlFor="qtpl" className="mb-1.5 block text-sm font-medium">{t("quiz.template")}</label>
-            <select id="qtpl" value={templateId} onChange={(e) => setTemplateId(e.target.value)} className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm">
+            <select id="qtpl" value={templateId} onChange={(e) => setTemplateId(e.target.value)} className="w-full rounded-xl border border-slate-500 bg-slate-950/70 px-3 py-2.5 text-sm">
               <option value="">{t("quiz.noTemplate")}</option>
               {templates.map((x) => <option key={x.id} value={x.id}>{tplText(t, x.id, "name", x.name)}</option>)}
             </select>
@@ -129,8 +130,8 @@ export function QuizzesTab({ me }: { me: AdminView }) {
       <Card>
         <h2 className="text-xl font-bold">{t("quiz.list")}</h2>
         {quizzes === null ? <p className="mt-4 text-sm text-ink-muted">{t("admin.loading")}</p> : quizzes.length === 0 ? <p className="mt-4 text-sm text-ink-muted">{t("quiz.empty")}</p> : (
-          <ul className="mt-4 divide-y divide-white/10">
-            {quizzes.map((q) => (
+          <><ul className="mt-4 divide-y divide-white/10">
+            {paged.rows.map((q) => (
               <li key={q.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                 <button type="button" onClick={() => setOpenId(q.id)} className="min-w-0 flex-1 text-left">
                   <p className="truncate font-medium hover:underline">{q.title}</p>
@@ -148,6 +149,7 @@ export function QuizzesTab({ me }: { me: AdminView }) {
               </li>
             ))}
           </ul>
+        <Pager page={paged.page} pages={paged.pages} setPage={paged.setPage} /></>
         )}
       </Card>
       {quota ? (
