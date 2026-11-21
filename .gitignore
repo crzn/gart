@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.gart/
+*.log
+.DS_Store
+backups/
+.quizlab/
+package-out/
+site-out/
+
+# Installation-specific Cloudflare config (generated; never commit)
+apps/worker/wrangler.jsonc

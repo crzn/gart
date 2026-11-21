@@ -1,0 +1,49 @@
+# Gart
+
+Self-hosted live quiz platform for one company, running entirely on the **Cloudflare Free plan** ($0 infrastructure). Open source, AGPL-3.0.
+
+**Status: 0.8.1. All 8 planned phases are built; install from the browser was added in 0.8.1; presentation polish (QR code, sound, animation for the host screen and projector) is planned for 0.9.0, see [docs/ROADMAP.md](docs/ROADMAP.md).** A full game with 120 simulated players passes locally; it has not been run on real Cloudflare yet, and neither has the browser installer, so 120 concurrent players and the installer are not yet confirmed on the real service. See [CHANGELOG.md](CHANGELOG.md) for exactly what works today.
+
+## What works in this build
+
+- **Browser installer** (0.8.1) and a local wizard (Windows, macOS, Linux): sign in with Cloudflare OAuth, create/reuse the D1 database, apply migrations, generate secrets, build, deploy, health-check. Actions: Install, Update, Repair, Backup, Uninstall.
+- Cloudflare Worker (Hono) serving the web app via Workers Static Assets, with `/api/health`, a WebSocket/Durable Object round-trip check, and setup status.
+- Complete D1 schema and seed data (13 tables, 6 quiz templates).
+- Shared, tested game rules: deterministic scoring, game state machine, nickname rules, PIN generation, ranking, settings schema, WebSocket protocol validation.
+- Responsive Ukrainian/English web shell (React, Tailwind).
+- **Administrator accounts (phase 2):** first owner created by the installer, sign-in/sign-out, roles (owner/admin/editor), password change, session list and revocation, administrator management, login rate limiting, CSRF protection, audit log, automatic tuning of password hashing to the account's CPU limit.
+- **Quiz editor and branding (phase 3):** templates, questions with images, game settings, statuses, duplication, runtime branding (colours, logo, background, messages).
+
+## What is not built yet
+
+QR code for joining, sound and animation (0.9.0); updates from the admin panel (0.8.2); quiz import/export; unused-image cleanup; Cloudflare Analytics API integration.
+
+## Install
+
+**From the browser, nothing to install on your computer:** follow the install page (GitHub Pages of this repository, `https://<owner>.github.io/<repo>/`) or section 2b of the **[Administrator Guide](docs/ADMIN-GUIDE.en.md)** ([українською](docs/ADMIN-GUIDE.uk.md)). You need a free Cloudflare account and an API token.
+
+Advanced, with Node.js 22.12+ on your computer (local wizard):
+
+```
+bash install.sh                                          # macOS / Linux
+powershell -ExecutionPolicy Bypass -File .\install.ps1   # Windows
+```
+
+## Develop
+
+```
+npm install
+npm run check          # typecheck + tests + build
+npm run dev:worker     # Worker on :8787 (local D1; run `npm run db:migrate:local -w apps/worker` once)
+npm run dev:web        # Vite on :5173, proxies /api to the Worker
+```
+
+Layout: `apps/web` (React), `apps/worker` (Hono + Durable Object), `packages/shared` (pure logic used by both), `migrations/`, `installer/`, `config/cloudflare-limits.json` (the only place quotas live), `docs/`.
+
+## Documents
+
+[Architecture and plan](docs/ARCHITECTURE.md) · [Decisions](docs/DECISIONS.md) · [Security](docs/SECURITY.md) · [Admin guide EN](docs/ADMIN-GUIDE.en.md) · [UK](docs/ADMIN-GUIDE.uk.md)
+
+## License
+
+GNU AGPL-3.0-only. See [LICENSE](LICENSE).

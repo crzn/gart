@@ -1,0 +1,36 @@
+name: Release
+# Runs when a version tag (v1.2.3) is pushed: tests, builds the signed package and the web installer page,
+# and attaches them to a GitHub Release. Installed copies of Gart and the installer download them from there.
+# Needs the repository secret GART_SIGNING_KEY (see scripts/generate-signing-key.mjs).
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: The tag must match the version in package.json
+        run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      - name: Build the signed package
+        env:
+          GART_SIGNING_KEY: ${{ secrets.GART_SIGNING_KEY }}
+        run: node scripts/build-package.mjs --out package-out
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          cp "package-out/gart-package-$V.json" package-out/gart-package.json
+          cp "package-out/gart-installer-$V.json" package-out/gart-installer.json
+          node scripts/release-notes.mjs "$V" > notes.md
+          gh release create "$GITHUB_REF_NAME" package-out/gart-package.json package-out/gart-installer.json --title "Gart $V" --notes-file notes.md

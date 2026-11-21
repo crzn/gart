@@ -1,0 +1,41 @@
+// Template used by the installer. The installer fills in the values marked with double
+// underscores and writes apps/worker/wrangler.jsonc (git-ignored). On Cloudflare Workers Builds the same file is generated from the GART_* build variables.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "__WORKER_NAME__",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-01-15",
+
+  // Frontend is served by Workers Static Assets. Static requests are free and unlimited;
+  // only /api/* and /ws/* invoke the Worker (and count toward the daily request quota).
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/ws/*"]
+  },
+
+  // One Durable Object (SQLite-backed, the only kind available on the Free plan) per live game.
+  "durable_objects": {
+    "bindings": [
+      { "name": "GAME_ROOM", "class_name": "GameRoom" },
+      { "name": "RATE_LIMITER", "class_name": "RateLimiter" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["GameRoom"] },
+    { "tag": "v2", "new_sqlite_classes": ["RateLimiter"] }
+  ],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "__D1_NAME__",
+      "database_id": "__D1_ID__",
+      "migrations_dir": "../../migrations"
+    }
+  ],
+
+  // No R2 bucket: media is stored in D1 (see docs/DECISIONS.md, D-001).
+  "observability": { "enabled": true }
+}

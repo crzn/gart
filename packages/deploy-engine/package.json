@@ -1,0 +1,16 @@
+{
+  "name": "@gart/deploy-engine",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "main": "src/index.mjs",
+  "exports": {
+    ".": "./src/index.mjs",
+    "./package-format": "./src/package-format.mjs",
+    "./cloudflare": "./src/cloudflare.mjs",
+    "./deploy": "./src/deploy.mjs"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

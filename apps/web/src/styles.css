@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* Design tokens. Branding (Phase 3) overrides these CSS variables at runtime, so the UI
+   stays usable with no custom branding configured. */
+:root {
+  --brand: #4f46e5;
+  --brand-2: #0ea5e9;
+  --bg: #0f172a;
+  --accent: #f59e0b;
+  --surface: rgb(255 255 255 / 0.06);
+  --surface-border: rgb(255 255 255 / 0.12);
+  --text: #f8fafc;
+  --text-muted: #94a3b8;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-canvas: var(--bg);
+  --color-accent: var(--accent);
+  --color-surface: var(--surface);
+  --color-surface-border: var(--surface-border);
+  --color-ink: var(--text);
+  --color-ink-muted: var(--text-muted);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-backdrop {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(60rem 40rem at 10% -10%, color-mix(in srgb, var(--brand) 45%, transparent), transparent 60%),
+    radial-gradient(50rem 36rem at 100% 0%, color-mix(in srgb, var(--brand-2) 30%, transparent), transparent 60%),
+    var(--bg-image, none);
+  background-size: auto, auto, cover;
+  background-position: 0 0, 0 0, center;
+  background-repeat: no-repeat;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Native form controls: dark scheme so dropdown lists, date pickers and scrollbars match the theme
+   (browsers draw option lists themselves and ignore transparent backgrounds). */
+:root { color-scheme: dark; }
+select, input, textarea { color-scheme: dark; color: var(--text); }
+select option, select optgroup { background-color: #1e293b; color: #f8fafc; }
+::placeholder { color: var(--text-muted); opacity: 0.8; }

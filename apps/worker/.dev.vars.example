@@ -1,0 +1,5 @@
+# Copy to .dev.vars for local development (git-ignored). Never reuse these values in production.
+SESSION_SECRET=local-dev-session-secret-change-me-0123456789
+WS_TICKET_SECRET=local-dev-ws-secret-change-me-0123456789
+SETUP_TOKEN=local-dev-setup-token-0123456789
+KDF_ITERATIONS=10000

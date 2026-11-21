@@ -1,0 +1,35 @@
+{
+  "name": "gart",
+  "version": "0.8.1",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "description": "Gart: self-hosted live quiz platform for Cloudflare Free plan",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w apps/web",
+    "dev:worker": "npm run dev -w apps/worker",
+    "build": "npm run build -w apps/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test && npm run build",
+    "install:wizard": "node installer/install.mjs",
+    "deploy:cloudflare": "node scripts/deploy-cloudflare.mjs",
+    "release:check": "node scripts/prepare-release.mjs",
+    "release:package": "node scripts/make-package.mjs",
+    "package:build": "node scripts/build-package.mjs",
+    "site:build": "node scripts/build-site.mjs",
+    "signing-key": "node scripts/generate-signing-key.mjs"
+  },
+  "devDependencies": {
+    "blake3-wasm": "^2.1.5",
+    "typescript": "~5.9.3",
+    "vitest": "^5.1.1"
+  }
+}

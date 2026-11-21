@@ -1,0 +1,12 @@
+{
+  "name": "@gart/installer-web",
+  "version": "0.8.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "echo \"installer-web is plain JavaScript, checked by its browser test\""
+  },
+  "dependencies": {
+    "@gart/deploy-engine": "*"
+  }
+}

@@ -1,0 +1,33 @@
+name: Install page
+# Publishes the installation microsite (instructions + the copyable bootstrap script) on GitHub Pages.
+# One-time setup: Settings -> Pages -> Source: GitHub Actions.
+on:
+  push:
+    branches: [main]
+    paths: ["site/**", "bootstrap/**", "config/release.json", "scripts/build-site.mjs", "scripts/make-bootstrap.mjs"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - run: node scripts/build-site.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site-out
+      - id: deployment
+        uses: actions/deploy-pages@v4

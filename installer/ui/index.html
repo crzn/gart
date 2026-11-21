@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gart — Installer</title>
+<style>
+  :root{--bg:#0f172a;--card:#16213a;--line:#2a3856;--text:#f1f5f9;--muted:#94a3b8;--brand:#6366f1;--ok:#34d399;--warn:#fbbf24;--bad:#f87171}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(60rem 36rem at 10% -10%,#312e8180,transparent 60%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+  header{max-width:760px;margin:0 auto;padding:20px 16px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  h1{font-size:20px;margin:0}
+  .lang button{background:none;border:1px solid var(--line);color:var(--muted);padding:4px 10px;border-radius:8px;cursor:pointer;font-weight:600}
+  .lang button[aria-pressed=true]{background:#fff;color:#0f172a}
+  main{max-width:760px;margin:0 auto;padding:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px;margin-bottom:16px}
+  h2{margin:0 0 8px;font-size:22px}
+  p{margin:8px 0;color:var(--muted)}
+  .steps{display:flex;gap:6px;margin:0 0 16px;padding:0;list-style:none;flex-wrap:wrap}
+  .steps li{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+  .steps li.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .steps li.done{color:var(--ok);border-color:#34d39966}
+  label{display:block;margin:14px 0 6px;font-weight:600;font-size:14px}
+  input,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1326;color:var(--text);font:inherit}
+  input[type=color]{padding:2px;height:46px}
+  .hint{font-size:13px;color:var(--muted);margin-top:4px}
+  button.primary{background:var(--brand);color:#fff;border:0;border-radius:14px;padding:13px 20px;font:inherit;font-weight:700;cursor:pointer}
+  button.primary:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:none;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:12px 18px;font:inherit;cursor:pointer}
+  button.danger{background:#7f1d1d;color:#fff;border:0;border-radius:14px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .check{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .check:last-child{border-bottom:0}
+  .ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+  pre{background:#0b1326;border:1px solid var(--line);border-radius:12px;padding:12px;max-height:260px;overflow:auto;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;color:#cbd5e1;white-space:pre-wrap;word-break:break-word}
+  .note{background:#fbbf2418;border:1px solid #fbbf2455;border-radius:12px;padding:12px 14px;color:#fde68a;font-size:14px}
+  .err{background:#f8717118;border:1px solid #f8717166;border-radius:12px;padding:12px 14px;color:#fecaca;font-size:14px}
+  a{color:#a5b4fc}
+  .pl{display:flex;gap:10px;align-items:center;padding:6px 0}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--line)}
+  .dot.running{background:var(--warn)}.dot.done{background:var(--ok)}.dot.failed{background:var(--bad)}.dot.skipped{background:#64748b}
+  [hidden]{display:none!important}
+  .big{font-size:18px;word-break:break-all}
+</style>
+</head>
+<body>
+<header>
+  <h1>Gart <small style="color:var(--muted);font-weight:400">v__VERSION__</small></h1>
+  <div class="lang" role="group" aria-label="Language"><button data-l="uk">UK</button> <button data-l="en">EN</button></div>
+</header>
+<main>
+  <ol class="steps" id="steps"></ol>
+  <div id="view"></div>
+</main>
+
+<script>
+"use strict";
+const TOKEN = "__TOKEN__";
+const T = {
+  uk: {
+    s_welcome:"Вітання", s_cf:"Cloudflare", s_setup:"Налаштування", s_run:"Встановлення", s_done:"Готово",
+    welcome:"Майстер встановлення Gart", welcomeP:"Цей майстер розгорне Gart у вашому акаунті Cloudflare: створить базу даних, налаштує сервіс і опублікує застосунок. Усе працює на безкоштовному плані, нічого не купується і плани не змінюються.",
+    req:"Системні вимоги", node:"Node.js 22.12 або новіший", deps:"Залежності проєкту", os:"Система",
+    installed:"Встановлено", missing:"Не встановлено",
+    prep:"Підготувати (встановити залежності)", next:"Далі", back:"Назад", refresh:"Перевірити знову",
+    nodeBad:"Встановіть Node.js з nodejs.org і запустіть майстер знову.",
+    cfTitle:"Вхід у Cloudflare", cfP:"Натисніть кнопку: відкриється сторінка Cloudflare, де потрібно підтвердити доступ (OAuth). Пароль або ключі нікуди не вводяться і не зберігаються майстром.",
+    login:"Увійти в Cloudflare", loggedAs:"Ви увійшли як", noLogin:"Ще не виконано вхід", waiting:"Очікуємо підтвердження в браузері…",
+    account:"Акаунт Cloudflare", names:"Імена ресурсів", workerName:"Назва сервісу (Worker)", workerHint:"Малі латинські літери, цифри, дефіс. Стане частиною адреси: назва.ваш-піддомен.workers.dev",
+    dbName:"Назва бази даних", brand:"Брендування (за бажанням)", company:"Назва компанії", color:"Основний колір",
+    brandHint:"Це можна змінити пізніше в адмін-панелі.",
+    adminTitle:"Перший адміністратор", adminHint:"Цей обліковий запис буде власником платформи. Пароль не зберігається майстром і не потрапляє в журнал; на сервері зберігається лише його хеш.",
+    aEmail:"Ел. пошта", aName:"Ім'я для показу", aPass:"Пароль (щонайменше 12 символів)", aPass2:"Повторіть пароль", passMismatch:"Паролі не збігаються", passShort:"Пароль закороткий (мінімум 12 символів)", emailBad:"Невірна адреса ел. пошти",
+    createAdmin:"Створити адміністратора", adminDone:"Адміністратор створено", adminLogin:"Увійдіть у застосунку цією поштою та паролем.", adminMissing:"Адміністратора ще не створено. Створіть його, щоб увійти в застосунок.",
+    s_admin:"Адміністратор", kdfInfo:"Складність хешування паролів підібрано автоматично під ліміти вашого акаунта.",
+    start:"Почати встановлення", running:"Виконується…", failed:"Помилка на кроці", hints:"Що можна зробити",
+    h_subdomain:"У акаунті немає піддомену workers.dev. Створіть його за посиланням і запустіть «Відновити».",
+    h_auth:"Потрібен вхід у Cloudflare. Поверніться на крок «Cloudflare».",
+    h_network:"Проблема з мережею. Перевірте інтернет/проксі та повторіть.",
+    h_limits:"Досягнуто ліміт безкоштовного плану. Видаліть непотрібні бази або Worker у Cloudflare.",
+    h_workerMissing:"Cloudflare ще не зареєстрував щойно створений сервіс. Зачекайте хвилину й натисніть «Спробувати знову».",
+    prepRunning:"Встановлюємо залежності… (1–3 хвилини)",
+    h_exists:"Ресурс уже існує. Використайте «Відновити», щоб підключити наявний.",
+    h_permissions:"Немає прав доступу до файлів. Запустіть із папки, де у вас є право запису.",
+    h_loginPort:"Порт входу 8976 зайнятий. Закрийте інший майстер/термінал із входом і повторіть.",
+    retry:"Спробувати знову", doneTitle:"Готово!", openApp:"Відкрити застосунок", yourUrl:"Адреса застосунку",
+    manage:"Керування установкою", mUpdate:"Оновити", mRepair:"Відновити", mBackup:"Резервна копія", mUninstall:"Видалити",
+    installedInfo:"Знайдено наявну установку", backupDone:"Резервну копію збережено в папці", uninstallTitle:"Видалення",
+    uninstallP:"Щоб видалити сервіс, введіть його назву. Базу даних (квізи та результати) буде ЗБЕРЕЖЕНО, якщо ви не введете її назву окремо.",
+    confirmWorker:"Введіть назву сервісу для підтвердження", confirmDb:"Назву бази даних вводьте ТІЛЬКИ якщо хочете назавжди видалити всі дані",
+    doUninstall:"Видалити", dbKept:"Базу даних збережено. Ваші квізи та результати на місці.", dbGone:"Базу даних видалено назавжди.",
+    freeNote:"Усе створюється на безкоштовному плані. Майстер не вмикає платні послуги.",
+    logs:"Журнал"
+  },
+  en: {
+    s_welcome:"Welcome", s_cf:"Cloudflare", s_setup:"Settings", s_run:"Install", s_done:"Done",
+    welcome:"Gart installation wizard", welcomeP:"This wizard deploys Gart to your Cloudflare account: it creates the database, configures the service and publishes the app. Everything runs on the free plan; nothing is purchased and no plan is changed.",
+    req:"System requirements", node:"Node.js 22.12 or newer", deps:"Project dependencies", os:"System",
+    installed:"Installed", missing:"Not installed",
+    prep:"Prepare (install dependencies)", next:"Next", back:"Back", refresh:"Check again",
+    nodeBad:"Install Node.js from nodejs.org and run the wizard again.",
+    cfTitle:"Sign in to Cloudflare", cfP:"Click the button: a Cloudflare page opens where you approve access (OAuth). No password or key is typed into, or stored by, this wizard.",
+    login:"Sign in to Cloudflare", loggedAs:"Signed in as", noLogin:"Not signed in yet", waiting:"Waiting for approval in the browser…",
+    account:"Cloudflare account", names:"Resource names", workerName:"Service name (Worker)", workerHint:"Lowercase letters, digits, hyphen. Becomes part of the address: name.your-subdomain.workers.dev",
+    dbName:"Database name", brand:"Branding (optional)", company:"Company name", color:"Main colour",
+    brandHint:"You can change this later in the admin panel.",
+    adminTitle:"First administrator", adminHint:"This account becomes the platform owner. The wizard does not store the password or write it to the log; the server keeps only its hash.",
+    aEmail:"E-mail", aName:"Display name", aPass:"Password (at least 12 characters)", aPass2:"Repeat password", passMismatch:"Passwords do not match", passShort:"Password is too short (minimum 12 characters)", emailBad:"Invalid e-mail address",
+    createAdmin:"Create administrator", adminDone:"Administrator created", adminLogin:"Sign in to the app with this e-mail and password.", adminMissing:"No administrator exists yet. Create one to sign in to the app.",
+    s_admin:"Administrator", kdfInfo:"Password hashing strength was tuned automatically to your account's limits.",
+    start:"Start installation", running:"Running…", failed:"Failed at step", hints:"What you can do",
+    h_subdomain:"This account has no workers.dev subdomain. Create one with the link, then run Repair.",
+    h_auth:"Cloudflare sign-in is needed. Go back to the Cloudflare step.",
+    h_network:"Network problem. Check your internet/proxy and retry.",
+    h_limits:"A free plan limit was reached. Delete unused databases or Workers in Cloudflare.",
+    h_workerMissing:"Cloudflare has not registered the newly created service yet. Wait a minute and press Try again.",
+    prepRunning:"Installing dependencies… (1–3 minutes)",
+    h_exists:"The resource already exists. Use Repair to attach to it.",
+    h_permissions:"No permission to write files. Run from a folder you can write to.",
+    h_loginPort:"Login port 8976 is busy. Close any other wizard/terminal login and retry.",
+    retry:"Try again", doneTitle:"Done!", openApp:"Open the app", yourUrl:"App address",
+    manage:"Manage installation", mUpdate:"Update", mRepair:"Repair", mBackup:"Backup", mUninstall:"Uninstall",
+    installedInfo:"Existing installation found", backupDone:"Backup saved in folder", uninstallTitle:"Uninstall",
+    uninstallP:"To remove the service, type its name. The database (quizzes and results) is KEPT unless you also type its name separately.",
+    confirmWorker:"Type the service name to confirm", confirmDb:"Type the database name ONLY if you want to permanently delete all data",
+    doUninstall:"Uninstall", dbKept:"The database was kept. Your quizzes and results are intact.", dbGone:"The database was permanently deleted.",
+    freeNote:"Everything is created on the free plan. The wizard never enables paid services.",
+    logs:"Log"
+  }
+};
+let lang = (() => { try { return localStorage.getItem("ql.lang") || "uk"; } catch { return "uk"; } })();
+const t = (k) => (T[lang][k] ?? k);
+const $ = (sel) => document.querySelector(sel);
+
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v === true) n.setAttribute(k, "");
+    else if (v !== false && v != null) n.setAttribute(k, String(v));
+  }
+  for (const kid of kids.flat()) n.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+  return n;
+}
+
+const api = async (path, opts = {}) => {
+  const res = await fetch(path, { ...opts, headers: { "x-wizard-token": TOKEN, "Content-Type": "application/json", ...(opts.headers || {}) } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+};
+
+const S = { screen: "welcome", env: null, logs: [], plan: [], stepStatus: {}, failure: null, result: null, action: null, loginState: null, form: { workerName: "gart", d1Name: "gart-db", companyName: "", primaryColor: "#4f46e5", accountId: "", adminEmail: "", adminName: "", adminPassword: "", adminPassword2: "" } };
+
+const SCREENS = ["welcome", "cf", "setup", "run", "done"];
+function renderSteps() {
+  const idx = SCREENS.indexOf(S.screen);
+  const ol = $("#steps"); ol.replaceChildren();
+  SCREENS.forEach((s, i) => ol.append(el("li", { class: i === idx ? "on" : i < idx ? "done" : "" }, t("s_" + s))));
+}
+
+async function loadEnv() { try { S.env = await api("/api/env"); } catch { S.env = null; } }
+
+function logBox() {
+  const pre = el("pre", { id: "log", "aria-live": "polite" }, S.logs.slice(-200).join("\n"));
+  queueMicrotask(() => { pre.scrollTop = pre.scrollHeight; });
+  return pre;
+}
+
+function viewWelcome() {
+  const e = S.env;
+  const rows = e ? [
+    [t("node"), e.nodeOk ? "ok" : "bad", `v${e.node}`],
+    [t("deps"), e.depsInstalled ? "ok" : "warn", e.depsInstalled ? t("installed") : t("missing")],
+    [t("os"), "ok", e.platform],
+  ] : [];
+  const kids = [
+    el("h2", {}, t("welcome")), el("p", {}, t("welcomeP")), el("p", { class: "note" }, t("freeNote")),
+    el("h2", { style: "margin-top:20px;font-size:18px" }, t("req")),
+    ...rows.map(([a, c, b]) => el("div", { class: "check" }, el("span", {}, a), el("span", { class: c }, b))),
+  ];
+  if (e && !e.nodeOk) kids.push(el("p", { class: "err" }, t("nodeBad")));
+  if (S.failure) kids.push(el("p", { class: "err" }, `${t("failed")}: ${STEP_LABEL[lang][S.failure.step] || S.failure.step}. ${S.failure.message}`));
+  if (e?.state) {
+    kids.push(el("h2", { style: "margin-top:20px;font-size:18px" }, t("manage")),
+      el("p", {}, `${t("installedInfo")}: ${e.state.workerName} / ${e.state.d1Name}` + (e.state.url ? ` — ${e.state.url}` : "")),
+      ...(e.state.adminCreated ? [] : [el("p", { class: "warn" }, t("adminMissing"))]),
+      el("div", { class: "row" },
+        ...(e.state.adminCreated ? [] : [el("button", { class: "primary", onclick: () => go("admin") }, t("createAdmin"))]),
+        el("button", { class: "ghost", onclick: () => startManage("update") }, t("mUpdate")),
+        el("button", { class: "ghost", onclick: () => startManage("repair") }, t("mRepair")),
+        el("button", { class: "ghost", onclick: () => startManage("backup") }, t("mBackup")),
+        el("button", { class: "danger", onclick: () => go("uninstall") }, t("mUninstall"))));
+  }
+  const row = el("div", { class: "row" });
+  if (e && e.nodeOk && !e.depsInstalled) row.append(el("button", { class: "primary", disabled: S.preparing, onclick: runPrepare }, S.preparing ? t("prepRunning") : t("prep")));
+  else row.append(el("button", { class: "primary", disabled: !(e && e.nodeOk), onclick: () => go("cf") }, t("next")));
+  row.append(el("button", { class: "ghost", onclick: async () => { await loadEnv(); render(); } }, t("refresh")));
+  kids.push(row);
+  if (S.logs.length && S.screen === "welcome") kids.push(el("h2", { style: "margin-top:20px;font-size:16px" }, t("logs")), logBox());
+  return el("section", { class: "card" }, kids);
+}
+
+function viewCf() {
+  const e = S.env;
+  const kids = [el("h2", {}, t("cfTitle")), el("p", {}, t("cfP"))];
+  if (e?.loggedIn) kids.push(el("p", { class: "ok" }, `${t("loggedAs")}: ${e.email ?? "OAuth"}`));
+  else kids.push(el("p", { class: "warn" }, S.loginState === "started" ? t("waiting") : t("noLogin")));
+  const row = el("div", { class: "row" },
+    el("button", { class: "ghost", onclick: () => go("welcome") }, t("back")),
+    el("button", { class: e?.loggedIn ? "ghost" : "primary", disabled: S.loginState === "started", onclick: doLogin }, t("login")),
+    el("button", { class: "primary", disabled: !e?.loggedIn, onclick: () => go("setup") }, t("next")));
+  kids.push(row);
+  if (S.logs.length) kids.push(el("h2", { style: "margin-top:20px;font-size:16px" }, t("logs")), logBox());
+  return el("section", { class: "card" }, kids);
+}
+
+function adminProblem() {
+  const f = S.form;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.adminEmail.trim())) return t("emailBad");
+  if (f.adminPassword.length < 12) return t("passShort");
+  if (f.adminPassword !== f.adminPassword2) return t("passMismatch");
+  return "";
+}
+function adminFields(refresh) {
+  const f = S.form;
+  const on = (key) => (ev) => { f[key] = ev.target.value; refresh(); };
+  return [
+    el("label", { for: "ae" }, t("aEmail")), el("input", { id: "ae", type: "email", value: f.adminEmail, maxlength: 120, autocomplete: "off", oninput: on("adminEmail") }),
+    el("label", { for: "an" }, t("aName")), el("input", { id: "an", value: f.adminName, maxlength: 60, autocomplete: "off", oninput: on("adminName") }),
+    el("label", { for: "ap" }, t("aPass")), el("input", { id: "ap", type: "password", value: f.adminPassword, maxlength: 128, autocomplete: "new-password", oninput: on("adminPassword") }),
+    el("label", { for: "ap2" }, t("aPass2")), el("input", { id: "ap2", type: "password", value: f.adminPassword2, maxlength: 128, autocomplete: "new-password", oninput: on("adminPassword2") }),
+  ];
+}
+
+function viewAdmin() {
+  const msg = el("p", { class: "err", "aria-live": "polite" });
+  const btn = el("button", { class: "primary", disabled: adminProblem() !== "", onclick: () => startManage("admin", { adminEmail: S.form.adminEmail.trim(), adminName: S.form.adminName.trim(), adminPassword: S.form.adminPassword }) }, t("createAdmin"));
+  const refresh = () => { const pr = adminProblem(); btn.disabled = pr !== ""; msg.textContent = S.form.adminEmail || S.form.adminPassword || S.form.adminPassword2 ? pr : ""; };
+  return el("section", { class: "card" }, el("h2", {}, t("adminTitle")), el("p", { class: "note" }, t("adminHint")),
+    ...adminFields(refresh), msg,
+    el("div", { class: "row" }, el("button", { class: "ghost", onclick: () => go("welcome") }, t("back")), btn));
+}
+
+function viewSetup() {
+  const f = S.form, accounts = S.env?.accounts ?? [];
+  if (!f.accountId && accounts.length === 1) f.accountId = accounts[0].id;
+  const acc = el("select", { id: "acc", onchange: (ev) => { f.accountId = ev.target.value; } },
+    el("option", { value: "" }, "—"), ...accounts.map((a) => el("option", { value: a.id, selected: a.id === f.accountId }, `${a.name} (${a.id.slice(0, 6)}…)`)));
+  const bind = (key, ev) => { f[key] = ev.target.value; };
+  const wn = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/.test(f.workerName);
+  const dn = /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/.test(f.d1Name);
+  const needAdmin = !(S.env?.state?.adminCreated);
+  const msg = el("p", { class: "err", id: "amsg", "aria-live": "polite" });
+  const formOk = () => {
+    const base = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/.test(f.workerName) && /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/.test(f.d1Name) && !!f.accountId;
+    if (!needAdmin) return base;
+    const em = adminProblem();
+    msg.textContent = f.adminEmail || f.adminPassword || f.adminPassword2 ? em : "";
+    return base && em === "";
+  };
+  const startBtn = el("button", { class: "primary", id: "go", disabled: !(wn && dn && f.accountId && (!needAdmin || adminProblem() === "")), onclick: () => startInstall() }, t("start"));
+  const refresh = () => { startBtn.disabled = !formOk(); };
+  acc.addEventListener("change", refresh);
+  return el("section", { class: "card" },
+    el("h2", {}, t("s_setup")),
+    el("label", { for: "acc" }, t("account")), acc,
+    el("h2", { style: "margin-top:22px;font-size:18px" }, t("names")),
+    el("label", { for: "wn" }, t("workerName")), el("input", { id: "wn", value: f.workerName, maxlength: 40, autocomplete: "off", oninput: (ev) => { bind("workerName", ev); refresh(); } }),
+    el("div", { class: "hint" }, t("workerHint")),
+    el("label", { for: "dn" }, t("dbName")), el("input", { id: "dn", value: f.d1Name, maxlength: 60, autocomplete: "off", oninput: (ev) => { bind("d1Name", ev); refresh(); } }),
+    el("h2", { style: "margin-top:22px;font-size:18px" }, t("brand")),
+    el("label", { for: "co" }, t("company")), el("input", { id: "co", value: f.companyName, maxlength: 60, oninput: (ev) => bind("companyName", ev) }),
+    el("label", { for: "cl" }, t("color")), el("input", { id: "cl", type: "color", value: f.primaryColor, oninput: (ev) => bind("primaryColor", ev) }),
+    el("div", { class: "hint" }, t("brandHint")),
+    ...(needAdmin ? [
+      el("h2", { style: "margin-top:22px;font-size:18px" }, t("adminTitle")),
+      el("p", { class: "note" }, t("adminHint")),
+      ...adminFields(refresh), msg,
+    ] : []),
+    el("div", { class: "row" }, el("button", { class: "ghost", onclick: () => go("cf") }, t("back")), startBtn));
+}
+
+const STEP_LABEL = {
+  uk: { preflight:"Перевірка системи", deps:"Залежності", account:"Акаунт Cloudflare", database:"База даних D1", config:"Конфігурація", build:"Збірка застосунку", migrate:"Міграції бази даних", secrets:"Секрети", deploy:"Публікація", adminSetup:"Перший адміністратор", branding:"Брендування", health:"Перевірка працездатності", backup:"Резервна копія", uninstall:"Видалення" },
+  en: { preflight:"System check", deps:"Dependencies", account:"Cloudflare account", database:"D1 database", config:"Configuration", build:"Building the app", migrate:"Database migrations", secrets:"Secrets", deploy:"Deploying", adminSetup:"First administrator", branding:"Branding", health:"Health check", backup:"Backup", uninstall:"Uninstall" },
+};
+
+function viewRun() {
+  const kids = [el("h2", {}, t("running"))];
+  for (const id of S.plan) kids.push(el("div", { class: "pl" }, el("span", { class: "dot " + (S.stepStatus[id] || "") }), el("span", {}, STEP_LABEL[lang][id] || id)));
+  if (S.failure) {
+    const f = S.failure;
+    kids.push(el("div", { class: "err", style: "margin-top:14px" }, `${t("failed")}: ${STEP_LABEL[lang][f.step] || f.step}. ${f.message}`));
+    if (f.hints.length) {
+      kids.push(el("h2", { style: "margin-top:14px;font-size:16px" }, t("hints")));
+      for (const h of f.hints) {
+        const p = el("p", {}, t("h_" + h.code));
+        if (h.link) p.append(" ", el("a", { href: h.link, target: "_blank", rel: "noopener noreferrer" }, h.link));
+        kids.push(p);
+      }
+    }
+    kids.push(el("div", { class: "row" },
+      el("button", { class: "ghost", onclick: () => go(f.step === "account" || f.hints.some((h) => h.code === "auth") ? "cf" : "setup") }, t("back")),
+      el("button", { class: "primary", onclick: () => (S.action === "install" ? startInstall() : S.action === "admin" ? startManage("admin", adminParams()) : startManage(S.action)) }, t("retry"))));
+  }
+  kids.push(el("h2", { style: "margin-top:18px;font-size:16px" }, t("logs")), logBox());
+  return el("section", { class: "card" }, kids);
+}
+
+function viewDone() {
+  const r = S.result || {};
+  const kids = [el("h2", {}, t("doneTitle"))];
+  if (r.url) {
+    kids.push(el("p", {}, t("yourUrl")), el("p", { class: "big" }, el("a", { href: r.url, target: "_blank", rel: "noopener noreferrer" }, r.url)),
+      el("div", { class: "row" }, el("a", { href: r.url, target: "_blank", rel: "noopener noreferrer" }, el("button", { class: "primary" }, t("openApp")))));
+  }
+  if (r.adminCreated && r.adminEmail) kids.push(el("p", { class: "ok" }, `${t("adminDone")}: ${r.adminEmail}`), el("p", {}, t("adminLogin")), el("p", { class: "hint" }, t("kdfInfo")));
+  if (S.action === "backup" && r.backupDir) kids.push(el("p", { class: "ok" }, `${t("backupDone")}: ${r.backupDir}`));
+  if (S.action === "uninstall") kids.push(el("p", { class: r.databaseDeleted ? "warn" : "ok" }, r.databaseDeleted ? t("dbGone") : t("dbKept")));
+  kids.push(el("div", { class: "row" }, el("button", { class: "ghost", onclick: async () => { S.logs = []; await loadEnv(); go("welcome"); } }, t("s_welcome"))));
+  return el("section", { class: "card" }, kids);
+}
+
+function viewUninstall() {
+  const st = S.env?.state;
+  let w = "", d = "";
+  const btn = el("button", { class: "danger", disabled: true, onclick: () => startManage("uninstall", { confirmWorkerName: w, confirmDatabaseName: d }) }, t("doUninstall"));
+  return el("section", { class: "card" },
+    el("h2", {}, t("uninstallTitle")), el("p", {}, t("uninstallP")),
+    el("label", { for: "cw" }, `${t("confirmWorker")} (${st?.workerName ?? ""})`), el("input", { id: "cw", autocomplete: "off", oninput: (ev) => { w = ev.target.value; btn.disabled = w !== st?.workerName; } }),
+    el("label", { for: "cd" }, `${t("confirmDb")} (${st?.d1Name ?? ""})`), el("input", { id: "cd", autocomplete: "off", oninput: (ev) => { d = ev.target.value; } }),
+    el("div", { class: "row" }, el("button", { class: "ghost", onclick: () => go("welcome") }, t("back")), btn));
+}
+
+function render() {
+  renderSteps();
+  const views = { welcome: viewWelcome, cf: viewCf, setup: viewSetup, admin: viewAdmin, run: viewRun, done: viewDone, uninstall: viewUninstall };
+  $("#view").replaceChildren(views[S.screen]());
+}
+function go(screen) { S.screen = screen; if (screen === "welcome" || screen === "cf") S.failure = null; render(); }
+
+async function runPrepare() { S.action = "prepare"; S.logs = []; S.failure = null; S.preparing = true; render(); try { await post("/api/run", { action: "prepare" }); } catch (e) { S.preparing = false; S.failure = { step: "preflight", message: String(e.message), hints: [], tail: [] }; render(); } }
+async function doLogin() { S.logs = []; S.loginState = "started"; render(); try { await post("/api/login", {}); } catch (e) { S.loginState = null; S.logs.push(String(e.message)); render(); } }
+const adminParams = () => ({ adminEmail: S.form.adminEmail.trim(), adminName: S.form.adminName.trim(), adminPassword: S.form.adminPassword });
+const wipePasswords = () => { S.form.adminPassword = ""; S.form.adminPassword2 = ""; };
+async function startInstall() { S.action = "install"; const { adminPassword2, adminEmail, adminName, adminPassword, ...rest } = S.form; await beginRun({ action: "install", params: { ...rest, ...(S.env?.state?.adminCreated ? {} : adminParams()) } }); }
+async function startManage(action, extra = {}) { S.action = action; await beginRun({ action, params: { ...extra, accountId: S.form.accountId || undefined } }); }
+async function beginRun(body) { S.logs = []; S.plan = []; S.stepStatus = {}; S.failure = null; S.result = null; go("run"); try { await post("/api/run", body); } catch (e) { S.failure = { step: "preflight", message: String(e.message), hints: [], tail: [] }; render(); } }
+const post = (path, body) => api(path, { method: "POST", body: JSON.stringify(body) });
+
+function connectEvents() {
+  const es = new EventSource("/api/events?t=" + encodeURIComponent(TOKEN));
+  es.onmessage = async (m) => {
+    const ev = JSON.parse(m.data);
+    if (ev.type === "log") { S.logs.push(ev.line); if (S.logs.length > 600) S.logs.shift(); const box = $("#log"); if (box) { box.textContent = S.logs.slice(-200).join("\n"); box.scrollTop = box.scrollHeight; } return; }
+    if (ev.type === "login") { S.loginState = ev.status; await loadEnv(); render(); return; }
+    if (ev.type === "plan") { S.plan = ev.steps; render(); return; }
+    if (ev.type === "step") { S.stepStatus[ev.id] = ev.status; if (S.screen === "run") render(); return; }
+    if (ev.type === "failed") { S.preparing = false; S.failure = ev; if (S.action === "prepare") { S.screen = "welcome"; } render(); return; }
+    if (ev.type === "done") {
+      S.preparing = false;
+      await loadEnv();
+      if (ev.action === "prepare") { S.screen = "cf"; render(); return; }
+      S.result = ev.result; wipePasswords(); S.screen = "done"; render();
+    }
+  };
+}
+
+document.querySelectorAll(".lang button").forEach((b) => {
+  b.addEventListener("click", () => { lang = b.dataset.l; try { localStorage.setItem("ql.lang", lang); } catch {} document.documentElement.lang = lang; syncLang(); render(); });
+});
+function syncLang() { document.querySelectorAll(".lang button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.l === lang))); }
+document.documentElement.lang = lang; syncLang();
+connectEvents();
+loadEnv().then(render);
+</script>
+</body>
+</html>

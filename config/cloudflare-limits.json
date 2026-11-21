@@ -1,0 +1,121 @@
+{
+  "_comment": "Official Cloudflare Free plan limits used by the Usage Monitor. Update this file when Cloudflare changes its limits. Nothing else in the code base hardcodes quotas.",
+  "verifiedOn": "2026-11-20",
+  "plan": "free",
+  "resetTimeUtc": "00:00",
+  "sources": [
+    "https://developers.cloudflare.com/workers/platform/limits/",
+    "https://developers.cloudflare.com/workers/platform/pricing/",
+    "https://developers.cloudflare.com/durable-objects/platform/pricing/",
+    "https://developers.cloudflare.com/durable-objects/platform/limits/",
+    "https://developers.cloudflare.com/d1/platform/pricing/"
+  ],
+  "limits": {
+    "workers.requests": {
+      "period": "day",
+      "limit": 100000,
+      "unit": "requests",
+      "note": "Static asset requests are free and unlimited."
+    },
+    "workers.cpuMsPerInvocation": {
+      "period": "invocation",
+      "limit": 10,
+      "unit": "ms"
+    },
+    "durableObjects.requests": {
+      "period": "day",
+      "limit": 100000,
+      "unit": "requests",
+      "note": "Incoming WebSocket messages are billed 20:1; each WebSocket connection counts as one request."
+    },
+    "durableObjects.durationGbSeconds": {
+      "period": "day",
+      "limit": 13000,
+      "unit": "GB-s",
+      "note": "Billed as 128 MB per active (non-hibernated) object."
+    },
+    "durableObjects.sqlRowsWritten": {
+      "period": "day",
+      "limit": 100000,
+      "unit": "rows"
+    },
+    "durableObjects.sqlRowsRead": {
+      "period": "day",
+      "limit": 5000000,
+      "unit": "rows",
+      "note": "Cloudflare pages disagree (5M vs 50M per day). The conservative value is used."
+    },
+    "durableObjects.storageGb": {
+      "period": "total",
+      "limit": 5,
+      "unit": "GB"
+    },
+    "d1.rowsRead": {
+      "period": "day",
+      "limit": 5000000,
+      "unit": "rows"
+    },
+    "d1.rowsWritten": {
+      "period": "day",
+      "limit": 100000,
+      "unit": "rows"
+    },
+    "d1.storageGb": {
+      "period": "total",
+      "limit": 5,
+      "unit": "GB",
+      "note": "Each database is also capped at 500 MB on the Free plan."
+    },
+    "d1.databaseStorageGb": {
+      "period": "total",
+      "limit": 0.5,
+      "unit": "GB",
+      "note": "Free plan cap of 500 MB per database; this is the one that applies in practice."
+    }
+  },
+  "notUsed": [
+    "r2.storageGb",
+    "r2.classAOperations",
+    "r2.classBOperations"
+  ],
+  "estimateCoefficients": {
+    "_comment": "Conservative round-ups of the local measurements in docs/ARCHITECTURE.md 9.1 (tests/e2e/game.e2e.mjs). Not Cloudflare-confirmed. Recalibrate after tests on a real account.",
+    "workersRequestsPerGameFixed": 100,
+    "workersRequestsPerPlayerJoin": 3,
+    "doRequestsFixed": 15,
+    "wsMessageBillingRatio": 20,
+    "wsMessagesPerPlayerJoin": 2,
+    "wsMessagesPerQuestionHost": 4,
+    "doRowsWrittenFixed": 40,
+    "doRowsWrittenPerPlayer": 2,
+    "doRowsWrittenPerAnswer": 1.1,
+    "doRowsWrittenPerQuestion": 3,
+    "doRowsReadFixed": 100,
+    "doRowsReadPerPlayerQuestionPair": 3.5,
+    "doRowsReadPerReconnect": 30,
+    "doMemoryGb": 0.128,
+    "d1RowsWrittenFixed": 12,
+    "d1RowsWrittenPerPlayer": 2,
+    "d1RowsWrittenPerAnswer": 2,
+    "d1RowsReadFixed": 200,
+    "d1RowsReadPerQuestion": 6,
+    "d1BytesPerAnswer": 120,
+    "d1BytesPerPlayer": 160,
+    "d1BytesPerQuestionSnapshot": 700,
+    "doBytesPerPlayer": 200,
+    "doBytesPerAnswer": 60,
+    "avgImageBytes": 150000,
+    "answerRateTypical": 0.9
+  },
+  "alertThresholds": {
+    "_comment": "Percent of a quota. Administrators can lower or raise the first three in the Usage tab; 100 is fixed.",
+    "info": 50,
+    "warning": 75,
+    "critical": 90,
+    "full": 100
+  },
+  "safeMode": {
+    "_comment": "Reduced game for a day when a quota is close. Never enables paid features.",
+    "maxPlayers": 60
+  }
+}

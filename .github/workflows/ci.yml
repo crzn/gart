@@ -1,0 +1,22 @@
+name: CI
+# Tests only. Nothing here deploys and no Cloudflare token is needed: deployment is done by Cloudflare itself
+# when the `release` branch moves (see docs/ADMIN-GUIDE).
+on:
+  push:
+    branches: [main, release]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: node scripts/prepare-release.mjs

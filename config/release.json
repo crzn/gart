@@ -1,0 +1,9 @@
+{
+  "repo": "crzn/gart",
+  "publicKey": {
+    "kty": "EC",
+    "crv": "P-256",
+    "x": "gsPqjM0mLK3rf9soXdD3lXb1pUb2RGaDdHHl1kOZL0w",
+    "y": "B-SDMEBrqyXl7vDYecsAIJk2jGhr5BhBfP8VYSDnb9U"
+  }
+}
