@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowLeft, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Info, Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { playabilityProblems, QUIZ_LIMITS, type QuestionView, type QuizView } from "@gart/shared";
 import { api, ApiError } from "../../api";
@@ -8,13 +8,25 @@ import { Button, Card, ErrorNote, Field } from "../../ui";
 import { ImageField } from "./ImageField";
 import { QuestionForm } from "./QuestionForm";
 
-const BOOL_SETTINGS = ["randomizeQuestions", "randomizeAnswers", "leaderboardEnabled", "timerEnabled", "showCorrectAnswer", "showExplanations", "showFinalLeaderboard", "allowLateJoin", "autoAdvance", "closeWhenAllAnswered", "soundEnabled"] as const;
+const fill = (text: string, n: number) => text.replace("{n}", String(n));
+const BOOL_SETTINGS = ["randomizeQuestions", "randomizeAnswers", "leaderboardEnabled", "timerEnabled", "showCorrectAnswer", "showExplanations", "showFinalLeaderboard", "allowLateJoin", "autoAdvance", "closeWhenAllAnswered"] as const;
 const NUM_SETTINGS: { key: string; min: number; max: number }[] = [
   { key: "defaultTimeLimitSec", min: 5, max: 300 },
   { key: "basePoints", min: 0, max: 10000 },
   { key: "speedBonusPercent", min: 0, max: 100 },
   { key: "countdownBeforeQuestionSec", min: 0, max: 10 },
 ];
+
+/** An (i) next to a setting: hover or focus shows what it does, how it looks in the game and its default delay. */
+function Help({ id, children }: { id: string; children: string }) {
+  const { t } = useLang();
+  return (
+    <span className="group relative inline-flex">
+      <button type="button" aria-label={t("set.help")} aria-describedby={id} className="rounded-full p-1 text-ink-muted hover:text-ink focus:text-ink"><Info className="size-4" aria-hidden /></button>
+      <span id={id} role="tooltip" className="pointer-events-none invisible absolute right-0 top-full z-20 mt-1 w-72 max-w-[80vw] rounded-xl border border-surface-border bg-surface p-3 text-left text-xs leading-relaxed text-ink opacity-0 shadow-xl transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">{children}</span>
+    </span>
+  );
+}
 
 export function QuizEditor({ id, onClose }: { id: string; onClose(): void }) {
   const { t } = useLang();
@@ -128,7 +140,9 @@ export function QuizEditor({ id, onClose }: { id: string; onClose(): void }) {
                   <span className="w-6 shrink-0 text-sm text-ink-muted">{i + 1}</span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{q.text}</p>
-                    <p className="mt-0.5 text-xs text-ink-muted">{t(q.type === "single" ? "q.single" : "q.truefalse")} · {q.options.length} {t("q.optionsShort")}</p>
+                    <p className="mt-0.5 text-xs text-ink-muted">{t(q.type === "single" ? "q.single" : "q.truefalse")} · {q.options.length} {t("q.optionsShort")}
+                      {q.timeLimitSec !== null ? <b className="ml-2 rounded bg-amber-500/20 px-1.5 py-0.5 text-amber-200" title={t("q.overrides")}>{fill(t("q.ownTime"), q.timeLimitSec)}</b> : null}
+                      {q.points !== null ? <b className="ml-2 rounded bg-amber-500/20 px-1.5 py-0.5 text-amber-200" title={t("q.overrides")}>{fill(t("q.ownPoints"), q.points)}</b> : null}</p>
                   </div>
                   <button type="button" onClick={() => void reorder(i, -1)} disabled={i === 0} aria-label={t("q.up")} className="rounded-lg p-2 hover:bg-white/10 disabled:opacity-30"><ArrowUp className="size-4" aria-hidden /></button>
                   <button type="button" onClick={() => void reorder(i, 1)} disabled={i === quiz.questions.length - 1} aria-label={t("q.down")} className="rounded-lg p-2 hover:bg-white/10 disabled:opacity-30"><ArrowDown className="size-4" aria-hidden /></button>
@@ -147,17 +161,23 @@ export function QuizEditor({ id, onClose }: { id: string; onClose(): void }) {
         <h2 className="text-xl font-bold">{t("quiz.settings")}</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {NUM_SETTINGS.map(({ key, min, max }) => (
-            <Field key={key} id={`s-${key}`} type="number" min={min} max={max} label={t(`set.${key}` as MessageKey)} defaultValue={Number(settings[key])}
-              onBlur={(e) => { const v = Number(e.target.value); if (Number.isFinite(v) && v !== settings[key]) void patch({ settings: { [key]: v } }, t("quiz.saved")); }} />
+            <div key={key} className="relative">
+              <div className="absolute right-0 top-0"><Help id={`h-${key}`}>{fill(t(`set.${key}.help` as MessageKey), Number(settings[key]))}</Help></div>
+              <Field id={`s-${key}`} type="number" min={min} max={max} label={t(`set.${key}` as MessageKey)} defaultValue={Number(settings[key])}
+                onBlur={(e) => { const v = Number(e.target.value); if (Number.isFinite(v) && v !== settings[key]) void patch({ settings: { [key]: v } }, t("quiz.saved")); }} />
+            </div>
           ))}
         </div>
         <ul className="mt-4 grid gap-2 sm:grid-cols-2">
           {BOOL_SETTINGS.map((key) => (
             <li key={key}>
-              <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-white/5 px-3 py-2.5 text-sm">
-                <input type="checkbox" checked={settings[key] === true} onChange={(e) => void patch({ settings: { [key]: e.target.checked } }, t("quiz.saved"))} className="size-4 accent-indigo-400" />
-                {t(`set.${key}` as MessageKey)}
-              </label>
+              <div className="flex items-center gap-1 rounded-xl bg-white/5 pr-2">
+                <label className="flex flex-1 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm">
+                  <input type="checkbox" checked={settings[key] === true} onChange={(e) => void patch({ settings: { [key]: e.target.checked } }, t("quiz.saved"))} className="size-4 shrink-0 accent-indigo-400" />
+                  {fill(t(`set.${key}` as MessageKey), key === "autoAdvance" ? Number(settings.autoAdvanceDelaySec) : 0)}
+                </label>
+                <Help id={`h-${key}`}>{fill(t(`set.${key}.help` as MessageKey), key === "autoAdvance" ? Number(settings.autoAdvanceDelaySec) : key === "timerEnabled" ? Number(settings.defaultTimeLimitSec) : 0)}</Help>
+              </div>
             </li>
           ))}
         </ul>

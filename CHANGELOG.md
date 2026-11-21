@@ -2,6 +2,22 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.10.1] - 2026-11-21: fixes and small improvements
+
+### Fixed
+- **Timer and bonus that "did not match the settings".** The server was using the quiz settings correctly (checked, and now covered by tests for the bonus: 20% means up to 20% of the base points, never more). The cause is a question's **own time or points**, which replace the quiz settings and were invisible in the editor (for example from an imported or AI-made file). Questions that carry them are now marked in the list ("own time: 25 s", "own points: 2000"), the import report warns about them, and the AI template asks for `null` by default.
+- After the **last question** the winners screen comes straight away: no in-between leaderboard (the button is gone, and automatic advance skips it too).
+- A **latecomer to a finished game** sees a friendly closing screen with the quiz title instead of a join form.
+
+### Added
+- **Cover picture and description of the quiz** in the lobby for everyone: on the host screen and the projector, on the join form and in the player's waiting screen. The public PIN lookup returns the title, description and cover of a live game (see SECURITY).
+- **Explanations on every game setting**: an (i) next to each parameter shows what it does, how it looks in the game, and the real delays and defaults (time limit, countdown, automatic advance). Setting names were reworded to say what they do.
+- Podium bars in gold, silver and bronze.
+
+### Changed
+- "Players: N" instead of "N players".
+- **Music and sound effects are no longer a quiz setting**: one Gart setting ("Gart sound", Branding tab) controls all sound on the host screen and the projector.
+
 ## [0.10.0] - 2026-11-21: import quizzes from files
 
 ### Added

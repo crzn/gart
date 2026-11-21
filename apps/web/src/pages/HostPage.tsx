@@ -106,8 +106,8 @@ export function HostPage() {
             {snap.paused ? <Button variant="ghost" onClick={() => send({ t: "host.resume" })}><Play className="size-4" aria-hidden />{t("host.resume")}</Button> : <Button variant="ghost" onClick={() => send({ t: "host.pause" })}><Pause className="size-4" aria-hidden />{t("host.pause")}</Button>}
           </>}
           {s === "QUESTION_RESULTS" && <>
-            {snap.settings.leaderboardEnabled ? <Button onClick={() => send({ t: "host.showLeaderboard" })}><Trophy className="size-4" aria-hidden />{t("host.leaderboard")}</Button> : null}
-            <Button variant={snap.settings.leaderboardEnabled ? "ghost" : "primary"} onClick={() => send({ t: "host.next" })}>{last ? <Flag className="size-4" aria-hidden /> : <ArrowRight className="size-4" aria-hidden />}{last ? t("host.finish") : t("host.next")}</Button>
+            {snap.settings.leaderboardEnabled && !last ? <Button onClick={() => send({ t: "host.showLeaderboard" })}><Trophy className="size-4" aria-hidden />{t("host.leaderboard")}</Button> : null}
+            <Button variant={snap.settings.leaderboardEnabled && !last ? "ghost" : "primary"} onClick={() => send({ t: "host.next" })}>{last ? <Flag className="size-4" aria-hidden /> : <ArrowRight className="size-4" aria-hidden />}{last ? t("host.finish") : t("host.next")}</Button>
           </>}
           {s === "LEADERBOARD" && <Button onClick={() => send({ t: "host.next" })}>{last ? <Flag className="size-4" aria-hidden /> : <ArrowRight className="size-4" aria-hidden />}{last ? t("host.finish") : t("host.next")}</Button>}
           {s === "FINISHED" && <Link to="/admin" className="inline-flex items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white">{t("host.toAdmin")}</Link>}

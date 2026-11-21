@@ -82,6 +82,22 @@ try {
   check("only the first five of six files are imported", (await page.getByTestId("import-results").locator("li").count()) === 5 && (await page.getByText("Вибрано забагато файлів").count()) === 1);
   check("the list shows the imported quizzes", (await page.getByText("Пакет 5").count()) >= 1);
 
+  // A question with its own time shows it in the editor, and each setting has an explanation.
+  const own = { ...tpl, quiz: { ...tpl.quiz, title: "Власний час" }, questions: [{ ...tpl.questions[0], timeLimitSec: 25, points: 2000 }] };
+  check("the template asks for no own time or points by default", tpl.questions.every((x) => x.timeLimitSec === null && x.points === null));
+  check("the import report warns about own time and points", await (async () => { await page.getByTestId("import-input").setInputFiles([mk("own.json", own)]); await page.getByTestId("import-results").getByText("власним часом або балами").waitFor(); return true; })());
+  await page.getByRole("button", { name: /Власний час/ }).first().click();
+  await page.getByText("власний час: 25 с").waitFor();
+  check("the editor marks a question's own time and points", (await page.getByText("власні бали: 2000").count()) === 1);
+  await page.getByRole("button", { name: "Пояснення" }).first().hover();
+  const tip = await page.getByRole("tooltip").first().innerText();
+  check("a setting's explanation appears on hover", tip.length > 40, tip);
+  const timerBox = page.locator('[id="h-timerEnabled"]');
+  await page.locator('[aria-describedby="h-timerEnabled"]').focus();
+  check("the time-limit explanation says where the time comes from and shows the real default", (await timerBox.innerText()).includes("Час на питання за замовчуванням") && /\d+ с/.test(await timerBox.innerText()), await timerBox.innerText());
+  check("music is no longer a quiz setting", (await page.getByText("Музика й звукові ефекти").count()) === 0);
+  await page.getByRole("button", { name: "До списку" }).click();
+
   // The server checks too, whatever the browser did.
   check("the server refuses a bad file by itself", (await call("POST", "/api/quizzes/import", { format: "gart.quiz", version: 1, quiz: { title: "x" }, questions: [] }, login.cookie)).status === 400);
   check("import needs a signed-in user", (await call("POST", "/api/quizzes/import", tpl)).status === 401);

@@ -55,7 +55,7 @@ export function GamesTab() {
       <div className="space-y-6">
         <Card>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div><h2 className="text-xl font-bold">{open.game.title}</h2><p className="text-sm text-ink-muted">PIN {open.game.pin} · {fmt(open.game.startedAt ?? open.game.createdAt)} · {open.people.length} {t("play.players")}</p></div>
+            <div><h2 className="text-xl font-bold">{open.game.title}</h2><p className="text-sm text-ink-muted">PIN {open.game.pin} · {fmt(open.game.startedAt ?? open.game.createdAt)} · {t("play.players")}: {open.people.length}</p></div>
             <div className="flex gap-2"><Button variant="ghost" onClick={exportCsv} disabled={open.people.length === 0}><Download className="size-4" aria-hidden />CSV</Button><Button variant="ghost" onClick={() => setOpen(null)}>{t("games.back")}</Button></div>
           </div>
           {open.people.length === 0 ? <p className="mt-4 text-sm text-ink-muted">{t("games.noResults")}</p> : (
@@ -93,7 +93,7 @@ export function GamesTab() {
             <li key={g.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
               <div className="min-w-0">
                 <p className="truncate font-medium">{g.title}</p>
-                <p className="mt-1 text-xs text-ink-muted">PIN {g.pin} · {t(`games.status.${g.status}` as MessageKey)} · {fmt(g.createdAt)} · {g.participants ?? 0} {t("play.players")}</p>
+                <p className="mt-1 text-xs text-ink-muted">PIN {g.pin} · {t(`games.status.${g.status}` as MessageKey)} · {fmt(g.createdAt)} · {t("play.players")}: {g.participants ?? 0}</p>
               </div>
               <div className="flex gap-2">
                 {LIVE.includes(g.status) ? (<>

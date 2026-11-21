@@ -6,7 +6,7 @@ import { errorKey } from "../../errors";
 import { useLang, type MessageKey } from "../../i18n";
 import { Button, Card } from "../../ui";
 
-interface Result { name: string; ok: boolean; title?: string; count?: number; error?: string; problems?: ImportProblem[] }
+interface Result { name: string; ok: boolean; title?: string; count?: number; overrides?: number; error?: string; problems?: ImportProblem[] }
 
 /** Import of quiz files (gart.json) and the downloadable template for AI assistants. */
 export function ImportCard({ onImported }: { onImported(): void }) {
@@ -33,7 +33,8 @@ export function ImportCard({ onImported }: { onImported(): void }) {
     if (!checked.ok) return { name: file.name, ok: false, problems: checked.problems };
     try {
       const r = await api<{ quiz: { title: string; questionCount: number } }>("/api/quizzes/import", { method: "POST", body: doc });
-      return { name: file.name, ok: true, title: r.quiz.title, count: r.quiz.questionCount };
+      const overrides = checked.file.questions.filter((x) => x.timeLimitSec !== null || x.points !== null).length;
+      return { name: file.name, ok: true, title: r.quiz.title, count: r.quiz.questionCount, overrides };
     } catch (e) {
       if (e instanceof ApiError && e.code === "invalid_quiz_file") return { name: file.name, ok: false, problems: (e.payload as { problems: ImportProblem[] }).problems };
       return { name: file.name, ok: false, error: t(errorKey(e)) };
@@ -78,6 +79,7 @@ export function ImportCard({ onImported }: { onImported(): void }) {
           {results.map((r, i) => (
             <li key={i} className={`rounded-2xl p-3 text-sm ${r.ok ? "bg-emerald-500/15 text-emerald-100" : "bg-rose-500/15 text-rose-100"}`}>
               <p className="font-medium">{r.name}: {r.ok ? t("imp.done").replace("{title}", r.title ?? "").replace("{n}", String(r.count ?? 0)) : r.error ?? t("imp.failed")}</p>
+              {r.ok && r.overrides ? <p className="mt-1 text-xs text-amber-200">{t("imp.overrides").replace("{n}", String(r.overrides))}</p> : null}
               {r.problems ? <ul className="mt-1 list-disc pl-5 text-xs">{r.problems.map((p, j) => <li key={j}>{label(p)}</li>)}</ul> : null}
             </li>
           ))}

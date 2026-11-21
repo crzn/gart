@@ -200,17 +200,15 @@ try {
   await until(screen, (t) => t.includes("Гру завершено"), "final");
   check("the podium rises in on the projector", (await screen.locator(".fx-podium").count()) >= 1);
 
-  // Quiz with music switched off: the Gart sound setting still gives the intro, but no music follows.
+  // A quiz carrying the old "music off" setting behaves like any other: only the Gart sound setting counts.
   const quiet = await startGame(quietQuiz.id);
   const q = await hostCtx.newPage(); q.on("pageerror", (e) => errors.push(`quiet: ${e.message}`));
   await q.goto(`${BASE}/screen/${quiet.id}`);
   await until(q, (t) => t.includes(quiet.pin), "quiet projector");
-  check("a quiz with music switched off still offers the Gart sound", (await q.getByTestId("sound-control").count()) === 1);
+  check("the old per-quiz music setting no longer hides the sound control", (await q.getByTestId("sound-control").count()) === 1);
   await q.getByRole("button", { name: "Увімкнути звук" }).click();
   await q.getByRole("button", { name: "Вимкнути звук" }).waitFor();
-  check("the intro plays even though the quiz has music off", (await q.evaluate(() => window.__peakOver(3500))) > 0.05);
-  await sleep(4000); // the intro is six seconds long; the waiting theme would start at 5.5 s if the quiz allowed it
-  check("and then nothing follows: no music in that quiz", (await q.evaluate(() => window.__peakOver(1500))) < 0.01);
+  check("the intro plays", (await q.evaluate(() => window.__peakOver(3500))) > 0.05);
   await q.close();
 
   // The loud quiz: the waiting theme builds with the players.

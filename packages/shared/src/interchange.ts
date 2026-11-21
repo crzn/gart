@@ -59,10 +59,10 @@ export function buildTemplate(): string {
       `At most ${L.questionsPerQuiz} questions. Question text up to ${L.questionTextMax} characters, each answer up to ${L.optionTextMax}, explanation up to ${L.explanationMax}, title up to ${L.titleMax}, description up to ${L.descriptionMax}, category up to ${L.categoryMax}, up to ${L.tagsMax} tags of up to ${L.tagMax} characters.`,
       `Every question has from ${MIN_ANSWER_OPTIONS} to ${MAX_ANSWER_OPTIONS} answers and EXACTLY ONE answer with "isCorrect": true. Answers of one question must differ from each other. Put the correct answer in a different position from question to question.`,
       "Question types: \"single\" (one correct answer out of 2 to 6) and \"truefalse\" (exactly two answers: True and False, in the quiz language).",
-      "timeLimitSec (5 to 300) and points (0 to 10000) are optional: use null to take the quiz defaults. Use a longer time for longer questions.",
+      "timeLimitSec (5 to 300) and points (0 to 10000) are optional and should normally be null: a value REPLACES the quiz settings for that question (time and base points). Set them only when the user asks for a specific time or points for a question.",
       "explanation is optional and is shown to players after the question: one or two sentences saying why the answer is right.",
       "Do not put images, links or HTML in the text. Do not invent facts: every question must have one clearly correct answer that can be checked.",
-      "settings is optional. Leave it as {} unless the user asks for something specific. Allowed keys: randomizeQuestions, randomizeAnswers (true/false), defaultTimeLimitSec (5-300), basePoints (0-10000), speedBonusPercent (0-100), showExplanations, showCorrectAnswer, leaderboardEnabled, allowLateJoin, autoAdvance, soundEnabled (true/false).",
+      "settings is optional. Leave it as {} unless the user asks for something specific. Allowed keys: randomizeQuestions, randomizeAnswers (true/false), defaultTimeLimitSec (5-300), basePoints (0-10000), speedBonusPercent (0-100), showExplanations, showCorrectAnswer, leaderboardEnabled, allowLateJoin, autoAdvance (true/false).",
       "One file is one quiz. For several quizzes, make several files (Gart imports up to 5 files at once).",
     ],
     format: GART_FILE_FORMAT,
@@ -81,7 +81,7 @@ export function buildTemplate(): string {
       {
         type: "single",
         text: "Which river flows through Kyiv?",
-        timeLimitSec: 20,
+        timeLimitSec: null,
         points: null,
         explanation: "The Dnipro divides Kyiv into the right and the left bank.",
         options: [

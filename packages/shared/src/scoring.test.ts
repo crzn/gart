@@ -50,3 +50,18 @@ describe("calculatePoints", () => {
     expect(() => calculatePoints({ ...base, correct: true, elapsedMs: Number.NaN })).toThrow(RangeError);
   });
 });
+
+describe("speed bonus as a share of the base points (regression: 20% really means up to 20%)", () => {
+  const base = { correct: true, basePoints: 1000, speedBonusPercent: 20, limitMs: 10_000 };
+  it("gives the full 20% for an instant answer and nothing at the deadline", () => {
+    expect(scoreBreakdown({ ...base, elapsedMs: 0 }).bonus).toBe(200);
+    expect(scoreBreakdown({ ...base, elapsedMs: 10_000 }).bonus).toBe(0);
+  });
+  it("falls off linearly, and never exceeds the percentage", () => {
+    expect(scoreBreakdown({ ...base, elapsedMs: 5000 }).bonus).toBe(100);
+    for (let ms = 0; ms <= 10_000; ms += 250) expect(scoreBreakdown({ ...base, elapsedMs: ms }).bonus).toBeLessThanOrEqual(200);
+  });
+  it("a longer time limit does not make the bonus bigger", () => {
+    expect(scoreBreakdown({ ...base, limitMs: 25_000, elapsedMs: 2500 }).bonus).toBeLessThanOrEqual(200);
+  });
+});

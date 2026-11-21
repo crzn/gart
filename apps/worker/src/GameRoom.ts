@@ -609,6 +609,8 @@ export class GameRoom extends DurableObject<Env> {
       state: core.state,
       paused: core.paused,
       title: core.title,
+      ...(this.snapshot.description ? { description: this.snapshot.description } : {}),
+      ...(this.snapshot.coverImageId ? { coverImageId: this.snapshot.coverImageId } : {}),
       pin: core.pin,
       playerCount: this.activePlayers().length,
       settings: {
@@ -972,7 +974,7 @@ export class GameRoom extends DurableObject<Env> {
 
   private async autoAdvance(): Promise<void> {
     const core = this.core!;
-    if (core.state === "QUESTION_RESULTS" && core.s.leaderboardEnabled) {
+    if (core.state === "QUESTION_RESULTS" && core.s.leaderboardEnabled && (core.cur?.idx ?? -1) + 1 < core.qCount) {
       core.state = "LEADERBOARD";
       await this.enterLeaderboard();
     } else if (core.state === "QUESTION_RESULTS" || core.state === "LEADERBOARD") {

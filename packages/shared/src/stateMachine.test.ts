@@ -34,6 +34,10 @@ describe("game state machine", () => {
     expect(next("LOBBY", "START", { questionCount: 0 })).toEqual({ ok: false, reason: "no_questions" });
   });
 
+  it("goes straight to the winners after the last question: no in-between leaderboard", () => {
+    expect(next("QUESTION_RESULTS", "SHOW_LEADERBOARD", { hasNextQuestion: false })).toEqual({ ok: false, reason: "last_question" });
+  });
+
   it("refuses the leaderboard when disabled in settings", () => {
     expect(next("QUESTION_RESULTS", "SHOW_LEADERBOARD", { leaderboardEnabled: false })).toEqual({
       ok: false,

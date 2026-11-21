@@ -35,7 +35,7 @@ export interface TransitionContext {
 
 export type TransitionResult =
   | { ok: true; next: GameState }
-  | { ok: false; reason: "terminal_state" | "invalid_transition" | "no_questions" | "leaderboard_disabled" };
+  | { ok: false; reason: "terminal_state" | "invalid_transition" | "no_questions" | "leaderboard_disabled" | "last_question" };
 
 export function isTerminal(state: GameState): boolean {
   return state === "FINISHED" || state === "CANCELLED";
@@ -63,6 +63,8 @@ export function transition(
     case "SHOW_LEADERBOARD":
       if (state !== "QUESTION_RESULTS") return invalid();
       if (!ctx.leaderboardEnabled) return { ok: false, reason: "leaderboard_disabled" };
+      // After the last question the winners screen comes straight away; an in-between table would only repeat it.
+      if (!ctx.hasNextQuestion) return { ok: false, reason: "last_question" };
       return { ok: true, next: "LEADERBOARD" };
 
     case "NEXT":

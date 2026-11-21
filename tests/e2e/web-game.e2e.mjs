@@ -44,6 +44,7 @@ try {
   await call("POST", "/api/auth/login", { email: "owner@example.com", password: PW });
   const quiz = (await call("POST", "/api/quizzes", { title: "Безпека на роботі" })).json.quiz;
   await call("PATCH", `/api/quizzes/${quiz.id}`, { settings: { countdownBeforeQuestionSec: 0, defaultTimeLimitSec: 20, closeWhenAllAnswered: true } });
+  await call("PATCH", `/api/quizzes/${quiz.id}`, { description: "Короткий тест про безпеку на роботі" });
   const o = (text, isCorrect = false) => ({ text, isCorrect });
   await call("POST", `/api/quizzes/${quiz.id}/questions`, { type: "single", text: "Що робити з підозрілим листом?", explanation: "Повідомте службу безпеки.", options: [o("Відкрити вкладення"), o("Повідомити службу безпеки", true), o("Переслати колегам"), o("Видалити й забути")] });
   await call("POST", `/api/quizzes/${quiz.id}/questions`, { type: "truefalse", text: "Пароль можна передавати колезі.", options: [o("Так"), o("Ні", true)] });
@@ -85,12 +86,14 @@ try {
     await p.waitForURL(/\/play\//);
     await until(p, (t) => t.includes("Ваш нікнейм"), "join form");
     if (i === 0) {
+      check("the join form already tells what the quiz is about", (await text(p)).includes("Короткий тест про безпеку на роботі"));
       await shot(p, "player-join");
       await p.fill("#nick", "x"); check("one-letter nickname keeps Join disabled", await p.getByRole("button", { name: "Приєднатися" }).isDisabled());
     }
     await p.fill("#nick", name);
     await p.getByRole("button", { name: "Приєднатися" }).click();
     await until(p, (t) => t.includes("Ви в грі"), `${name} joined`);
+    if (i === 0) check("the quiz description is shown to the player in the lobby", (await text(p)).includes("Короткий тест про безпеку на роботі"));
     players.push({ ctx, p, name });
   }
   const dup = await (await browser.newContext({ viewport: { width: 390, height: 780 } })).newPage();
@@ -102,7 +105,7 @@ try {
   check("a taken nickname shows a readable message", true);
   await dup.close();
 
-  await until(host, (t) => t.includes("3 гравців") && t.includes("Анна") && t.includes("Віка"), "host lobby lists players");
+  await until(host, (t) => t.includes("Гравців: 3") && t.includes("Анна") && t.includes("Віка"), "host lobby lists players");
   check("host and projector list all players", (await text(screen)).includes("Богдан"));
   await shot(host, "host-lobby");
   await shot(players[0].p, "player-lobby");
@@ -157,6 +160,7 @@ try {
   await players[0].p.getByRole("button", { name: /Ні/ }).click();
   await players[1].p.getByRole("button", { name: /Ні/ }).click();
   await until(host, (t) => t.includes("Завершити гру"), "last question offers Finish");
+  check("no in-between leaderboard is offered after the last question", (await host.getByRole("button", { name: "Рейтинг" }).count()) === 0);
   await host.getByRole("button", { name: "Завершити гру" }).click();
   await until(players[0].p, (t) => t.includes("Гру завершено") && t.includes("Ваше місце"), "final screen on phone");
   await until(screen, (t) => t.includes("Гру завершено"), "final on projector");
@@ -180,7 +184,8 @@ try {
   // The finished game's PIN no longer lets anyone in.
   const late = await (await browser.newContext()).newPage();
   await late.goto(`${BASE}/play/${pin}`);
-  await until(late, (t) => t.includes("Гру не знайдено") || t.includes("завершилась") || t.includes("Ваш нікнейм"), "late visitor sees something");
+  await until(late, (t) => t.includes("Гру не знайдено") || t.includes("вже закінчилася") || t.includes("Ваш нікнейм"), "late visitor sees something");
+  check("a latecomer to a finished game gets the friendly closing screen, not a join form", (await text(late)).includes("вже закінчилася") && !(await text(late)).includes("Ваш нікнейм"), (await text(late)).slice(0, 120));
   check("no uncaught page errors anywhere", errors.length === 0, errors.join(" | "));
 } catch (e) {
   bad++;

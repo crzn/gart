@@ -1,6 +1,6 @@
 import { Loader2, UserX } from "lucide-react";
 import { Suspense, lazy, type ReactNode } from "react";
-import { Avatar, Board, Distribution, OPTION_STYLE, OptionLabel, Podium, TimerBar } from "./parts";
+import { Avatar, Board, Distribution, OPTION_STYLE, OptionLabel, Podium, QuizIntro, TimerBar } from "./parts";
 import { secondsLeft, secondsUntilStart, type GameClientState } from "./reducer";
 import { useLang } from "../i18n";
 import { mediaUrl } from "../image";
@@ -39,7 +39,8 @@ export function LiveView({ state, big = false, onKick, joinUrl, fx = false }: { 
           <p className={`text-ink-muted ${big ? "text-2xl" : ""}`}>{t("host.pin")}</p>
           <p className={`font-mono font-black tracking-[0.25em] ${big ? "text-8xl 2xl:text-9xl" : "text-6xl sm:text-7xl"}`} data-testid="pin">{snap.pin}</p>
           <h1 className={`${h1} font-bold`}>{snap.title}</h1>
-          <p className={big ? "text-4xl" : "text-lg"}>{snap.playerCount} {t("play.players")}</p>
+          <QuizIntro cover={snap.coverImageId} description={snap.description} big={big} />
+          <p className={big ? "text-4xl" : "text-lg"}>{t("play.players")}: {snap.playerCount}</p>
         </div>
         {big ? qr : null}
         {!big && qr ? <div className="flex justify-center">{qr}</div> : null}

@@ -142,6 +142,9 @@ export interface SnapshotData {
   state: GameState;
   paused: boolean;
   title: string;
+  /** What the quiz is about and its cover picture; shown in the lobby to everyone. */
+  description?: string;
+  coverImageId?: string;
   pin: string;
   playerCount: number;
   settings: { showQuestionProgress: boolean; soundEnabled: boolean; showCorrectAnswer: boolean; leaderboardEnabled: boolean };

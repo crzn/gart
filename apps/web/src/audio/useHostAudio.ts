@@ -54,7 +54,7 @@ export function useHostAudio(state: GameClientState, scope: Scope): HostAudio {
   // The quiz setting "Music and sound effects" only controls the music and the other effects.
   const { branding } = useBranding();
   const allowed = branding.soundEnabled;
-  const quizSound = state.snap?.settings.soundEnabled === true;
+  const quizSound = true; // music and effects are not a quiz setting any more: the Gart sound setting governs everything
   const [prefs, setPrefs] = useState<Prefs>(() => readPrefs(scope));
   const [loading, setLoading] = useState(false);
   const engine = useRef<AudioEngine | null>(null);

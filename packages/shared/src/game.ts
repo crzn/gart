@@ -16,6 +16,9 @@ export interface SnapshotQuestion {
 export interface GameSnapshot {
   quizId: string;
   title: string;
+  /** Shown to everyone in the lobby. Absent in snapshots of games created before 0.10.1. */
+  description?: string;
+  coverImageId?: string | null;
   questions: SnapshotQuestion[];
   settings: QuizSettings;
 }
@@ -24,6 +27,8 @@ export function buildGameSnapshot(quiz: QuizView): GameSnapshot {
   return {
     quizId: quiz.id,
     title: quiz.title,
+    description: quiz.description,
+    coverImageId: quiz.coverMediaId,
     settings: QuizSettingsSchema.parse(quiz.settings),
     questions: quiz.questions.map((q) => ({
       id: q.id,

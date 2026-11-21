@@ -2,7 +2,7 @@ import { Loader2, LogOut, Pause, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AVATAR_IDS, isValidPin } from "@gart/shared";
-import { Avatar, Board, Distribution, OPTION_STYLE, OptionLabel, Podium, TimerBar, Verdict } from "../game/parts";
+import { Avatar, Board, Distribution, OPTION_STYLE, OptionLabel, Podium, QuizIntro, TimerBar, Verdict } from "../game/parts";
 import { secondsLeft, secondsUntilStart } from "../game/reducer";
 import { useGameSocket } from "../game/useGameSocket";
 import { useLang, type MessageKey } from "../i18n";
@@ -29,7 +29,7 @@ export function PlayPage() {
   // A link or QR code for a game that does not exist is turned away at once, before any connection is opened.
   const exists = usePinCheck(valid ? pin : null);
   const { state, dispatch, send } = useGameSocket({
-    pin: valid && exists === "ok" ? pin : null,
+    pin: valid && exists.status === "ok" && !(exists.info?.over && readToken(pin) === null) ? pin : null,
     firstFrame: async () => {
       const token = readToken(pin);
       return token ? { t: "player.resume", d: { playerToken: token } } : null;
@@ -68,8 +68,21 @@ export function PlayPage() {
     send({ t: "answer.submit", d: { questionIdx: q.index, optionId } });
   }
 
-  if (valid && exists === "missing") return <Notice title={t("play.noGame")} body={t("play.noGameHint")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
-  if (valid && exists === "checking") return <p className="m-auto flex items-center gap-2 text-ink-muted"><Loader2 className="size-5 animate-spin" aria-hidden />{t("play.connecting")}</p>;
+  if (valid && exists.status === "missing") return <Notice title={t("play.noGame")} body={t("play.noGameHint")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
+  if (valid && exists.status === "checking") return <p className="m-auto flex items-center gap-2 text-ink-muted"><Loader2 className="size-5 animate-spin" aria-hidden />{t("play.connecting")}</p>;
+  // Someone who arrives after the game has ended gets a friendly closing screen instead of a nickname form.
+  if (exists.status === "ok" && exists.info?.over && readToken(pin) === null) {
+    return (
+      <section className="m-auto w-full max-w-md space-y-6 text-center">
+        <h1 className="text-2xl font-bold">{t("play.finished")}</h1>
+        <p className="text-ink-muted">{exists.info.title}</p>
+        <QuizIntro cover={exists.info.coverImageId} description={exists.info.description} />
+        <p>{t("play.finishedLate")}</p>
+        <Button className="w-full" onClick={() => navigate("/")}>{t("play.back")}</Button>
+      </section>
+    );
+  }
+
   if (!valid) return <Notice title={t("play.badPin")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
   if (state.kicked) return <Notice title={t("play.kicked")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
   if (state.cancelled) return <Notice title={t("play.cancelled")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
@@ -83,7 +96,8 @@ export function PlayPage() {
       <section className="m-auto w-full max-w-md">
         <Card>
           <p className="text-sm text-ink-muted">{t("play.game")} · {pin}</p>
-          <h1 className="mt-1 text-2xl font-bold">{snap?.title ?? t("play.joinTitle")}</h1>
+          <h1 className="mt-1 text-2xl font-bold">{snap?.title ?? (exists.status === "ok" ? exists.info?.title : undefined) ?? t("play.joinTitle")}</h1>
+          <div className="mt-4"><QuizIntro cover={snap?.coverImageId ?? (exists.status === "ok" ? exists.info?.coverImageId : undefined)} description={snap?.description ?? (exists.status === "ok" ? exists.info?.description : undefined)} /></div>
           <form onSubmit={join} className="mt-6 space-y-5">
             <div>
               <label htmlFor="nick" className="mb-1.5 block text-sm font-medium">{t("play.nickname")}</label>
@@ -127,8 +141,10 @@ export function PlayPage() {
         <Card className="text-center">
           <Avatar id={me.avatar} size="xl" />
           <h1 className="mt-4 text-2xl font-bold">{t("play.in")}</h1>
+          <p className="mt-1 font-medium">{snap.title}</p>
+          <div className="mt-4"><QuizIntro cover={snap.coverImageId} description={snap.description} /></div>
           <p className="mt-2 text-ink-muted">{t("play.waitStart")}</p>
-          <p className="mt-6 text-sm text-ink-muted">{snap.playerCount} {t("play.players")}</p>
+          <p className="mt-6 text-sm text-ink-muted">{t("play.players")}: {snap.playerCount}</p>
         </Card>
       )}
 

@@ -19,8 +19,18 @@ joinRoutes.get("/:pin", async (c) => {
   if (!rl.allowed) { c.header("Retry-After", String(rl.retryAfterSec)); return c.json({ error: "rate_limited" }, 429); }
   const since = new Date(Date.now() - GAME_LIMITS.finishedGraceMs).toISOString();
   const game = await c.env.DB.prepare(
-    `SELECT 1 AS ok FROM game_sessions
+    `SELECT status, quiz_title, quiz_snapshot_json FROM game_sessions
      WHERE pin = ? AND (status IN (${ACTIVE_STATUSES}) OR (status IN ('FINISHED','CANCELLED') AND finished_at > ?)) LIMIT 1`,
-  ).bind(pin, since).first();
-  return game ? c.json({ ok: true }) : c.json({ error: "not_found" }, 404);
+  ).bind(pin, since).first<{ status: string; quiz_title: string; quiz_snapshot_json: string }>();
+  if (!game) return c.json({ error: "not_found" }, 404);
+  // What the join page may show before the player has a nickname: the title, what the quiz is about, and whether it is over.
+  let snap: { description?: string; coverImageId?: string | null } = {};
+  try { snap = JSON.parse(game.quiz_snapshot_json) as typeof snap; } catch { /* keep the title only */ }
+  return c.json({
+    ok: true,
+    over: game.status === "FINISHED" || game.status === "CANCELLED",
+    title: game.quiz_title,
+    ...(snap.description ? { description: snap.description } : {}),
+    ...(snap.coverImageId ? { coverImageId: snap.coverImageId } : {}),
+  });
 });

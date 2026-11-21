@@ -89,6 +89,7 @@ export function Podium({ top, fx = false }: { top: LeaderboardEntry[]; fx?: bool
   const order = [top[1], top[0], top[2]];
   const heights = ["h-24", "h-36", "h-16"];
   const delays = ["0.9s", "1.8s", "0s"]; // second, first, third place
+  const medals = ["bg-gradient-to-b from-slate-200 to-slate-400", "bg-gradient-to-b from-amber-200 to-amber-400", "bg-gradient-to-b from-orange-400 to-amber-700"]; // silver, gold, bronze
   return (
     <div className="flex items-end justify-center gap-3" aria-hidden={top.length === 0}>
       {order.map((e, i) => e ? (
@@ -96,7 +97,7 @@ export function Podium({ top, fx = false }: { top: LeaderboardEntry[]; fx?: bool
           <Avatar id={e.avatar} size="lg" />
           <p className="w-full truncate text-sm font-semibold">{e.nickname}</p>
           <p className="font-mono text-sm text-ink-muted">{e.points}</p>
-          <div className={`${heights[i]} grid w-full place-items-center rounded-t-2xl bg-accent/80 text-3xl font-black text-slate-900`}>{e.rank}</div>
+          <div className={`${heights[i]} grid w-full place-items-center rounded-t-2xl ${medals[i]} text-3xl font-black text-slate-900 shadow-lg`}>{e.rank}</div>
         </div>
       ) : <div key={i} className="w-28 sm:w-36" />)}
     </div>
@@ -136,6 +137,17 @@ export function Verdict({ ok, children }: { ok: boolean; children: ReactNode }) 
     <div className={`flex items-center gap-3 rounded-2xl p-4 text-xl font-bold ${ok ? "bg-emerald-500/25 text-emerald-100" : "bg-red-500/25 text-red-100"}`}>
       {ok ? <Check className="size-7" aria-hidden /> : <X className="size-7" aria-hidden />}
       {children}
+    </div>
+  );
+}
+
+/** The quiz's cover and its description: what the game is about, shown to everyone before it starts. */
+export function QuizIntro({ cover, description, big = false }: { cover?: string | undefined; description?: string | undefined; big?: boolean }) {
+  if (!cover && !description) return null;
+  return (
+    <div className={`mx-auto flex w-full flex-col items-center gap-3 ${big ? "max-w-3xl" : "max-w-md"}`}>
+      {cover ? <img src={mediaUrl(cover)} alt="" className={`w-full rounded-2xl object-cover ${big ? "max-h-72" : "max-h-48"}`} /> : null}
+      {description ? <p className={`text-center text-ink-muted ${big ? "text-2xl" : "text-sm"}`}>{description}</p> : null}
     </div>
   );
 }
