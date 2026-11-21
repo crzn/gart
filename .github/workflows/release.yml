@@ -33,4 +33,10 @@ jobs:
           cp "package-out/gart-package-$V.json" package-out/gart-package.json
           cp "package-out/gart-installer-$V.json" package-out/gart-installer.json
           node scripts/release-notes.mjs "$V" > notes.md
-          gh release create "$GITHUB_REF_NAME" package-out/gart-package.json package-out/gart-installer.json --title "Gart $V" --notes-file notes.md
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            # A release made by hand in the GitHub UI already exists for this tag: attach the files to it.
+            gh release upload "$GITHUB_REF_NAME" package-out/gart-package.json package-out/gart-installer.json --clobber
+            gh release edit "$GITHUB_REF_NAME" --title "Gart $V" --notes-file notes.md
+          else
+            gh release create "$GITHUB_REF_NAME" package-out/gart-package.json package-out/gart-installer.json --title "Gart $V" --notes-file notes.md
+          fi
