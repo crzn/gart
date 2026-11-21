@@ -73,7 +73,7 @@ export function JoinPage() {
           <button
             type="submit"
             disabled={checking}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-70"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 hover:brightness-110 disabled:opacity-70"
           >
             {t("join.submit")}
             <ArrowRight className="size-5" aria-hidden />

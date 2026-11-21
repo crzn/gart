@@ -7,6 +7,7 @@ import { errorKey } from "../errors";
 import { SoundControl } from "../audio/SoundControl";
 import { useHostAudio } from "../audio/useHostAudio";
 import { LiveView } from "../game/LiveView";
+import { BrandBar } from "../game/parts";
 import { useGameSocket } from "../game/useGameSocket";
 import { useLang, type MessageKey } from "../i18n";
 import { Button, Card, ErrorNote } from "../ui";
@@ -135,8 +136,9 @@ export function ScreenPage() {
   return (
     <section className="w-full" data-testid="screen">
       {state.snap && state.snap.state !== "LOBBY" ? <p className="mb-4 text-right text-xl text-ink-muted">{t("host.joinAt")} {location.host} · PIN <b className="font-mono text-ink">{game.pin}</b></p> : null}
+      <div className="mb-4"><BrandBar big /></div>
       <LiveView state={state} big fx joinUrl={location.host} />
-      <div className="fixed bottom-4 right-4 opacity-60 transition-opacity hover:opacity-100 focus-within:opacity-100"><SoundControl audio={audio} /></div>
+      <div className="fixed bottom-4 right-4 opacity-60 hover:opacity-100 focus-within:opacity-100"><SoundControl audio={audio} /></div>
     </section>
   );
 }

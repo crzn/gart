@@ -142,7 +142,7 @@
   "q.explanation": "Explanation (shown after answering)",
   "q.save": "Save question",
   "q.cancel": "Cancel",
-  "set.defaultTimeLimitSec": "Default time per question, s",
+  "set.defaultTimeLimitSec": "Time per question, s",
   "set.basePoints": "Base points for a correct answer",
   "set.speedBonusPercent": "Speed bonus, % of base points",
   "set.countdownBeforeQuestionSec": "Countdown before a question, s",
@@ -172,6 +172,7 @@
   "brand.logo": "Logo",
   "brand.backgroundImage": "Background image",
   "brand.welcome": "Welcome message",
+  "brand.tagline": "Slogan",
   "brand.final": "End-of-game message",
   "brand.lowContrast": "The background or main colour has weak contrast with the text. It may be hard to read on screens.",
   "brand.reset": "Reset colours",
@@ -555,8 +556,8 @@
   "ws.err.last_question": "That was the last question: the winners are shown right away.",
   "play.finishedLate": "This game has already ended, so it can't be joined.",
   "set.help": "Explanation",
-  "set.defaultTimeLimitSec.help": "How many seconds players have if the question has no time of its own. A question with its own time (shown in the question list) ignores this value. Works only while the time limit is on.",
-  "set.timerEnabled.help": "On: every question has a timer. The time comes from \"Default time per question\" (now {n} s), or from the question itself if it has its own. Off: no timer, the host closes each question, and there is no speed bonus.",
+  "set.defaultTimeLimitSec.help": "How many seconds players have for every question of the quiz (default 15 s). One time for the whole quiz; a question has no time of its own. Works only while the time limit is on.",
+  "set.timerEnabled.help": "On: every question has a timer set by \"Time per question\" (now {n} s). Off: no timer, the host closes each question, and there is no speed bonus.",
   "set.basePoints.help": "Points for a correct answer before any bonus. If a question has its own points, they replace this value.",
   "set.speedBonusPercent.help": "Extra points for speed, up to {n}% of the base points. An instant answer earns the full bonus, an answer at the very end earns none. Example: 1000 base points and 20% give the fastest player up to 200 extra. No time limit, no bonus.",
   "set.countdownBeforeQuestionSec.help": "A pause before each question so players can get ready. Default {n} s; 0 means no countdown.",
@@ -571,6 +572,6 @@
   "set.closeWhenAllAnswered.help": "The question closes early as soon as every player who is online has answered. Off: wait for the timer or for the host.",
   "q.ownTime": "own time: {n} s",
   "q.ownPoints": "own points: {n}",
-  "q.overrides": "A question's own time or points replace the quiz settings.",
-  "imp.overrides": "Questions with their own time or points: {n} (they replace the quiz settings)"
+  "q.overrides": "A question's own points replace the quiz base points.",
+  "imp.overrides": "Questions with their own points: {n} (they replace the quiz base points)"
 }

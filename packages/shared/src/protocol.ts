@@ -161,7 +161,7 @@ export interface SnapshotData {
 }
 
 export type ServerMessage =
-  | Frame<"hello", { serverTime: number; role: WsRole | "anon"; state: GameState; paused: boolean }>
+  | Frame<"hello", { serverTime: number; role: WsRole | "anon"; state: GameState; paused: boolean; /** Players in the game at this moment; lets the join form say how many are already in. */ playerCount?: number }>
   | Frame<"snapshot", SnapshotData>
   | Frame<"kicked", Record<string, never>>
   | Frame<"game.cancelled", Record<string, never>>

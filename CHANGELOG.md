@@ -2,6 +2,18 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.10.2] - 2026-11-21: clearer editor, brand on screens, no animations
+
+### Changed
+- The **parameter hints** in the quiz editor have an opaque, high-contrast background and are readable.
+- **Answer time is set for the whole quiz** (default **15 s**). A question no longer has its own time; old per-question values are ignored, and the import ignores them too.
+- **No animations anywhere.** Nothing moves on the projector, the host screen or phones.
+- Sound is unchanged.
+
+### Added
+- When joining, a player sees the **quiz title, cover, short description and the number of players**.
+- **Logo, company name and slogan** on the projector and on the player waiting screen. The slogan is set in Branding; the default is "Знай. Дій. Перемагай!" (empty hides it).
+
 ## [0.10.1] - 2026-11-21: fixes and small improvements
 
 ### Fixed

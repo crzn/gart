@@ -14,7 +14,7 @@ export function Field({ label, id, hint, ...rest }: { label: string; id: string;
         id={id}
         aria-describedby={hint ? `${id}-hint` : undefined}
         {...rest}
-        className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm outline-none transition focus:border-brand"
+        className="w-full rounded-xl border border-surface-border bg-black/20 px-3 py-2.5 text-sm outline-none focus:border-brand"
       />
     </div>
   );
@@ -30,9 +30,9 @@ export function Button({ busy, variant = "primary", children, ...rest }: { busy?
     <button
       {...rest}
       disabled={rest.disabled || busy}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${styles}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${styles}`}
     >
-      {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+      {busy ? <Loader2 className="size-4" aria-hidden /> : null}
       {children}
     </button>
   );

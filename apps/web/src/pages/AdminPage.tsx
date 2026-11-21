@@ -48,7 +48,7 @@ export function AdminPage() {
               type="button"
               aria-selected={tab === id}
               onClick={() => setTab(id)}
-              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition ${tab === id ? "bg-white/15" : "text-ink-muted hover:bg-white/10"}`}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium ${tab === id ? "bg-white/15" : "text-ink-muted hover:bg-white/10"}`}
             >
               <Icon className="size-4" aria-hidden />
               {t(label)}

@@ -159,8 +159,10 @@ try {
   await phone.fill("#nick", "Анна"); await phone.getByRole("button", { name: "Приєднатися" }).click();
   await until(phone, (t) => t.includes("Ви в грі"), "joined");
   await until(screen, (t) => t.includes("Анна"), "projector lists the player");
-  check("a joining player pops in on the projector", (await screen.locator("li.fx-pop").count()) >= 1);
-  check("the phone has no animation classes at all", (await phone.locator("[class*=fx-]").count()) === 0);
+  check("a joining player appears on the projector without animation", (await screen.locator("li").count()) >= 1 && (await screen.evaluate(() => document.getAnimations().length)) === 0);
+  check("the projector shows the default slogan", (await screen.getByText("Знай. Дій. Перемагай!").count()) >= 1);
+  check("the player waiting screen shows the slogan", (await phone.getByText("Знай. Дій. Перемагай!").count()) >= 1);
+  check("the phone has no animations", (await phone.evaluate(() => document.getAnimations().length)) === 0);
   check("the phone never downloaded the sound engine or the QR library", !phoneRequests.some((u) => /engine-|QrCode-|ListenPage-/.test(u)), phoneRequests.filter((u) => /assets/.test(u)).join(", "));
   check("the phone has no sound switch", (await phone.getByText("Увімкнути звук").count()) === 0);
 
@@ -179,7 +181,7 @@ try {
   await until(screen, (t) => /Питання один\?/.test(t), "question on the projector", 15000);
   const qLevel = await screen.evaluate(() => window.__peakOver(1500));
   check("music plays during the question", qLevel > 0.02, String(qLevel));
-  check("question options rise in on the projector", (await screen.locator(".fx-rise").count()) >= 4);
+  check("question options show on the projector", (await screen.locator("[data-testid=screen] .rounded-2xl").count()) >= 4);
   for (const [w, h] of [[1280, 720], [1920, 1080]]) {
     await screen.setViewportSize({ width: w, height: h }); await sleep(1500);
     const f = await fits(screen);
@@ -189,7 +191,7 @@ try {
   await phone.getByRole("button", { name: /Так/ }).click();
   await until(screen, (t) => t.includes("Відповіли") || true, "answered", 1000);
   await until(host, (t) => t.includes("Повідомте") || t.includes("Рейтинг") || t.includes("Далі"), "results", 15000);
-  check("answer bars grow on the projector", (await screen.locator(".fx-grow").count()) >= 1);
+  check("answer results show on the projector, nothing animates", (await screen.evaluate(() => document.getAnimations().length)) === 0);
   await host.getByRole("button", { name: "Рейтинг" }).click();
   await until(screen, (t) => t.includes("Рейтинг"), "projector leaderboard");
   await host.getByRole("button", { name: "Далі" }).click();
@@ -198,7 +200,7 @@ try {
   await until(host, (t) => t.includes("Завершити гру"), "finish offered", 15000);
   await host.getByRole("button", { name: "Завершити гру" }).click();
   await until(screen, (t) => t.includes("Гру завершено"), "final");
-  check("the podium rises in on the projector", (await screen.locator(".fx-podium").count()) >= 1);
+  check("the podium shows on the projector", (await screen.locator("[data-testid=screen]").count()) === 1 && (await screen.evaluate(() => document.getAnimations().length)) === 0);
 
   // A quiz carrying the old "music off" setting behaves like any other: only the Gart sound setting counts.
   const quiet = await startGame(quietQuiz.id);
@@ -231,8 +233,8 @@ try {
   await rm.addCookies([{ name: cookie.v.split("=")[0], value: cookie.v.split("=")[1], url: BASE }]);
   const rmp = await rm.newPage(); await rmp.goto(`${BASE}/screen/${quiet.id}`);
   await until(rmp, (t) => t.includes(quiet.pin), "reduced-motion projector");
-  const dur = await rmp.evaluate(() => { const el = document.querySelector("[class*=fx-]"); return el ? getComputedStyle(el).animationDuration : "none-found"; });
-  check("with 'reduce motion' the animations are effectively off", dur === "none-found" || parseFloat(dur) < 0.01, dur);
+  const dur = await rmp.evaluate(() => String(document.getAnimations().length));
+  check("nothing animates (also with reduce motion)", dur === "0", dur);
 
   // ---------- listening page and sound samples
   const listen = await (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();

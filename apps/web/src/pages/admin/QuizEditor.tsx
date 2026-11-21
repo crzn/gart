@@ -23,7 +23,7 @@ function Help({ id, children }: { id: string; children: string }) {
   return (
     <span className="group relative inline-flex">
       <button type="button" aria-label={t("set.help")} aria-describedby={id} className="rounded-full p-1 text-ink-muted hover:text-ink focus:text-ink"><Info className="size-4" aria-hidden /></button>
-      <span id={id} role="tooltip" className="pointer-events-none invisible absolute right-0 top-full z-20 mt-1 w-72 max-w-[80vw] rounded-xl border border-surface-border bg-surface p-3 text-left text-xs leading-relaxed text-ink opacity-0 shadow-xl transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">{children}</span>
+      <span id={id} role="tooltip" className="pointer-events-none invisible absolute right-0 top-full z-20 mt-1 w-72 max-w-[80vw] rounded-xl border-2 border-slate-300 bg-slate-950 p-3 text-left text-sm leading-relaxed text-white opacity-0 shadow-2xl group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">{children}</span>
     </span>
   );
 }
@@ -141,7 +141,6 @@ export function QuizEditor({ id, onClose }: { id: string; onClose(): void }) {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{q.text}</p>
                     <p className="mt-0.5 text-xs text-ink-muted">{t(q.type === "single" ? "q.single" : "q.truefalse")} · {q.options.length} {t("q.optionsShort")}
-                      {q.timeLimitSec !== null ? <b className="ml-2 rounded bg-amber-500/20 px-1.5 py-0.5 text-amber-200" title={t("q.overrides")}>{fill(t("q.ownTime"), q.timeLimitSec)}</b> : null}
                       {q.points !== null ? <b className="ml-2 rounded bg-amber-500/20 px-1.5 py-0.5 text-amber-200" title={t("q.overrides")}>{fill(t("q.ownPoints"), q.points)}</b> : null}</p>
                   </div>
                   <button type="button" onClick={() => void reorder(i, -1)} disabled={i === 0} aria-label={t("q.up")} className="rounded-lg p-2 hover:bg-white/10 disabled:opacity-30"><ArrowUp className="size-4" aria-hidden /></button>

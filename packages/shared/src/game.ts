@@ -35,7 +35,7 @@ export function buildGameSnapshot(quiz: QuizView): GameSnapshot {
       type: q.type,
       text: q.text,
       imageId: q.imageMediaId,
-      timeLimitSec: q.timeLimitSec,
+      timeLimitSec: null, // one time limit for the whole quiz: a question's own time (older data, older files) is ignored
       points: q.points,
       explanation: q.explanation,
       options: q.options.map((o) => ({ id: o.id, text: o.text, imageId: o.imageMediaId, correct: o.isCorrect })),

@@ -2,7 +2,7 @@ import { Loader2, LogOut, Pause, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AVATAR_IDS, isValidPin } from "@gart/shared";
-import { Avatar, Board, Distribution, OPTION_STYLE, OptionLabel, Podium, QuizIntro, TimerBar, Verdict } from "../game/parts";
+import { Avatar, Board, Distribution, OPTION_STYLE, BrandBar, OptionLabel, Podium, QuizIntro, TimerBar, Verdict } from "../game/parts";
 import { secondsLeft, secondsUntilStart } from "../game/reducer";
 import { useGameSocket } from "../game/useGameSocket";
 import { useLang, type MessageKey } from "../i18n";
@@ -69,7 +69,7 @@ export function PlayPage() {
   }
 
   if (valid && exists.status === "missing") return <Notice title={t("play.noGame")} body={t("play.noGameHint")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
-  if (valid && exists.status === "checking") return <p className="m-auto flex items-center gap-2 text-ink-muted"><Loader2 className="size-5 animate-spin" aria-hidden />{t("play.connecting")}</p>;
+  if (valid && exists.status === "checking") return <p className="m-auto flex items-center gap-2 text-ink-muted"><Loader2 className="size-5" aria-hidden />{t("play.connecting")}</p>;
   // Someone who arrives after the game has ended gets a friendly closing screen instead of a nickname form.
   if (exists.status === "ok" && exists.info?.over && readToken(pin) === null) {
     return (
@@ -89,7 +89,7 @@ export function PlayPage() {
   if (state.conn === "failed") return <Notice title={t("play.noGame")} body={t("play.noGameHint")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
   if (state.error === "game_over") return <Notice title={t("play.over")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
   const waiting = !snap && (!state.hello || (readToken(pin) !== null && !state.error));
-  if (waiting) return <p className="m-auto flex items-center gap-2 text-ink-muted"><Loader2 className="size-5 animate-spin" aria-hidden />{t("play.connecting")}</p>;
+  if (waiting) return <p className="m-auto flex items-center gap-2 text-ink-muted"><Loader2 className="size-5" aria-hidden />{t("play.connecting")}</p>;
 
   if (!snap || !me) {
     return (
@@ -98,6 +98,7 @@ export function PlayPage() {
           <p className="text-sm text-ink-muted">{t("play.game")} · {pin}</p>
           <h1 className="mt-1 text-2xl font-bold">{snap?.title ?? (exists.status === "ok" ? exists.info?.title : undefined) ?? t("play.joinTitle")}</h1>
           <div className="mt-4"><QuizIntro cover={snap?.coverImageId ?? (exists.status === "ok" ? exists.info?.coverImageId : undefined)} description={snap?.description ?? (exists.status === "ok" ? exists.info?.description : undefined)} /></div>
+          {state.helloCount !== null ? <p className="mt-4 text-center text-sm text-ink-muted" data-testid="join-count">{t("play.players")}: {state.helloCount}</p> : null}
           <form onSubmit={join} className="mt-6 space-y-5">
             <div>
               <label htmlFor="nick" className="mb-1.5 block text-sm font-medium">{t("play.nickname")}</label>
@@ -139,6 +140,7 @@ export function PlayPage() {
       {header}{banner}{paused}
       {snap.state === "LOBBY" && (
         <Card className="text-center">
+          <div className="mb-5"><BrandBar /></div>
           <Avatar id={me.avatar} size="xl" />
           <h1 className="mt-4 text-2xl font-bold">{t("play.in")}</h1>
           <p className="mt-1 font-medium">{snap.title}</p>
@@ -166,7 +168,7 @@ export function PlayPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   {q.options.map((o, i) => (
                     <button key={o.id} type="button" disabled={!!state.pending || snap.paused} onClick={() => answer(o.id)}
-                      className={`${OPTION_STYLE[i % 4]!.bg} min-h-20 rounded-2xl px-4 py-4 text-white shadow-lg transition active:scale-[0.98] disabled:opacity-60`}>
+                      className={`${OPTION_STYLE[i % 4]!.bg} min-h-20 rounded-2xl px-4 py-4 text-white shadow-lg disabled:opacity-60`}>
                       <OptionLabel option={o} index={i} />
                     </button>
                   ))}
@@ -184,7 +186,7 @@ export function PlayPage() {
             snap.results.you.answered ? (
               <Verdict ok={snap.results.you.correct}>{snap.results.you.correct ? `${t("play.correct")} +${snap.results.you.points}` : t("play.wrong")}</Verdict>
             ) : <Verdict ok={false}>{t("play.noAnswer")}</Verdict>
-          ) : <p className="flex items-center gap-2 text-ink-muted"><Loader2 className="size-4 animate-spin" aria-hidden />{t("play.counting")}</p>}
+          ) : <p className="flex items-center gap-2 text-ink-muted"><Loader2 className="size-4" aria-hidden />{t("play.counting")}</p>}
           {snap.results && q && snap.settings.showCorrectAnswer ? <Card><Distribution options={q.options} results={snap.results} /></Card> : null}
           {snap.results?.explanation ? <Card><p className="text-sm text-ink-muted">{t("play.explanation")}</p><p className="mt-1">{snap.results.explanation}</p></Card> : null}
           <p className="text-center text-sm text-ink-muted">{t("play.waitNext")}</p>

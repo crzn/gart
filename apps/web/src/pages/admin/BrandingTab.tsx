@@ -60,6 +60,7 @@ export function BrandingTab() {
           <ImageField label={t("brand.logo")} value={b.logoMediaId} maxSide={400} onChange={(id) => set({ logoMediaId: id })} />
           <ImageField label={t("brand.backgroundImage")} value={b.backgroundMediaId} maxSide={1600} onChange={(id) => set({ backgroundMediaId: id })} />
           <Field id="bw" label={t("brand.welcome")} maxLength={200} value={b.welcomeMessage} onChange={(e) => set({ welcomeMessage: e.target.value })} />
+          <Field id="bt" label={t("brand.tagline")} maxLength={80} value={b.tagline} onChange={(e) => set({ tagline: e.target.value })} />
           <Field id="bf" label={t("brand.final")} maxLength={200} value={b.finalMessage} onChange={(e) => set({ finalMessage: e.target.value })} />
         </div>
         <fieldset className="mt-5 rounded-2xl border border-surface-border p-4">

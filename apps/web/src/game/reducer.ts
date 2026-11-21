@@ -6,6 +6,8 @@ export interface GameClientState {
   snap: SnapshotData | null;
   /** True once the room said hello; an anonymous visitor has no snapshot until they join. */
   hello: boolean;
+  /** Players in the game when the room said hello (what an anonymous visitor can know). */
+  helloCount: number | null;
   /** serverTime - Date.now() at the last snapshot; add it to local time to get server time. */
   offset: number;
   /** Local time the game was paused; the countdown is frozen at this moment. */
@@ -19,7 +21,7 @@ export interface GameClientState {
 }
 
 export const initialGameState: GameClientState = {
-  conn: "connecting", snap: null, hello: false, offset: 0, pausedAt: null, pending: null, reject: null, error: null, kicked: false, cancelled: false, identity: null,
+  conn: "connecting", snap: null, hello: false, helloCount: null, offset: 0, pausedAt: null, pending: null, reject: null, error: null, kicked: false, cancelled: false, identity: null,
 };
 
 export type GameAction =
@@ -47,7 +49,7 @@ export function gameReducer(s: GameClientState, a: GameAction): GameClientState 
   const m = a.msg;
   switch (m.t) {
     case "hello":
-      return { ...s, conn: "open", hello: true };
+      return { ...s, conn: "open", hello: true, helloCount: m.d.playerCount ?? null };
     case "snapshot":
       return { ...s, conn: "open", snap: m.d, offset: m.d.serverTime - a.now, pausedAt: m.d.paused ? a.now : null, pending: null, error: null };
     case "joined":

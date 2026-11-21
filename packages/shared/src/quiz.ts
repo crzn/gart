@@ -96,6 +96,8 @@ export const BrandingSchema = z.object({
   backgroundMediaId: mediaId,
   welcomeMessage: z.string().trim().max(200),
   finalMessage: z.string().trim().max(200),
+  /** Short slogan shown next to the logo on the projector and the player waiting screen. */
+  tagline: z.string().trim().max(80).default("Знай. Дій. Перемагай!"),
   /** Gart-wide sound: the intro and the join sound on the host screen and the projector. */
   soundEnabled: z.boolean().default(true),
 });
@@ -112,6 +114,7 @@ export const DEFAULT_BRANDING: Branding = {
   backgroundMediaId: null,
   welcomeMessage: "",
   finalMessage: "",
+  tagline: "Знай. Дій. Перемагай!",
   soundEnabled: true,
 };
 

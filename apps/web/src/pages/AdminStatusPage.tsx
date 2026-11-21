@@ -73,9 +73,9 @@ export function AdminStatusPage() {
             type="button"
             onClick={refresh}
             disabled={load.state === "loading"}
-            className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium transition hover:bg-white/20 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm font-medium hover:bg-white/20 disabled:opacity-50"
           >
-            <RefreshCw className={`size-4 ${load.state === "loading" ? "animate-spin" : ""}`} aria-hidden />
+            <RefreshCw className="size-4" aria-hidden />
             {t("admin.refresh")}
           </button>
         </div>
@@ -83,7 +83,7 @@ export function AdminStatusPage() {
         <div className="mt-6" aria-live="polite">
           {load.state === "loading" && (
             <p className="flex items-center gap-2 text-sm text-ink-muted">
-              <Loader2 className="size-4 animate-spin" aria-hidden />
+              <Loader2 className="size-4" aria-hidden />
               {t("admin.loading")}
             </p>
           )}

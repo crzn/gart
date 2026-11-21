@@ -33,7 +33,7 @@ export function ImportCard({ onImported }: { onImported(): void }) {
     if (!checked.ok) return { name: file.name, ok: false, problems: checked.problems };
     try {
       const r = await api<{ quiz: { title: string; questionCount: number } }>("/api/quizzes/import", { method: "POST", body: doc });
-      const overrides = checked.file.questions.filter((x) => x.timeLimitSec !== null || x.points !== null).length;
+      const overrides = checked.file.questions.filter((x) => x.points !== null).length;
       return { name: file.name, ok: true, title: r.quiz.title, count: r.quiz.questionCount, overrides };
     } catch (e) {
       if (e instanceof ApiError && e.code === "invalid_quiz_file") return { name: file.name, ok: false, problems: (e.payload as { problems: ImportProblem[] }).problems };

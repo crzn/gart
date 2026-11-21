@@ -18,7 +18,7 @@ const ListenPage = lazy(() => import("./pages/ListenPage"));
 
 function navClass({ isActive }: { isActive: boolean }): string {
   return [
-    "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors",
+    "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium",
     isActive ? "bg-white/15 text-ink" : "text-ink-muted hover:bg-white/10 hover:text-ink",
   ].join(" ");
 }
@@ -36,7 +36,7 @@ function LanguageSwitcher() {
           onClick={() => setLang(code)}
           aria-pressed={lang === code}
           className={[
-            "rounded-lg px-2.5 py-1 text-xs font-semibold uppercase tracking-wide transition-colors",
+            "rounded-lg px-2.5 py-1 text-xs font-semibold uppercase tracking-wide",
             lang === code ? "bg-white text-slate-900" : "text-ink-muted hover:bg-white/10",
           ].join(" ")}
         >

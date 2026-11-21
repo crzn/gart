@@ -47,7 +47,7 @@ export function QuestionForm({ quizId, question, onSaved, onCancel }: { quizId: 
     setError(null);
     const body = {
       type: d.type, text: d.text, imageMediaId: d.imageMediaId, explanation: d.explanation,
-      timeLimitSec: d.timeLimitSec.trim() === "" ? null : Number(d.timeLimitSec),
+      timeLimitSec: null,
       points: d.points.trim() === "" ? null : Number(d.points),
       options: d.options,
     };
@@ -104,7 +104,6 @@ export function QuestionForm({ quizId, question, onSaved, onCancel }: { quizId: 
         )}
       </fieldset>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field id="qtime" type="number" min={5} max={300} label={t("q.time")} placeholder={t("q.byDefault")} value={d.timeLimitSec} onChange={(e) => set({ timeLimitSec: e.target.value })} />
         <Field id="qpts" type="number" min={0} max={10000} label={t("q.points")} placeholder={t("q.byDefault")} value={d.points} onChange={(e) => set({ points: e.target.value })} />
       </div>
       <div>

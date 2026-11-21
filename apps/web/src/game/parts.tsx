@@ -1,7 +1,8 @@
+import type { ReactNode } from "react";
 import { Circle, Diamond, Square, Triangle, Check, X, ArrowUp, ArrowDown, Minus } from "lucide-react";
-import { useLayoutEffect, useRef, type ReactNode } from "react";
 import type { LeaderboardEntry, PublicOption, ResultsData } from "@gart/shared";
 import { mediaUrl } from "../image";
+import { useBranding } from "../branding";
 
 const EMOJI: Record<string, string> = {
   fox: "🦊", owl: "🦉", bear: "🐻", wolf: "🐺", lynx: "🐱", otter: "🦦", panda: "🐼", koala: "🐨",
@@ -33,15 +34,15 @@ export function OptionLabel({ option, index, big = false }: { option: PublicOpti
   );
 }
 
-export function TimerBar({ left, total, fx = false }: { left: number | null; total: number | null; fx?: boolean }) {
+export function TimerBar({ left, total }: { left: number | null; total: number | null }) {
   if (left === null || !total) return null;
   const pct = Math.max(0, Math.min(100, (left / total) * 100));
   return (
     <div className="flex items-center gap-3" role="timer" aria-label={`${Math.ceil(left)} s`}>
       <div className="h-3 flex-1 overflow-hidden rounded-full bg-white/15">
-        <div className={`h-full rounded-full ${left <= 5 ? "bg-red-500" : "bg-accent"}`} style={{ width: `${pct}%`, transition: "width 250ms linear" }} />
+        <div className={`h-full rounded-full ${left <= 5 ? "bg-red-500" : "bg-accent"}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className={`w-10 text-right font-mono text-lg font-bold tabular-nums ${fx && left <= 5 ? "fx-pulse text-red-300" : ""}`}>{Math.ceil(left)}</span>
+      <span className={`w-10 text-right font-mono text-lg font-bold tabular-nums ${left <= 5 ? "text-red-300" : ""}`}>{Math.ceil(left)}</span>
     </div>
   );
 }
@@ -52,25 +53,10 @@ export function Movement({ value }: { value: number }) {
   return <Minus className="size-3 text-ink-muted" aria-hidden />;
 }
 
-const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-/** `fx` (host screen and projector): rows slide from their previous place to the new one, so a rise or a fall is seen, not read. */
-export function Board({ entries, meId, big = false, fx = false }: { entries: LeaderboardEntry[]; meId?: string; big?: boolean; fx?: boolean }) {
-  const list = useRef<HTMLOListElement>(null);
-  useLayoutEffect(() => {
-    if (!fx || reducedMotion() || !list.current || typeof Element.prototype.animate !== "function") return;
-    const rows = [...list.current.children] as HTMLElement[];
-    rows.forEach((row, i) => {
-      const moved = entries[i]?.movement ?? 0;
-      const pitch = row.offsetHeight + 8; // row height plus the gap between rows
-      row.animate(
-        [{ transform: `translateY(${moved * pitch}px)`, opacity: moved === 0 ? 0 : 1 }, { transform: "none", opacity: 1 }],
-        { duration: 900, delay: i * 60, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "backwards" },
-      );
-    });
-  }, [entries, fx]);
+/** The ranking table. */
+export function Board({ entries, meId, big = false }: { entries: LeaderboardEntry[]; meId?: string; big?: boolean }) {
   return (
-    <ol ref={list} className="space-y-2">
+    <ol className="space-y-2">
       {entries.map((e) => (
         <li key={e.playerId} className={`flex items-center gap-3 rounded-2xl px-4 ${big ? "py-3 text-2xl" : "py-2"} ${e.playerId === meId ? "bg-brand/40 ring-2 ring-accent" : "bg-white/10"}`}>
           <span className="w-8 text-center font-bold tabular-nums">{e.rank}</span>
@@ -84,16 +70,14 @@ export function Board({ entries, meId, big = false, fx = false }: { entries: Lea
   );
 }
 
-/** `fx`: third place rises first, then second, then the winner. */
-export function Podium({ top, fx = false }: { top: LeaderboardEntry[]; fx?: boolean }) {
+export function Podium({ top }: { top: LeaderboardEntry[] }) {
   const order = [top[1], top[0], top[2]];
   const heights = ["h-24", "h-36", "h-16"];
-  const delays = ["0.9s", "1.8s", "0s"]; // second, first, third place
   const medals = ["bg-gradient-to-b from-slate-200 to-slate-400", "bg-gradient-to-b from-amber-200 to-amber-400", "bg-gradient-to-b from-orange-400 to-amber-700"]; // silver, gold, bronze
   return (
     <div className="flex items-end justify-center gap-3" aria-hidden={top.length === 0}>
       {order.map((e, i) => e ? (
-        <div key={e.playerId} className={`flex w-28 flex-col items-center gap-1 text-center sm:w-36 ${fx ? "fx-podium" : ""}`} style={fx ? { animationDelay: delays[i] ?? "0s" } : undefined}>
+        <div key={e.playerId} className={`flex w-28 flex-col items-center gap-1 text-center sm:w-36`}>
           <Avatar id={e.avatar} size="lg" />
           <p className="w-full truncate text-sm font-semibold">{e.nickname}</p>
           <p className="font-mono text-sm text-ink-muted">{e.points}</p>
@@ -105,7 +89,7 @@ export function Podium({ top, fx = false }: { top: LeaderboardEntry[]; fx?: bool
 }
 
 /** Bars of how many players chose each option; the correct one is marked when the quiz shows it. */
-export function Distribution({ options, results, big = false, fx = false }: { options: PublicOption[]; results: ResultsData; big?: boolean; fx?: boolean }) {
+export function Distribution({ options, results, big = false }: { options: PublicOption[]; results: ResultsData; big?: boolean }) {
   const max = Math.max(1, ...Object.values(results.distribution));
   return (
     <ul className="space-y-3">
@@ -122,7 +106,7 @@ export function Distribution({ options, results, big = false, fx = false }: { op
                 <span className="truncate font-medium">{o.text}</span>
                 {ok ? <Check className="size-5 shrink-0 text-emerald-300" aria-label="✓" /> : null}
               </div>
-              <div className="mt-1 h-4 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${ok ? "bg-emerald-400" : "bg-white/50"} ${fx ? "fx-grow" : ""}`} style={{ width: `${(n / max) * 100}%`, ...(fx ? { animationDelay: `${i * 90}ms` } : {}) }} /></div>
+              <div className="mt-1 h-4 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${ok ? "bg-emerald-400" : "bg-white/50"}`} style={{ width: `${(n / max) * 100}%` }} /></div>
             </div>
             <span className={`w-10 text-right font-mono font-bold tabular-nums ${big ? "text-3xl" : ""}`}>{n}</span>
           </li>
@@ -148,6 +132,23 @@ export function QuizIntro({ cover, description, big = false }: { cover?: string 
     <div className={`mx-auto flex w-full flex-col items-center gap-3 ${big ? "max-w-3xl" : "max-w-md"}`}>
       {cover ? <img src={mediaUrl(cover)} alt="" className={`w-full rounded-2xl object-cover ${big ? "max-h-72" : "max-h-48"}`} /> : null}
       {description ? <p className={`text-center text-ink-muted ${big ? "text-2xl" : "text-sm"}`}>{description}</p> : null}
+    </div>
+  );
+}
+
+/** The company's logo, name and slogan: a header on the projector and a signature on the player's waiting screen. */
+export function BrandBar({ big = false }: { big?: boolean }) {
+  const { branding: b } = useBranding();
+  if (!b.logoMediaId && !b.companyName && !b.tagline) return null;
+  return (
+    <div className={`flex items-center justify-center gap-4 ${big ? "" : "flex-col text-center"}`} data-testid="brand-bar">
+      {b.logoMediaId ? <img src={mediaUrl(b.logoMediaId)} alt="" className={`${big ? "h-16" : "h-12"} w-auto max-w-[40%] object-contain`} /> : null}
+      {b.companyName || b.tagline ? (
+        <div className={big ? "text-left" : ""}>
+          {b.companyName ? <p className={`font-bold leading-tight ${big ? "text-3xl" : "text-lg"}`}>{b.companyName}</p> : null}
+          {b.tagline ? <p className={`text-ink-muted ${big ? "text-xl" : "text-sm"}`}>{b.tagline}</p> : null}
+        </div>
+      ) : null}
     </div>
   );
 }

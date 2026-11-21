@@ -272,7 +272,7 @@ export class GameRoom extends DurableObject<Env> {
     this.usage.connects++;
     this.ctx.acceptWebSocket(server);
     server.serializeAttachment({ role: null, t: Date.now() } satisfies Attachment);
-    this.send(server, { v: 1, t: "hello", d: { serverTime: Date.now(), role: "anon", state: this.core.state, paused: this.core.paused } });
+    this.send(server, { v: 1, t: "hello", d: { serverTime: Date.now(), role: "anon", state: this.core.state, paused: this.core.paused, playerCount: this.activePlayers().length } });
     return new Response(null, { status: 101, webSocket: client });
   }
 

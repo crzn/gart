@@ -7,7 +7,7 @@ import { startServer } from "./lib/server.mjs";
 import { nodeVersionOk } from "./lib/util.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const version = "0.10.1";
+const version = "0.10.2";
 
 if (!nodeVersionOk(process.versions.node)) {
   console.error(`Node.js ${process.versions.node} is too old. Install Node.js 22.12 or newer from https://nodejs.org`);

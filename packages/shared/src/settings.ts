@@ -16,7 +16,7 @@ export const QuizSettingsSchema = z
     randomizeAnswers: z.boolean().default(false),
     leaderboardEnabled: z.boolean().default(true),
     timerEnabled: z.boolean().default(true),
-    defaultTimeLimitSec: z.number().int().min(5).max(300).default(20),
+    defaultTimeLimitSec: z.number().int().min(5).max(300).default(15),
     basePoints: z.number().int().min(0).max(10_000).default(1000),
     /** Max speed bonus as % of basePoints. 0 = no speed bonus. */
     speedBonusPercent: z.number().int().min(0).max(100).default(50),

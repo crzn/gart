@@ -104,7 +104,7 @@ export function UpdatesTab() {
               <ul className="space-y-1.5 text-sm" aria-live="polite">
                 {run.steps.map((s) => (
                   <li key={s.step} className="flex items-center gap-2">
-                    {s.status === "running" ? <Loader2 className="size-4 animate-spin" aria-hidden /> : s.status === "failed" ? <CircleAlert className="size-4 text-red-400" aria-hidden /> : <CheckCircle2 className="size-4 text-emerald-400" aria-hidden />}
+                    {s.status === "running" ? <Loader2 className="size-4" aria-hidden /> : s.status === "failed" ? <CircleAlert className="size-4 text-red-400" aria-hidden /> : <CheckCircle2 className="size-4 text-emerald-400" aria-hidden />}
                     <span>{t(`upd.step.${s.step}` as MessageKey)}</span>
                     <span className="text-ink-muted">· {t(`upd.status.${s.status}` as MessageKey)}</span>
                   </li>

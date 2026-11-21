@@ -225,7 +225,7 @@ export async function importQuiz(
     const qid = randomId();
     stmts.push(
       db.prepare("INSERT INTO questions (id, quiz_id, position, type, text, image_media_id, time_limit_s, points, explanation) VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?)")
-        .bind(qid, q.id, position, question.type, question.text, question.timeLimitSec, question.points, question.explanation),
+        .bind(qid, q.id, position, question.type, question.text, null, question.points, question.explanation),
       ...optionStatements(db, qid, { ...question, options: question.options.map((o) => ({ ...o, imageMediaId: null })) }),
     );
   });
