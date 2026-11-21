@@ -7,6 +7,7 @@ import { errorKey } from "../../errors";
 import { useLang, type MessageKey } from "../../i18n";
 import { Button, Card, ErrorNote, Field } from "../../ui";
 import { QuizEditor } from "./QuizEditor";
+import { ImportCard } from "./ImportCard";
 import { ConcernList } from "./UsagePanels";
 
 interface Template { id: string; name: string; description: string; settings: Record<string, unknown> }
@@ -124,6 +125,7 @@ export function QuizzesTab({ me }: { me: AdminView }) {
         })()}
         {error ? <div className="mt-4"><ErrorNote>{error}</ErrorNote></div> : null}
       </Card>
+      <ImportCard onImported={() => void load()} />
       <Card>
         <h2 className="text-xl font-bold">{t("quiz.list")}</h2>
         {quizzes === null ? <p className="mt-4 text-sm text-ink-muted">{t("admin.loading")}</p> : quizzes.length === 0 ? <p className="mt-4 text-sm text-ink-muted">{t("quiz.empty")}</p> : (

@@ -2,6 +2,13 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.10.0] - 2026-11-21: import quizzes from files
+
+### Added
+- **Import of quizzes from `gart.json` files** in the Quizzes tab: up to 5 files at a time, one quiz per file. Each quiz is created as a **draft** (nothing goes live by accident); every file gets its own result, and a refused file lists what is wrong and where (for example `questions[2].options: exactly one correct answer`). Server route `POST /api/quizzes/import` checks the same schema again, so the browser is not trusted.
+- **Template for download** with comments for an AI assistant (rules, limits, question types, how to fill each field), shown in the page and downloadable as `gart-template.json`. Keys that start with an underscore are comments and are ignored on import. The template itself is a valid quiz.
+- Format `gart.quiz` version 1 (`packages/shared/src/interchange.ts`): quiz title, description, category, tags, difficulty, language, optional settings, 1 to 50 questions of type `single` or `truefalse` with 2 to 6 answers and exactly one correct. Images are not part of the file.
+
 ## [0.9.0] - 2026-11-21: presentation for the host screen and projector
 
 ### Added

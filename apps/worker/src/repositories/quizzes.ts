@@ -210,6 +210,28 @@ export async function duplicateQuiz(db: D1Database, source: QuizView, newId: str
   await db.batch(stmts);
 }
 
+/** Creates a draft quiz with all its questions in one batch (used by the file import). */
+export async function importQuiz(
+  db: D1Database,
+  q: { id: string; createdBy: string; title: string; description: string; category: string; tags: string[]; difficulty: string | null; language: string; settings: Record<string, unknown>; questions: QuestionInput[] },
+): Promise<void> {
+  const stmts: D1PreparedStatement[] = [
+    db.prepare(
+      `INSERT INTO quizzes (id, title, description, category, tags_json, difficulty, language, template_id, settings_json, status, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, 'draft', ?)`,
+    ).bind(q.id, q.title, q.description, q.category, JSON.stringify(q.tags), q.difficulty, q.language, JSON.stringify(q.settings), q.createdBy),
+  ];
+  q.questions.forEach((question, position) => {
+    const qid = randomId();
+    stmts.push(
+      db.prepare("INSERT INTO questions (id, quiz_id, position, type, text, image_media_id, time_limit_s, points, explanation) VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?)")
+        .bind(qid, q.id, position, question.type, question.text, question.timeLimitSec, question.points, question.explanation),
+      ...optionStatements(db, qid, { ...question, options: question.options.map((o) => ({ ...o, imageMediaId: null })) }),
+    );
+  });
+  await db.batch(stmts);
+}
+
 export async function mediaExists(db: D1Database, ids: (string | null | undefined)[]): Promise<boolean> {
   const wanted = [...new Set(ids.filter((x): x is string => !!x))];
   if (wanted.length === 0) return true;

@@ -218,3 +218,5 @@ The wizard (**Update**) remains the fallback.
 ## 11. Uninstalling
 
 **Manage installation → Uninstall.** Type the service name to remove the app. To also delete **all quizzes and results forever**, additionally type the database name in the second box. If you leave it empty, the database is kept and a later install with the same names will find it again.
+
+**Importing quizzes from files (gart.json).** In the Quizzes tab, **Import quizzes from a file** accepts up to 5 files at once, one quiz per file; each becomes a draft that you review and activate. **Download template** gives you `gart-template.json` with comments written for an AI assistant: send it to the assistant and ask for a quiz on your topic in that format, then import the file it returns. If a file is refused, the page says which question and field is wrong. Images are not included in the files: add them in the editor afterwards.

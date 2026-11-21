@@ -1,11 +1,11 @@
-import { CreateQuizSchema, QUIZ_LIMITS, QuestionInputSchema, ReorderSchema, UpdateQuizSchema, playabilityProblems, roleAtLeast } from "@gart/shared";
+import { CreateQuizSchema, checkQuizFile, QUIZ_LIMITS, QuestionInputSchema, ReorderSchema, UpdateQuizSchema, playabilityProblems, roleAtLeast } from "@gart/shared";
 import { Hono } from "hono";
 import { requireAuth } from "../middleware/auth";
 import type { AppEnv } from "../middleware/context";
 import { writeAudit } from "../repositories/audit";
 import {
   appendQuestion, countQuestions, countQuizzes, deleteQuestion, deleteQuiz, duplicateQuiz, getQuiz, getQuizRow, getTemplateSettings,
-  getTemplates, insertQuiz, listQuizzes, mediaExists, normalizeSettings, reorderQuestions, replaceQuestion, updateQuiz,
+  getTemplates, importQuiz, insertQuiz, listQuizzes, mediaExists, normalizeSettings, reorderQuestions, replaceQuestion, updateQuiz,
 } from "../repositories/quizzes";
 import { randomId } from "../security/tokens";
 import { readJson } from "./util";
@@ -35,6 +35,24 @@ quizRoutes.post("/", async (c) => {
   await insertQuiz(c.env.DB, { id, title: body.data.title, description: body.data.description, templateId: body.data.templateId, settings, createdBy: actor.adminId, language: "uk" });
   await writeAudit(c.env.DB, { adminId: actor.adminId, action: "quiz.created", entity: "quiz", entityId: id });
   return c.json({ quiz: await getQuiz(c.env.DB, id) }, 201);
+});
+
+/** Imports one quiz from a gart.json document. The quiz is created as a draft so nothing goes live by accident. */
+quizRoutes.post("/import", async (c) => {
+  const actor = c.get("auth");
+  let raw: unknown;
+  try { raw = await c.req.json(); } catch { return c.json({ error: "invalid_json" }, 400); }
+  const checked = checkQuizFile(raw);
+  if (!checked.ok) return c.json({ error: "invalid_quiz_file", problems: checked.problems }, 400);
+  const f = checked.file;
+  if ((await countQuizzes(c.env.DB)) >= QUIZ_LIMITS.quizzesTotal) return c.json({ error: "limit_reached" }, 409);
+  const settings = normalizeSettings(f.settings);
+  if (!settings) return c.json({ error: "invalid_quiz_file", problems: [{ path: "settings", message: "invalid_settings" }] }, 400);
+
+  const id = randomId();
+  await importQuiz(c.env.DB, { id, createdBy: actor.adminId, ...f.quiz, settings, questions: f.questions });
+  await writeAudit(c.env.DB, { adminId: actor.adminId, action: "quiz.imported", entity: "quiz", entityId: id, meta: { questions: f.questions.length } });
+  return c.json({ quiz: { id, title: f.quiz.title, questionCount: f.questions.length } }, 201);
 });
 
 quizRoutes.get("/:id", async (c) => {
