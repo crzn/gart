@@ -92,6 +92,8 @@ Sign in at your app address → **Administration**.
 
 **Pictures.** Choose a file (PNG, JPEG, WebP or GIF). The browser shrinks and compresses it automatically before uploading (limit 200 KB per picture after compression; total storage 150 MB). Identical pictures are stored once.
 
+**Menu.** At the top: **Quizzes, Games, Settings, My account**. **Settings** (owner and administrators) holds System status, Updates (owner only), Administrators, Usage and Branding. An editor sees only Quizzes, Games and My account. In the header every role sees **"Gart sound: on/off"** and can switch it.
+
 **Branding tab** (administrators and owners). Company name, logo and its position, four colours, background image and welcome and final messages. A preview is shown on the right, and a warning appears when the contrast with white text is too low. Branding applies immediately to the whole app.
 
 *Live games, the host screen and import/export arrive in later phases.*

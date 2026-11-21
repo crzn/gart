@@ -124,7 +124,7 @@ try {
   await page.waitForTimeout(500);
   check("quiz can be deleted", (await page.locator("ul li").count()) === 1);
 
-  await page.click("text=Брендування");
+  await page.getByRole("tab", { name: "Налаштування" }).click(); await page.getByRole("tab", { name: "Брендування" }).click();
   await page.fill("#bn", "Acme Corp");
   await page.fill("#bw", "Привіт, команда!");
   await page.evaluate(() => { const el = document.querySelector("#c-primaryColor"); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set; set.call(el, "#d90429"); el.dispatchEvent(new Event("input", { bubbles: true })); });

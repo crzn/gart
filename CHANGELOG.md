@@ -2,6 +2,15 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.11.0] - 2026-11-21: Settings menu and roles
+
+### Changed
+- New top menu: **Quizzes, Games, Settings, My account**. **Settings** holds System status, Updates (owner only), Administrators, Usage and Branding.
+- Roles: the owner and administrators see Settings; an **editor** sees only Quizzes, Games and My account.
+
+### Added
+- A **Gart sound indicator** in the header, visible to every role: "Gart sound: on/off". Everyone, editors included, can switch it (new `PUT /api/branding/sound`). The projector's sound switch still appears only when Gart sound is on.
+
 ## [0.10.2] - 2026-11-21: clearer editor, brand on screens, no animations
 
 ### Changed

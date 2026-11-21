@@ -4,7 +4,7 @@ Self-hosted live quiz platform for a company, a school or a club, running entire
 
 **You only need a Cloudflare account and a browser.** Install it from the [install page](https://crzn.github.io/gart/) (no software on your computer), update it later from the admin panel. The interface is Ukrainian by default, English is included.
 
-**Status: 0.10.2. All planned phases are built, plus install from the browser (0.8.1), updates from the admin panel (0.8.2) and presentation polish for the host screen and projector (0.9.0): QR code to join, original music and sound effects, animation, and import of quizzes from gart.json files, made by an AI assistant (0.10.0).** A full game with 120 simulated players passes locally; it has not been run on real Cloudflare yet, and neither has the browser installer, so 120 concurrent players and the installer are not yet confirmed on the real service. See [CHANGELOG.md](CHANGELOG.md) for exactly what works today.
+**Status: 0.11.0. All planned phases are built, plus install from the browser (0.8.1), updates from the admin panel (0.8.2) and presentation polish for the host screen and projector (0.9.0): QR code to join, original music and sound effects, animation, and import of quizzes from gart.json files, made by an AI assistant (0.10.0).** A full game with 120 simulated players passes locally; it has not been run on real Cloudflare yet, and neither has the browser installer, so 120 concurrent players and the installer are not yet confirmed on the real service. See [CHANGELOG.md](CHANGELOG.md) for exactly what works today.
 
 ## What works in this build
 

@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { DEFAULT_BRANDING, type Branding } from "@gart/shared";
 import { api } from "./api";
 
-interface Ctx { branding: Branding; reload(): Promise<void> }
+interface Ctx { branding: Branding; reload(): Promise<void>; set(b: Branding): void }
 const BrandingCtx = createContext<Ctx | null>(null);
 
 function apply(b: Branding): void {
@@ -27,7 +27,8 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
     }
   }, []);
   useEffect(() => { void reload(); }, [reload]);
-  const value = useMemo(() => ({ branding, reload }), [branding, reload]);
+  const set = useCallback((b: Branding) => { setBranding(b); apply(b); }, []);
+  const value = useMemo(() => ({ branding, reload, set }), [branding, reload, set]);
   return <BrandingCtx.Provider value={value}>{children}</BrandingCtx.Provider>;
 }
 

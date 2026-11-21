@@ -54,7 +54,7 @@ try {
   await page.waitForSelector("[role=tablist]");
   check("session survives a reload", true);
 
-  await page.click("text=Адміністратори");
+  await page.getByRole("tab", { name: "Налаштування" }).click(); await page.getByRole("tab", { name: "Адміністратори" }).click();
   await page.waitForSelector("#n-email");
   let idleCalls = 0;
   const countCalls = (req) => { if (req.url().includes("/api/")) idleCalls++; };

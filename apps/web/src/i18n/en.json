@@ -573,5 +573,9 @@
   "q.ownTime": "own time: {n} s",
   "q.ownPoints": "own points: {n}",
   "q.overrides": "A question's own points replace the quiz base points.",
-  "imp.overrides": "Questions with their own points: {n} (they replace the quiz base points)"
+  "imp.overrides": "Questions with their own points: {n} (they replace the quiz base points)",
+  "tab.settings": "Settings",
+  "sound.gart": "Gart sound",
+  "sound.gartOn": "on",
+  "sound.gartOff": "off"
 }

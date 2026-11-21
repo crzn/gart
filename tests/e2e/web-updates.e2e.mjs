@@ -95,7 +95,7 @@ try {
   check("updates API needs a signed-in user", anon.status === 401);
   await page.fill("#email", "boss@example.com"); await page.fill("#password", "Correct-Horse-Battery-9"); await page.click("button[type=submit]"); await page.waitForURL("**/admin");
 
-  await page.click("[role=tab]:has-text('Оновлення')");
+  await page.getByRole('tab', { name: 'Налаштування' }).click(); await page.click("[role=tab]:has-text('Оновлення')");
   await page.waitForSelector("#upd-token");
   check("without a token the tab asks to connect", (await page.textContent("main, body")).includes("Підключення до Cloudflare"));
 
@@ -136,7 +136,7 @@ try {
   check("an unknown version is refused", r.status === 404);
 
   // destructive migration through the UI
-  await page.reload(); await page.click("[role=tab]:has-text('Оновлення')");
+  await page.reload(); await page.getByRole('tab', { name: 'Налаштування' }).click(); await page.click("[role=tab]:has-text('Оновлення')");
   await page.waitForSelector(`button:has-text('Оновити до ${V3}')`);
   await page.click(`button:has-text('Оновити до ${V3}')`);
   await page.waitForSelector("text=змінює або видаляє дані", { timeout: 30000 });

@@ -50,7 +50,7 @@ try {
   await p.click("button[type=submit]");
   await p.waitForSelector("[role=tablist]");
 
-  await p.getByRole("tab", { name: "Використання" }).click();
+  await p.getByRole("tab", { name: "Налаштування" }).click(); await p.getByRole("tab", { name: "Використання" }).click();
   await until(p, (t) => t.includes("Використання безкоштовного плану Cloudflare") && t.includes("Жоден ресурс сьогодні не досяг порогу"), "usage tab loads");
   const t0 = await text(p);
   check("the three kinds of numbers are explained", t0.includes("Розрахунок") && t0.includes("Виміряно застосунком") && t0.includes("Офіційно"));
@@ -101,6 +101,16 @@ try {
   await ed.click("button[type=submit]");
   await ed.waitForSelector("[role=tablist]");
   check("an editor does not see the Usage tab", (await ed.getByRole("tab", { name: "Використання" }).count()) === 0);
+  check("an editor has no Settings menu", (await ed.getByRole("tab", { name: "Налаштування" }).count()) === 0);
+  check("an editor still sees My account", (await ed.getByRole("tab", { name: "Мій акаунт" }).count()) === 1);
+  const ind = ed.getByTestId("gart-sound");
+  check("an editor sees whether Gart sound is on", (await ind.innerText()).includes("увімкнено"));
+  await ind.click();
+  await ed.waitForFunction(() => document.querySelector("[data-testid=gart-sound]")?.textContent?.includes("вимкнено"));
+  check("an editor can switch Gart sound off", true);
+  await ind.click();
+  await ed.waitForFunction(() => document.querySelector("[data-testid=gart-sound]")?.textContent?.includes("увімкнено"));
+  check("and on again", true);
   check("no uncaught page errors", errors.length === 0, errors.join(" | "));
 } catch (e) { bad++; console.log("  FAIL (exception)", e instanceof Error ? e.message : e); }
 finally {
