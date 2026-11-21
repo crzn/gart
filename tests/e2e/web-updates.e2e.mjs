@@ -15,6 +15,9 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const workerDir = join(root, "apps", "worker");
 const wr = join(root, "node_modules", "wrangler", "bin", "wrangler.js");
 const version = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
+// Versions newer than the one under test, so the test keeps working as the project moves on.
+const [vMaj, vMin, vPat] = version.split(".").map(Number);
+const V1 = `${vMaj}.${vMin}.${vPat + 1}`, V2 = `${vMaj}.${vMin}.${vPat + 2}`, V3 = `${vMaj}.${vMin}.${vPat + 3}`;
 const PORT = 8804, BASE = `http://127.0.0.1:${PORT}`;
 const env = { ...process.env, CI: "1", WRANGLER_SEND_METRICS: "false" };
 const { chromium } = createRequire(process.env.PLAYWRIGHT_ROOT ?? execFileSync("npm", ["root", "-g"]).toString().trim() + "/")("playwright");
@@ -35,11 +38,11 @@ async function variant(newVersion, edit = (m, blobs) => {}) {
   return { format: 1, manifestText, signature: await signManifestText(privateJwk, manifestText), blobs };
 }
 const packages = {
-  "0.8.3": await variant("0.8.3"),
-  "0.8.4": await variant("0.8.4", (m, blobs) => { const k = Object.keys(blobs).find((h) => h === m.worker.sha256); blobs[k] = bytesToBase64(new TextEncoder().encode("// changed after signing")); }),
-  "0.8.5": await variant("0.8.5", async (m, blobs) => { const sql = "SELECT 1;"; const h = await sha256Hex(sql); blobs[h] = bytesToBase64(new TextEncoder().encode(sql)); m.migrations.push({ name: "9999_drop_example.sql", sha256: h, destructive: true }); }),
+  [V1]: await variant(V1),
+  [V2]: await variant(V2, (m, blobs) => { const k = Object.keys(blobs).find((h) => h === m.worker.sha256); blobs[k] = bytesToBase64(new TextEncoder().encode("// changed after signing")); }),
+  [V3]: await variant(V3, async (m, blobs) => { const sql = "SELECT 1;"; const h = await sha256Hex(sql); blobs[h] = bytesToBase64(new TextEncoder().encode(sql)); m.migrations.push({ name: "9999_drop_example.sql", sha256: h, destructive: true }); }),
 };
-const releaseList = ["0.8.5", "0.8.4", "0.8.3", "0.8.2"].map((v) => ({ tag_name: `v${v}`, name: `Gart ${v}`, body: `Notes for ${v}\n- something new`, draft: false, prerelease: false, published_at: "2026-11-21T10:00:00Z", assets: [{ name: "gart-package.json" }] }));
+const releaseList = [V3, V2, V1, version].map((v) => ({ tag_name: `v${v}`, name: `Gart ${v}`, body: `Notes for ${v}\n- something new`, draft: false, prerelease: false, published_at: "2026-11-21T10:00:00Z", assets: [{ name: "gart-package.json" }] }));
 let apiDown = false;
 const ghHits = { api: 0, feed: 0 };
 const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -110,17 +113,17 @@ try {
 
   apiDown = true;
   await page.click("button:has-text('Перевірити оновлення')");
-  await page.waitForSelector("text=Доступна версія 0.8.5");
-  check("when the GitHub API refuses, the public releases feed is used", ghHits.api === 1 && ghHits.feed === 1 && (await page.textContent("body")).includes("Notes for 0.8.5"));
+  await page.waitForSelector(`text=Доступна версія ${V3}`);
+  check("when the GitHub API refuses, the public releases feed is used", ghHits.api === 1 && ghHits.feed === 1 && (await page.textContent("body")).includes(`Notes for ${V3}`));
   apiDown = false;
   await page.click("button:has-text('Перевірити оновлення')");
-  await page.waitForFunction(() => document.body.textContent.includes("Notes for 0.8.5"));
+  await page.waitForFunction((n) => document.body.textContent.includes(n), `Notes for ${V3}`);
   await sleep(300);
   check("the API is used when it works", ghHits.api === 2 && ghHits.feed === 1, JSON.stringify(ghHits));
-  check("the latest release and its notes are shown", (await page.textContent("body")).includes("Notes for 0.8.5") && (await page.textContent("body")).includes("something new"));
+  check("the latest release and its notes are shown", (await page.textContent("body")).includes(`Notes for ${V3}`) && (await page.textContent("body")).includes("something new"));
 
   // tampered package
-  let r = await call("/api/updates/start", "POST", { version: "0.8.4" });
+  let r = await call("/api/updates/start", "POST", { version: V2 });
   check("starting an update answers at once", r.status === 200 && r.body.run?.phase === "running");
   for (let i = 0; i < 60 && (await call("/api/updates")).body.run?.phase === "running"; i++) await sleep(500);
   let st = (await call("/api/updates")).body;
@@ -134,13 +137,13 @@ try {
 
   // destructive migration through the UI
   await page.reload(); await page.click("[role=tab]:has-text('Оновлення')");
-  await page.waitForSelector("button:has-text('Оновити до 0.8.5')");
-  await page.click("button:has-text('Оновити до 0.8.5')");
+  await page.waitForSelector(`button:has-text('Оновити до ${V3}')`);
+  await page.click(`button:has-text('Оновити до ${V3}')`);
   await page.waitForSelector("text=змінює або видаляє дані", { timeout: 30000 });
   check("a migration that removes data needs confirmation", (await page.textContent("body")).includes("9999_drop_example.sql"));
   check("nothing was deployed before the confirmation", fake.state.log.filter((l) => l.startsWith("PUT /accounts/acc1/workers/scripts/gart")).length === putsBefore);
   await page.click("button:has-text('Розумію, оновити')");
-  await page.waitForSelector("text=Готово: встановлено версію 0.8.5", { timeout: 40000 });
+  await page.waitForSelector(`text=Готово: встановлено версію ${V3}`, { timeout: 40000 });
   check("the update finished and the recovery point is shown", (await page.textContent("body")).includes("D1 Time Travel"));
   const w = fake.state.workers.get("gart");
   check("the Worker was re-uploaded keeping secrets", fake.state.log.filter((l) => l.startsWith("PUT /accounts/acc1/workers/scripts/gart")).length === putsBefore + 1 && w.secretNames.includes("SESSION_SECRET") && w.metadata.keep_bindings.includes("secret_text"));
@@ -156,7 +159,7 @@ try {
 
   r = await call("/api/updates/connection", "DELETE");
   check("the token can be deleted", r.status === 200 && r.body.connection === null);
-  r = await call("/api/updates/start", "POST", { version: "0.8.3" });
+  r = await call("/api/updates/start", "POST", { version: V1 });
   check("without a token nothing can be started", r.status === 409);
   check("no uncaught page errors", errors.length === 0, errors.join("; "));
 } finally {

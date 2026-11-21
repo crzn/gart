@@ -3,18 +3,27 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { isValidPin, PIN_LENGTH } from "@gart/shared";
 import { useLang } from "../i18n";
+import { pinExists } from "../game/usePinCheck";
 
 export function JoinPage() {
   const { t } = useLang();
   const navigate = useNavigate();
   const [pin, setPin] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [missing, setMissing] = useState(false);
+  const [checking, setChecking] = useState(false);
   const valid = isValidPin(pin);
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitted(true);
-    if (isValidPin(pin)) navigate(`/play/${pin}`);
+    if (!isValidPin(pin)) return;
+    // A code that matches no game is refused here, so nobody lands on a game screen that does not exist.
+    setChecking(true);
+    const found = await pinExists(pin);
+    setChecking(false);
+    if (found === "missing") return setMissing(true);
+    navigate(`/play/${pin}`);
   }
 
   return (
@@ -38,6 +47,7 @@ export function JoinPage() {
               value={pin}
               onChange={(e) => {
                 setSubmitted(false);
+                setMissing(false);
                 setPin(e.target.value.replace(/\D/g, "").slice(0, PIN_LENGTH));
               }}
               placeholder="000000"
@@ -48,6 +58,11 @@ export function JoinPage() {
             <p id="pin-hint" className="mt-2 text-xs text-ink-muted">
               {t("join.pinHint")}
             </p>
+            {missing && (
+              <p role="alert" className="mt-2 text-sm text-red-300">
+                {t("join.notFound")}
+              </p>
+            )}
             {submitted && !valid && (
               <p role="alert" className="mt-2 text-sm text-red-300">
                 {t("join.invalidPin")}
@@ -57,7 +72,8 @@ export function JoinPage() {
 
           <button
             type="submit"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 transition hover:brightness-110 active:scale-[0.99]"
+            disabled={checking}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-4 text-base font-semibold text-white shadow-lg shadow-brand/30 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-70"
           >
             {t("join.submit")}
             <ArrowRight className="size-5" aria-hidden />

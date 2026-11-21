@@ -16,7 +16,7 @@ Goal: installing Gart is a short guided process that needs only a Cloudflare acc
 - "Updates" tab: reads the latest public release, shows what is new, button for the owner runs the same deploy engine (in a Durable Object, 30 s CPU per step), with rollback to the previous version. Needs the same Cloudflare API token, stored encrypted.
 - Repository ready for publication: no installation-specific `wrangler.jsonc`, source-code link in the footer (AGPL), README for outsiders, CONTRIBUTING, vulnerability reporting.
 
-## 0.9.0: presentation polish (host screen and projector only)
+## 0.9.0: presentation polish (host screen and projector only) (built; the music awaits your listening and feedback)
 
 **Principle (decision D-026).** The host screen and the projector get sound and animation. Participant screens are remote controls: no sound, no animation beyond the plain state change, and the audio code is never downloaded on a participant's phone (separate lazy chunk).
 

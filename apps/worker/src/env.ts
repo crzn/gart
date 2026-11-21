@@ -24,4 +24,4 @@ export interface Env {
   RELEASE_CHECK_GAP_MS?: string;
 }
 
-export const APP_VERSION = "0.8.3";
+export const APP_VERSION = "0.9.0";

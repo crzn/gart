@@ -1,5 +1,5 @@
 import { Circle, Diamond, Square, Triangle, Check, X, ArrowUp, ArrowDown, Minus } from "lucide-react";
-import type { ReactNode } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import type { LeaderboardEntry, PublicOption, ResultsData } from "@gart/shared";
 import { mediaUrl } from "../image";
 
@@ -33,7 +33,7 @@ export function OptionLabel({ option, index, big = false }: { option: PublicOpti
   );
 }
 
-export function TimerBar({ left, total }: { left: number | null; total: number | null }) {
+export function TimerBar({ left, total, fx = false }: { left: number | null; total: number | null; fx?: boolean }) {
   if (left === null || !total) return null;
   const pct = Math.max(0, Math.min(100, (left / total) * 100));
   return (
@@ -41,7 +41,7 @@ export function TimerBar({ left, total }: { left: number | null; total: number |
       <div className="h-3 flex-1 overflow-hidden rounded-full bg-white/15">
         <div className={`h-full rounded-full ${left <= 5 ? "bg-red-500" : "bg-accent"}`} style={{ width: `${pct}%`, transition: "width 250ms linear" }} />
       </div>
-      <span className="w-10 text-right font-mono text-lg font-bold tabular-nums">{Math.ceil(left)}</span>
+      <span className={`w-10 text-right font-mono text-lg font-bold tabular-nums ${fx && left <= 5 ? "fx-pulse text-red-300" : ""}`}>{Math.ceil(left)}</span>
     </div>
   );
 }
@@ -52,9 +52,25 @@ export function Movement({ value }: { value: number }) {
   return <Minus className="size-3 text-ink-muted" aria-hidden />;
 }
 
-export function Board({ entries, meId, big = false }: { entries: LeaderboardEntry[]; meId?: string; big?: boolean }) {
+const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** `fx` (host screen and projector): rows slide from their previous place to the new one, so a rise or a fall is seen, not read. */
+export function Board({ entries, meId, big = false, fx = false }: { entries: LeaderboardEntry[]; meId?: string; big?: boolean; fx?: boolean }) {
+  const list = useRef<HTMLOListElement>(null);
+  useLayoutEffect(() => {
+    if (!fx || reducedMotion() || !list.current || typeof Element.prototype.animate !== "function") return;
+    const rows = [...list.current.children] as HTMLElement[];
+    rows.forEach((row, i) => {
+      const moved = entries[i]?.movement ?? 0;
+      const pitch = row.offsetHeight + 8; // row height plus the gap between rows
+      row.animate(
+        [{ transform: `translateY(${moved * pitch}px)`, opacity: moved === 0 ? 0 : 1 }, { transform: "none", opacity: 1 }],
+        { duration: 900, delay: i * 60, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)", fill: "backwards" },
+      );
+    });
+  }, [entries, fx]);
   return (
-    <ol className="space-y-2">
+    <ol ref={list} className="space-y-2">
       {entries.map((e) => (
         <li key={e.playerId} className={`flex items-center gap-3 rounded-2xl px-4 ${big ? "py-3 text-2xl" : "py-2"} ${e.playerId === meId ? "bg-brand/40 ring-2 ring-accent" : "bg-white/10"}`}>
           <span className="w-8 text-center font-bold tabular-nums">{e.rank}</span>
@@ -68,13 +84,15 @@ export function Board({ entries, meId, big = false }: { entries: LeaderboardEntr
   );
 }
 
-export function Podium({ top }: { top: LeaderboardEntry[] }) {
+/** `fx`: third place rises first, then second, then the winner. */
+export function Podium({ top, fx = false }: { top: LeaderboardEntry[]; fx?: boolean }) {
   const order = [top[1], top[0], top[2]];
   const heights = ["h-24", "h-36", "h-16"];
+  const delays = ["0.9s", "1.8s", "0s"]; // second, first, third place
   return (
     <div className="flex items-end justify-center gap-3" aria-hidden={top.length === 0}>
       {order.map((e, i) => e ? (
-        <div key={e.playerId} className="flex w-28 flex-col items-center gap-1 text-center sm:w-36">
+        <div key={e.playerId} className={`flex w-28 flex-col items-center gap-1 text-center sm:w-36 ${fx ? "fx-podium" : ""}`} style={fx ? { animationDelay: delays[i] ?? "0s" } : undefined}>
           <Avatar id={e.avatar} size="lg" />
           <p className="w-full truncate text-sm font-semibold">{e.nickname}</p>
           <p className="font-mono text-sm text-ink-muted">{e.points}</p>
@@ -86,7 +104,7 @@ export function Podium({ top }: { top: LeaderboardEntry[] }) {
 }
 
 /** Bars of how many players chose each option; the correct one is marked when the quiz shows it. */
-export function Distribution({ options, results, big = false }: { options: PublicOption[]; results: ResultsData; big?: boolean }) {
+export function Distribution({ options, results, big = false, fx = false }: { options: PublicOption[]; results: ResultsData; big?: boolean; fx?: boolean }) {
   const max = Math.max(1, ...Object.values(results.distribution));
   return (
     <ul className="space-y-3">
@@ -103,7 +121,7 @@ export function Distribution({ options, results, big = false }: { options: Publi
                 <span className="truncate font-medium">{o.text}</span>
                 {ok ? <Check className="size-5 shrink-0 text-emerald-300" aria-label="✓" /> : null}
               </div>
-              <div className="mt-1 h-4 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${ok ? "bg-emerald-400" : "bg-white/50"}`} style={{ width: `${(n / max) * 100}%` }} /></div>
+              <div className="mt-1 h-4 overflow-hidden rounded-full bg-white/10"><div className={`h-full rounded-full ${ok ? "bg-emerald-400" : "bg-white/50"} ${fx ? "fx-grow" : ""}`} style={{ width: `${(n / max) * 100}%`, ...(fx ? { animationDelay: `${i * 90}ms` } : {}) }} /></div>
             </div>
             <span className={`w-10 text-right font-mono font-bold tabular-nums ${big ? "text-3xl" : ""}`}>{n}</span>
           </li>

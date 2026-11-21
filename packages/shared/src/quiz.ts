@@ -96,6 +96,8 @@ export const BrandingSchema = z.object({
   backgroundMediaId: mediaId,
   welcomeMessage: z.string().trim().max(200),
   finalMessage: z.string().trim().max(200),
+  /** Gart-wide sound: the intro and the join sound on the host screen and the projector. */
+  soundEnabled: z.boolean().default(true),
 });
 export type Branding = z.infer<typeof BrandingSchema>;
 
@@ -110,6 +112,7 @@ export const DEFAULT_BRANDING: Branding = {
   backgroundMediaId: null,
   welcomeMessage: "",
   finalMessage: "",
+  soundEnabled: true,
 };
 
 /* ------------------------------ views ------------------------------ */

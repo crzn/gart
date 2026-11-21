@@ -8,6 +8,7 @@ import { useGameSocket } from "../game/useGameSocket";
 import { useLang, type MessageKey } from "../i18n";
 import { mediaUrl } from "../image";
 import { Button, Card, ErrorNote } from "../ui";
+import { usePinCheck } from "../game/usePinCheck";
 import { useNow } from "../game/useNow";
 
 const tokenKey = (pin: string) => `gart.player.${pin}`;
@@ -25,8 +26,10 @@ export function PlayPage() {
   const [avatar, setAvatar] = useState<string>(() => AVATAR_IDS[Math.floor(Math.random() * AVATAR_IDS.length)]!);
   const [joining, setJoining] = useState(false);
 
+  // A link or QR code for a game that does not exist is turned away at once, before any connection is opened.
+  const exists = usePinCheck(valid ? pin : null);
   const { state, dispatch, send } = useGameSocket({
-    pin: valid ? pin : null,
+    pin: valid && exists === "ok" ? pin : null,
     firstFrame: async () => {
       const token = readToken(pin);
       return token ? { t: "player.resume", d: { playerToken: token } } : null;
@@ -65,6 +68,8 @@ export function PlayPage() {
     send({ t: "answer.submit", d: { questionIdx: q.index, optionId } });
   }
 
+  if (valid && exists === "missing") return <Notice title={t("play.noGame")} body={t("play.noGameHint")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
+  if (valid && exists === "checking") return <p className="m-auto flex items-center gap-2 text-ink-muted"><Loader2 className="size-5 animate-spin" aria-hidden />{t("play.connecting")}</p>;
   if (!valid) return <Notice title={t("play.badPin")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
   if (state.kicked) return <Notice title={t("play.kicked")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;
   if (state.cancelled) return <Notice title={t("play.cancelled")} action={<Button onClick={() => navigate("/")}>{t("play.back")}</Button>} />;

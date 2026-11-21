@@ -62,6 +62,21 @@ body {
   }
 }
 
+/* Animation for the host screen and the projector only (classes are applied through the `fx` flag; participant phones never get them).
+   Transforms and opacity only, so they stay smooth on old projector laptops. "Reduce motion" is honoured by the rule above. */
+@keyframes fx-pop { from { opacity: 0; transform: scale(0.55); } to { opacity: 1; transform: none; } }
+@keyframes fx-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes fx-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fx-count { 0% { opacity: 0; transform: scale(1.7); } 35% { opacity: 1; } 100% { opacity: 1; transform: scale(1); } }
+@keyframes fx-podium { from { opacity: 0; transform: translateY(110%); } to { opacity: 1; transform: none; } }
+@keyframes fx-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+.fx-pop { animation: fx-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.fx-rise { animation: fx-rise 0.45s ease-out both; }
+.fx-grow { transform-origin: left center; animation: fx-grow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.fx-count { animation: fx-count 0.6s ease-out both; }
+.fx-podium { animation: fx-podium 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.08) both; }
+.fx-pulse { animation: fx-pulse 1s ease-in-out infinite; }
+
 /* Native form controls: dark scheme so dropdown lists, date pickers and scrollbars match the theme
    (browsers draw option lists themselves and ignore transparent backgrounds). */
 :root { color-scheme: dark; }

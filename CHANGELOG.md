@@ -2,6 +2,29 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.9.0] - 2026-11-21: presentation for the host screen and projector
+
+### Added
+- **QR code to join** in the lobby of the host screen and the projector. Drawn in the browser (library `qrcode-generator`, MIT, in its own chunk); the code opens `/play/<PIN>` on the same address.
+- **Sound** on the host screen and the projector, off until the "Enable sound" button is pressed (browsers require a click), with volume, a choice of music and a link to the listening page. Per-quiz setting "Music and sound effects" (on by default; nothing plays unless that screen enabled sound).
+- **Original music**, composed for Gart and synthesised in the browser with the Web Audio API (no audio files): three variants in the D "Ukrainian Dorian" scale: Sopilka (calm), Tsymbaly (light, dulcimer) and Hopak (dance). Moods: lobby, question, last five seconds (faster, with a tick). Effects: player joined, countdown tick, question start, time up, correct answer, leaderboard, fanfares.
+- **Listening page** `/listen`: all variants and moods, all effects, and a "save a sample (WAV)" button.
+- **Animation** on the host screen and the projector: players pop into the lobby, countdown numbers, options rise in, answer bars grow, leaderboard rows slide from their previous place, the podium rises third place first. CSS transforms and opacity only; "reduce motion" switches it off.
+- Projector lobby: QR code beside the PIN so it fits 1280x720 and 1920x1080 without scrolling (checked by a test).
+- **Join link on the host screen**: the address with the PIN (`/play/<PIN>`) with a Copy button, to paste into a messenger. The projector address is unchanged.
+- **Six-second intro jingle** (bandura, sopilka, brass, drums), synthesised like the music (`audio/jingle.ts`). It plays when the game screen opens in the lobby.
+- **Waiting theme** for the lobby (`audio/waiting.ts`): a monotone pulse on one note that builds bar by bar, and sounds fuller as players join.
+- **Gart sound setting** (Branding tab, "Gart sound": Yes/No). It alone controls the intro and the player-join sound; the per-quiz setting "Music and sound effects" controls the music and the other effects.
+
+### Fixed
+- A wrong 6-digit code on the Join page no longer opens a game screen: a public, rate-limited `GET /api/join/<PIN>` is checked first and the page says the game was not found. `/play/<wrong PIN>` shows the same notice at once.
+
+### Changed
+- The sound setting defaults to on for new quizzes, and the safe mode no longer switches it off (sound costs no Cloudflare quota).
+
+### Notes
+- Participants' phones get no sound and no animation, and never download the sound code or the QR library (checked by a test).
+
 ## [0.8.3] - 2026-11-21
 
 ### Fixed

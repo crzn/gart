@@ -13,6 +13,8 @@ export const LIMITS = {
   // A whole office can sit behind one address, so the WebSocket limit must allow a full room joining and reconnecting.
   wsConnectPerIp: { limit: 600, windowSec: 600 },
   gameCreatePerAdmin: { limit: 20, windowSec: 3600 },
+  // One check per player who types a code, plus one per opened link: a whole office behind one address must fit.
+  pinLookupPerIp: { limit: 600, windowSec: 600 },
   updatesPerAdmin: { limit: 30, windowSec: 3600 },
   updateConnectPerAdmin: { limit: 10, windowSec: 3600 },
 } as const satisfies Record<string, Limit>;
@@ -25,6 +27,7 @@ export const rlKey = {
   passwordChange: (adminId: string) => `pw:${adminId}`,
   wsConnectIp: (ip: string) => `ws:ip:${ip}`,
   gameCreate: (adminId: string) => `game:create:${adminId}`,
+  pinLookupIp: (ip: string) => `pin:ip:${ip}`,
   updates: (adminId: string) => `updates:${adminId}`,
   updateConnect: (adminId: string) => `updates:connect:${adminId}`,
 };

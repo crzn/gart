@@ -8,7 +8,7 @@ import { Button, Card, ErrorNote, Field } from "../../ui";
 import { ImageField } from "./ImageField";
 import { QuestionForm } from "./QuestionForm";
 
-const BOOL_SETTINGS = ["randomizeQuestions", "randomizeAnswers", "leaderboardEnabled", "timerEnabled", "showCorrectAnswer", "showExplanations", "showFinalLeaderboard", "allowLateJoin", "autoAdvance", "closeWhenAllAnswered"] as const;
+const BOOL_SETTINGS = ["randomizeQuestions", "randomizeAnswers", "leaderboardEnabled", "timerEnabled", "showCorrectAnswer", "showExplanations", "showFinalLeaderboard", "allowLateJoin", "autoAdvance", "closeWhenAllAnswered", "soundEnabled"] as const;
 const NUM_SETTINGS: { key: string; min: number; max: number }[] = [
   { key: "defaultTimeLimitSec", min: 5, max: 300 },
   { key: "basePoints", min: 0, max: 10000 },

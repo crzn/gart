@@ -92,6 +92,7 @@ Optional Turnstile; abuse tests and a load run against a real deployment.
 |---|---|
 | Someone gets the Cloudflare token kept for updates | Stored only inside the `Updater` Durable Object, encrypted with AES-GCM (key derived from the installation's `SESSION_SECRET`, fresh random IV). Never returned by any API. The owner can delete it at any time. A test scans the stored data for the plain token. |
 | A non-owner starts an update | Every updates route requires the **owner** role; sign-in, CSRF header and rate limits apply. Connecting, disconnecting and starting an update are written to the audit log. |
+| Someone guesses PINs | `GET /api/join/<PIN>` answers only "exists" or "not found" (no game data), is limited to 600 requests per 10 minutes per IP, and the PIN space is one million codes; joining still needs the game to be open. |
 | A tampered or fake release | Nothing is installed before the ECDSA signature and every file hash are verified with the public key built into the application. The version inside the signed manifest must equal the requested release. |
 | A release that removes data | Migrations are flagged when they contain `DROP`, `DELETE`, renames and the like; the update stops and asks for explicit confirmation. A D1 Time Travel recovery point is recorded and shown before migrations run. |
 | Rollback to a version that does not match the stored layout | Refused when the installed Durable Object migration tag is unknown to the older package. |

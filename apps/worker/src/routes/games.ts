@@ -69,7 +69,6 @@ gameRoutes.post("/", async (c) => {
   const snapshot = buildGameSnapshot(quiz);
   if (body.data.safeMode) {
     snapshot.settings.maxParticipants = Math.min(snapshot.settings.maxParticipants, SAFE_MODE_MAX_PLAYERS);
-    snapshot.settings.soundEnabled = false;
   }
   // Warn before the game starts; never refuse outright, and never switch anything paid on.
   const forecast = await forecastGame(c.env.DB, quiz.questions.length, snapshot.settings.maxParticipants);

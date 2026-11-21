@@ -62,6 +62,18 @@ export function BrandingTab() {
           <Field id="bw" label={t("brand.welcome")} maxLength={200} value={b.welcomeMessage} onChange={(e) => set({ welcomeMessage: e.target.value })} />
           <Field id="bf" label={t("brand.final")} maxLength={200} value={b.finalMessage} onChange={(e) => set({ finalMessage: e.target.value })} />
         </div>
+        <fieldset className="mt-5 rounded-2xl border border-surface-border p-4">
+          <legend className="px-2 text-sm font-medium">{t("brand.sound")}</legend>
+          <div className="flex gap-4" role="radiogroup">
+            {([true, false] as const).map((v) => (
+              <label key={String(v)} className="inline-flex items-center gap-2 text-sm">
+                <input type="radio" name="gart-sound" checked={b.soundEnabled === v} onChange={() => set({ soundEnabled: v })} />
+                {v ? t("brand.soundYes") : t("brand.soundNo")}
+              </label>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-ink-muted">{t("brand.soundHint")}</p>
+        </fieldset>
         {lowContrast ? <p role="note" className="mt-4 rounded-2xl bg-amber-500/15 p-3 text-sm text-amber-200">{t("brand.lowContrast")}</p> : null}
         {error ? <div className="mt-4"><ErrorNote>{error}</ErrorNote></div> : null}
         {saved ? <p role="status" className="mt-4 rounded-2xl bg-emerald-500/15 p-3 text-sm text-emerald-200">{t("quiz.saved")}</p> : null}

@@ -108,6 +108,8 @@ Sign in at your app address → **Administration**.
 
 Do not close the host tab needlessly, and do not open it in two places at once: the second tab replaces the first.
 
+**QR code, sound and animation (host screen and projector).** The lobby shows a **QR code**: participants point their phone camera at it and land on the join page with the PIN already filled in. Animation is automatic and follows your system's "reduce motion" setting. **Sound** starts switched off because browsers allow it only after a click: press **Enable sound** on the screen that is connected to the speakers (usually the projector tab; if you enable it on both the host tab and the projector on one computer you will hear everything twice). Volume and the choice of music (Sopilka, Tsymbaly, Hopak) are on the same panel; **Listen to the variants** opens `/listen`, where you can try every music variant and effect and save a sample. When the lobby opens you hear the six-second Gart intro, then a monotone waiting theme that builds as players join. The intro and the join sound are controlled only by **Branding → Gart sound (Yes/No)**; a quiz can switch the music and the other effects off in its own settings. The host screen also shows the join link with the PIN and a Copy button, to paste into a messenger. Participants' phones are always silent.
+
 ## 5b. The Usage tab
 
 For administrators and the owner. It shows how much of the free Cloudflare allowances was used today (the day is counted in UTC) and whether the next game fits.

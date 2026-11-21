@@ -1,4 +1,5 @@
 import { Languages, ShieldCheck, Users } from "lucide-react";
+import { Suspense, lazy } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useBranding } from "./branding";
 import { mediaUrl } from "./image";
@@ -12,6 +13,8 @@ import { HostPage, ScreenPage } from "./pages/HostPage";
 
 /** AGPL-3.0 section 13: everyone who uses the site over a network can get the source code it runs. */
 const SOURCE_URL = "https://github.com/crzn/gart";
+
+const ListenPage = lazy(() => import("./pages/ListenPage"));
 
 function navClass({ isActive }: { isActive: boolean }): string {
   return [
@@ -88,6 +91,7 @@ export function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/setup" element={<SetupPage />} />
+          <Route path="/listen" element={<Suspense fallback={null}><ListenPage /></Suspense>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

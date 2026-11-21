@@ -1,9 +1,11 @@
-import { ArrowRight, Flag, MonitorPlay, Pause, Play, Square, Trophy, XCircle } from "lucide-react";
+import { ArrowRight, Check, Copy, Flag, MonitorPlay, Pause, Play, Square, Trophy, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import { useAuth } from "../auth";
 import { errorKey } from "../errors";
+import { SoundControl } from "../audio/SoundControl";
+import { useHostAudio } from "../audio/useHostAudio";
 import { LiveView } from "../game/LiveView";
 import { useGameSocket } from "../game/useGameSocket";
 import { useLang, type MessageKey } from "../i18n";
@@ -30,12 +32,40 @@ function useControlledGame(id: string, role: "host" | "screen") {
   return { game, error, ...socket };
 }
 
+/** The address with the PIN already in it: copy it and send it in a messenger, nobody has to type the code. */
+function JoinLink({ pin }: { pin: string }) {
+  const { t } = useLang();
+  const [copied, setCopied] = useState(false);
+  const url = `${location.origin}/play/${pin}`;
+  async function copy() {
+    try { await navigator.clipboard.writeText(url); }
+    catch {
+      // Clipboard API unavailable (plain http, old browser): select the text so Ctrl+C works.
+      const el = document.getElementById("join-url");
+      if (el) { const r = document.createRange(); r.selectNodeContents(el); const sel = getSelection(); sel?.removeAllRanges(); sel?.addRange(r); }
+      return;
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 text-sm">
+      <span className="text-ink-muted">{t("host.joinLink")}</span>
+      <code id="join-url" className="select-all break-all rounded-lg bg-black/25 px-2 py-1 font-mono" data-testid="join-url">{url}</code>
+      <button type="button" onClick={() => void copy()} className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-1.5 font-medium hover:bg-white/20">
+        {copied ? <Check className="size-4 text-emerald-300" aria-hidden /> : <Copy className="size-4" aria-hidden />}{copied ? t("host.copied") : t("host.copyLink")}
+      </button>
+    </div>
+  );
+}
+
 export function HostPage() {
   const { t } = useLang();
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { state: auth } = useAuth();
   const { game, error, state, dispatch, send } = useControlledGame(id, "host");
+  const audio = useHostAudio(state, "host");
   const [confirmEnd, setConfirmEnd] = useState(false);
 
   if (auth.status === "anonymous") return <Navigate to="/login" replace state={{ from: `/host/${id}` }} />;
@@ -60,7 +90,9 @@ export function HostPage() {
         <p className="text-sm text-ink-muted">{game.title} · PIN {game.pin}{state.conn === "reconnecting" ? ` · ${t("play.reconnecting")}` : ""}</p>
         <a href={`/screen/${id}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20"><MonitorPlay className="size-4" aria-hidden />{t("host.projector")}</a>
       </div>
-      <Card><LiveView state={state} joinUrl={joinUrl} onKick={s === "LOBBY" ? kick : undefined} /></Card>
+      <JoinLink pin={game.pin} />
+      <SoundControl audio={audio} />
+      <Card><LiveView state={state} joinUrl={joinUrl} fx onKick={s === "LOBBY" ? kick : undefined} /></Card>
       {errText ? <ErrorNote>{errText}</ErrorNote> : null}
       {snap ? (
         <div className="flex flex-wrap items-center gap-3">
@@ -95,6 +127,7 @@ export function ScreenPage() {
   const { id = "" } = useParams();
   const { state: auth } = useAuth();
   const { game, error, state } = useControlledGame(id, "screen");
+  const audio = useHostAudio(state, "screen");
   if (auth.status === "anonymous" || (error instanceof ApiError && error.status === 401)) return <Navigate to="/login" replace state={{ from: `/screen/${id}` }} />;
   if (error) return <Notice title={t(errorKey(error))} />;
   if (!game) return <p className="m-auto text-sm text-ink-muted">{t("admin.loading")}</p>;
@@ -102,7 +135,8 @@ export function ScreenPage() {
   return (
     <section className="w-full" data-testid="screen">
       {state.snap && state.snap.state !== "LOBBY" ? <p className="mb-4 text-right text-xl text-ink-muted">{t("host.joinAt")} {location.host} · PIN <b className="font-mono text-ink">{game.pin}</b></p> : null}
-      <LiveView state={state} big joinUrl={location.host} />
+      <LiveView state={state} big fx joinUrl={location.host} />
+      <div className="fixed bottom-4 right-4 opacity-60 transition-opacity hover:opacity-100 focus-within:opacity-100"><SoundControl audio={audio} /></div>
     </section>
   );
 }

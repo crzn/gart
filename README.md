@@ -4,10 +4,11 @@ Self-hosted live quiz platform for a company, a school or a club, running entire
 
 **You only need a Cloudflare account and a browser.** Install it from the [install page](https://crzn.github.io/gart/) (no software on your computer), update it later from the admin panel. The interface is Ukrainian by default, English is included.
 
-**Status: 0.8.3. All 8 planned phases are built; install from the browser was added in 0.8.1 and updates from the admin panel in 0.8.2; presentation polish (QR code, sound, animation for the host screen and projector) is planned for 0.9.0, see [docs/ROADMAP.md](docs/ROADMAP.md).** A full game with 120 simulated players passes locally; it has not been run on real Cloudflare yet, and neither has the browser installer, so 120 concurrent players and the installer are not yet confirmed on the real service. See [CHANGELOG.md](CHANGELOG.md) for exactly what works today.
+**Status: 0.9.0. All planned phases are built, plus install from the browser (0.8.1), updates from the admin panel (0.8.2) and presentation polish for the host screen and projector (0.9.0): QR code to join, original music and sound effects, animation.** A full game with 120 simulated players passes locally; it has not been run on real Cloudflare yet, and neither has the browser installer, so 120 concurrent players and the installer are not yet confirmed on the real service. See [CHANGELOG.md](CHANGELOG.md) for exactly what works today.
 
 ## What works in this build
 
+- **Presentation (0.9.0), host screen and projector only:** QR code to join, original background music and effects made in the browser (three variants, listening page at `/listen`), animations (respecting "reduce motion"). Participants' phones stay silent and plain.
 - **Updates from the admin panel** (0.8.2): the owner sees new releases, what changed, and updates or goes back to an earlier release with a button; packages are signed and verified before anything is installed.
 - **Browser installer** (0.8.1) and a local wizard (Windows, macOS, Linux): sign in with Cloudflare OAuth, create/reuse the D1 database, apply migrations, generate secrets, build, deploy, health-check. Actions: Install, Update, Repair, Backup, Uninstall.
 - Cloudflare Worker (Hono) serving the web app via Workers Static Assets, with `/api/health`, a WebSocket/Durable Object round-trip check, and setup status.
@@ -19,7 +20,7 @@ Self-hosted live quiz platform for a company, a school or a club, running entire
 
 ## What is not built yet
 
-QR code for joining, sound and animation (0.9.0); quiz import/export; unused-image cleanup; Cloudflare Analytics API integration.
+quiz import/export; unused-image cleanup; Cloudflare Analytics API integration.
 
 ## Install
 

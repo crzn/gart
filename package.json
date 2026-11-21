@@ -1,6 +1,6 @@
 {
   "name": "gart",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "private": true,
   "license": "AGPL-3.0-only",
   "description": "Gart: self-hosted live quiz platform for Cloudflare Free plan",
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "blake3-wasm": "^2.1.5",
+    "jsqr": "^1.4.0",
     "typescript": "~5.9.3",
     "vitest": "^5.1.1"
   }

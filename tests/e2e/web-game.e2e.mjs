@@ -71,7 +71,7 @@ try {
   await until(screen, (t) => t.includes(pin), "projector shows the PIN");
   check("the projector has no site navigation", (await screen.locator("header").count()) === 0);
   
-  check("the projector shows no controls", (await screen.getByRole("button").count()) === 0);
+  check("the projector shows no controls except the sound switch", (await screen.locator("button:not([data-testid=sound-control] button)").count()) === 0);
 
   // Players on phone-sized screens, each in their own browser context.
   const names = ["Анна", "Богдан", "Віка"];

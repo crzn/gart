@@ -205,6 +205,13 @@ Admin panel (owner) ── /api/updates/* ──► Worker ──► Updater Dur
 - A migration flagged as destructive stops the run in the `confirm` phase until the owner acknowledges it. Rollback to a package whose Durable Object migration list does not contain the installed tag is refused.
 - Test: `tests/e2e/web-updates.e2e.mjs` (real Worker, fake Cloudflare and GitHub, real browser).
 
+## 7c. Presentation layer (0.9.0)
+
+- **Only host and projector.** `LiveView` takes an `fx` flag: QR code and animation classes appear only when it is set (host and projector pass it, phones never do). Sound lives in `apps/web/src/audio/`: `music.ts` (score, pure), `engine.ts` (Web Audio, dynamic import), `useHostAudio.ts` (small hook that follows the game state: lobby, countdown, question, closed, results, leaderboard, finished), `SoundControl.tsx`.
+- **Chunks:** `index` (main), `QrCode`, `engine`, `ListenPage`. A test asserts that a phone requests none of the last three.
+- **Autoplay rule:** the audio context is created inside the click on "Enable sound"; the choice of music and volume are remembered per browser and per screen type (`gart.sound.host`, `gart.sound.screen`), the "on" state never is.
+- **Quiz setting** `soundEnabled` (default on) decides whether a game offers sound at all.
+
 ## 8. Usage Monitor methodology
 
 Three clearly separated layers in the UI:
