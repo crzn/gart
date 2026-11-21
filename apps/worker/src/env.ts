@@ -21,6 +21,7 @@ export interface Env {
   RELEASE_DL_BASE?: string;
   CF_API_BASE?: string;
   RELEASE_PUBLIC_KEY?: string;
+  RELEASE_CHECK_GAP_MS?: string;
 }
 
-export const APP_VERSION = "0.8.2";
+export const APP_VERSION = "0.8.3";

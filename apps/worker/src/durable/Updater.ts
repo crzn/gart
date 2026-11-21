@@ -36,7 +36,7 @@ export interface UpdaterView {
   current: string;
   connection: { accountName: string; workerName: string; databaseName: string; connectedAt: number } | null;
   run: RunState | null;
-  releases: { checkedAt: number; list: ReleaseInfo[]; error?: string } | null;
+  releases: { checkedAt: number; list: ReleaseInfo[]; error?: string; detail?: string } | null;
 }
 type Fail = { ok: false; code: string };
 
@@ -56,7 +56,7 @@ export class Updater extends DurableObject<Env> {
         await this.ctx.storage.put("run", run);
       }
     }
-    const releases = (await this.ctx.storage.get<{ checkedAt: number; list: ReleaseInfo[]; error?: string }>("releases")) ?? null;
+    const releases = (await this.ctx.storage.get<{ checkedAt: number; list: ReleaseInfo[]; error?: string; detail?: string }>("releases")) ?? null;
     return {
       current: APP_VERSION,
       connection: conn ? { accountName: conn.accountName, workerName: conn.workerName, databaseName: conn.databaseName, connectedAt: conn.connectedAt } : null,
@@ -93,26 +93,25 @@ export class Updater extends DurableObject<Env> {
     await this.ctx.storage.delete("conn");
   }
 
-  /** Reads the public release list (cached: GitHub limits anonymous requests per address). */
+  /** Reads the public release list (cached: GitHub limits anonymous API requests per address, and Cloudflare's addresses are shared).
+   * The API is tried first; if it refuses, the public Atom feed of the releases page is used, which has no such limit. */
   async check(force: boolean): Promise<{ ok: true } | Fail> {
     const cached = await this.ctx.storage.get<{ checkedAt: number; list: ReleaseInfo[]; error?: string }>("releases");
     const age = cached ? Date.now() - cached.checkedAt : Infinity;
-    if (cached && !cached.error && (force ? age < CHECK_MIN_GAP_MS : age < CHECK_TTL_MS)) return { ok: true };
+    const gap = Number(this.env.RELEASE_CHECK_GAP_MS ?? CHECK_MIN_GAP_MS);
+    if (cached && !cached.error && (force ? age < gap : age < CHECK_TTL_MS)) return { ok: true };
     const cfg = releaseConfig(this.env);
-    try {
-      const res = await fetch(`${cfg.apiBase}/repos/${cfg.repo}/releases?per_page=20`, { headers: { Accept: "application/vnd.github+json", "User-Agent": "gart-updater" } });
-      if (!res.ok) throw new Error(`status ${res.status}`);
-      const raw = (await res.json()) as { tag_name?: string; name?: string; body?: string; draft?: boolean; prerelease?: boolean; published_at?: string; assets?: { name?: string }[] }[];
-      const list = raw
-        .filter((r) => !r.draft && !r.prerelease && VERSION_TAG.test(r.tag_name ?? "") && (r.assets ?? []).some((a) => a.name === "gart-package.json"))
-        .map((r) => ({ version: String(r.tag_name).slice(1), title: String(r.name ?? r.tag_name), notes: String(r.body ?? "").slice(0, 4000), publishedAt: String(r.published_at ?? "") }))
-        .sort((a, b) => compareVersions(b.version, a.version));
+    const failures: string[] = [];
+    let list: ReleaseInfo[] | null = null;
+    try { list = await readReleasesApi(cfg.apiBase, cfg.repo); } catch (e) { failures.push(`api: ${(e as Error).message}`); }
+    if (!list) { try { list = await readReleasesFeed(cfg.dlBase, cfg.repo); } catch (e) { failures.push(`feed: ${(e as Error).message}`); } }
+    if (list) {
+      list.sort((a, b) => compareVersions(b.version, a.version));
       await this.ctx.storage.put("releases", { checkedAt: Date.now(), list });
       return { ok: true };
-    } catch {
-      await this.ctx.storage.put("releases", { checkedAt: Date.now(), list: cached?.list ?? [], error: "github_unavailable" });
-      return { ok: false, code: "github_unavailable" };
     }
+    await this.ctx.storage.put("releases", { checkedAt: Date.now(), list: cached?.list ?? [], error: "github_unavailable", detail: failures.join("; ").slice(0, 300) });
+    return { ok: false, code: "github_unavailable" };
   }
 
   async start(version: string, acknowledge: boolean): Promise<{ ok: true } | Fail> {
@@ -199,4 +198,34 @@ function cloudflareFailure(e: unknown): Failure {
   if (e instanceof CloudflareError && (e.status === 401 || e.status === 403)) return new Failure("token_rejected", "Cloudflare did not accept the stored token. Create a new one and connect again.");
   const message = e instanceof Error ? e.message : "Unknown error";
   return new Failure("deploy_failed", message.slice(0, 500));
+}
+
+const UA = { "User-Agent": "gart-updater" };
+
+async function readReleasesApi(apiBase: string, repo: string): Promise<ReleaseInfo[]> {
+  const res = await fetch(`${apiBase}/repos/${repo}/releases?per_page=20`, { headers: { Accept: "application/vnd.github+json", ...UA } });
+  if (!res.ok) throw new Error(`status ${res.status}`);
+  const raw = (await res.json()) as { tag_name?: string; name?: string; body?: string; draft?: boolean; prerelease?: boolean; published_at?: string; assets?: { name?: string }[] }[];
+  return raw
+    .filter((r) => !r.draft && !r.prerelease && VERSION_TAG.test(r.tag_name ?? "") && (r.assets ?? []).some((a) => a.name === "gart-package.json"))
+    .map((r) => ({ version: String(r.tag_name).slice(1), title: String(r.name ?? r.tag_name), notes: String(r.body ?? "").slice(0, 4000), publishedAt: String(r.published_at ?? "") }));
+}
+
+const decodeEntities = (t: string) => t.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&amp;/g, "&");
+
+/** The Atom feed has no asset list; a release without a package simply fails at download with a clear message. */
+async function readReleasesFeed(base: string, repo: string): Promise<ReleaseInfo[]> {
+  const res = await fetch(`${base}/${repo}/releases.atom`, { headers: UA });
+  if (!res.ok) throw new Error(`status ${res.status}`);
+  const xml = await res.text();
+  const out: ReleaseInfo[] = [];
+  for (const entry of xml.split("<entry>").slice(1)) {
+    const tag = /releases\/tag\/([^"<\s]+)/.exec(entry)?.[1];
+    if (!tag || !VERSION_TAG.test(tag)) continue;
+    const title = decodeEntities(/<title>([\s\S]*?)<\/title>/.exec(entry)?.[1] ?? tag);
+    const html = decodeEntities(/<content[^>]*>([\s\S]*?)<\/content>/.exec(entry)?.[1] ?? "");
+    const notes = decodeEntities(html.replace(/<(br|\/p|\/li|\/h\d)\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "")).replace(/\n{3,}/g, "\n\n").trim().slice(0, 4000);
+    out.push({ version: tag.slice(1), title, notes, publishedAt: /<updated>([^<]*)<\/updated>/.exec(entry)?.[1] ?? "" });
+  }
+  return out;
 }

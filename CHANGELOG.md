@@ -2,6 +2,11 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.8.3] - 2026-11-21
+
+### Fixed
+- The Updates tab could not read the release list on a real installation: GitHub limits anonymous API requests per address and Cloudflare's addresses are shared. The check now falls back to the public releases feed (no such limit), and when both fail the tab shows the reason.
+
 ## [0.8.2] - 2026-11-21
 
 ### Added

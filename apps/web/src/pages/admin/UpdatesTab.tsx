@@ -14,7 +14,7 @@ interface View {
   current: string;
   connection: { accountName: string; workerName: string; databaseName: string } | null;
   run: Run | null;
-  releases: { checkedAt: number; list: Release[]; error?: string } | null;
+  releases: { checkedAt: number; list: Release[]; error?: string; detail?: string } | null;
 }
 
 /** The first version that carries the updater itself: earlier ones cannot be restored from here. */
@@ -96,7 +96,7 @@ export function UpdatesTab() {
               </div>
             </div>
             {view.releases ? <p className="mt-2 text-xs text-ink-muted">{fill("upd.checkedAt", { time: new Date(view.releases.checkedAt).toLocaleString(lang === "uk" ? "uk-UA" : "en-GB") })}</p> : null}
-            {view.releases?.error ? <div className="mt-3"><ErrorNote>{t(errorKey(new ApiError(502, view.releases.error)))}</ErrorNote></div> : null}
+            {view.releases?.error ? <div className="mt-3"><ErrorNote>{t(errorKey(new ApiError(502, view.releases.error)))}</ErrorNote>{view.releases.detail ? <p className="mt-1 break-all text-xs text-ink-muted">{view.releases.detail}</p> : null}</div> : null}
           </Card>
 
           {run ? (

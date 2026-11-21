@@ -40,9 +40,16 @@ const packages = {
   "0.8.5": await variant("0.8.5", async (m, blobs) => { const sql = "SELECT 1;"; const h = await sha256Hex(sql); blobs[h] = bytesToBase64(new TextEncoder().encode(sql)); m.migrations.push({ name: "9999_drop_example.sql", sha256: h, destructive: true }); }),
 };
 const releaseList = ["0.8.5", "0.8.4", "0.8.3", "0.8.2"].map((v) => ({ tag_name: `v${v}`, name: `Gart ${v}`, body: `Notes for ${v}\n- something new`, draft: false, prerelease: false, published_at: "2026-11-21T10:00:00Z", assets: [{ name: "gart-package.json" }] }));
+let apiDown = false;
+const ghHits = { api: 0, feed: 0 };
+const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const feed = () => `<?xml version="1.0"?><feed>${releaseList.map((r) => `<entry><id>tag:github.com,2008:Repository/1/${r.tag_name}</id><link rel="alternate" type="text/html" href="https://github.com/crzn/gart/releases/tag/${r.tag_name}"/><title>${esc(r.name)}</title><updated>${r.published_at}</updated><content type="html">${esc(`<p>Notes for ${r.tag_name.slice(1)}</p><ul><li>something new</li></ul>`)}</content></entry>`).join("")}</feed>`;
 const github = createServer((req, res) => {
   const url = req.url ?? "";
-  if (url.startsWith("/repos/crzn/gart/releases")) { res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(releaseList)); }
+  if (url === "/crzn/gart/releases.atom") { ghHits.feed++; res.writeHead(200, { "content-type": "application/atom+xml" }); return res.end(feed()); }
+  if (url.startsWith("/repos/crzn/gart/releases")) {
+    ghHits.api++;
+    if (apiDown) { res.writeHead(403); return res.end("rate limit exceeded"); } res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(releaseList)); }
   const m = url.match(/^\/crzn\/gart\/releases\/download\/v([\d.]+)\/gart-package\.json$/);
   const pkg = m && (packages[m[1]] ?? (m[1] === version ? base : null));
   if (!pkg) { res.writeHead(404); return res.end(); }
@@ -61,7 +68,7 @@ const installedWorkersDev = fake.state.workers.get("gart").workersDev;
 copyFileSync(join(workerDir, ".dev.vars.example"), join(workerDir, ".dev.vars"));
 rmSync(join(workerDir, ".wrangler", "state"), { recursive: true, force: true, maxRetries: 8, retryDelay: 400 });
 execFileSync(process.execPath, [wr, "d1", "migrations", "apply", "DB", "--local", "-c", "wrangler.dev.jsonc"], { cwd: workerDir, env, stdio: "ignore" });
-const vars = [`RELEASE_API_BASE:${ghUrl}`, `RELEASE_DL_BASE:${ghUrl}`, `CF_API_BASE:${fake.url}`, `RELEASE_PUBLIC_KEY:${JSON.stringify(publicJwk)}`].flatMap((v) => ["--var", v]);
+const vars = [`RELEASE_API_BASE:${ghUrl}`, `RELEASE_DL_BASE:${ghUrl}`, `CF_API_BASE:${fake.url}`, `RELEASE_PUBLIC_KEY:${JSON.stringify(publicJwk)}`, "RELEASE_CHECK_GAP_MS:0"].flatMap((v) => ["--var", v]);
 const server = spawn(process.execPath, [wr, "dev", "-c", "wrangler.dev.jsonc", "--port", String(PORT), ...vars], { cwd: workerDir, env, stdio: "ignore", detached: true });
 const browser = await chromium.launch();
 const TOKEN = "local-dev-setup-token-0123456789";
@@ -101,9 +108,16 @@ try {
   const view = await call("/api/updates");
   check("the API never returns the token", !JSON.stringify(view.body).includes(SECRET_TOKEN));
 
+  apiDown = true;
   await page.click("button:has-text('Перевірити оновлення')");
   await page.waitForSelector("text=Доступна версія 0.8.5");
-  check("the latest release and its notes are shown", (await page.textContent("body")).includes("Notes for 0.8.5"));
+  check("when the GitHub API refuses, the public releases feed is used", ghHits.api === 1 && ghHits.feed === 1 && (await page.textContent("body")).includes("Notes for 0.8.5"));
+  apiDown = false;
+  await page.click("button:has-text('Перевірити оновлення')");
+  await page.waitForFunction(() => document.body.textContent.includes("Notes for 0.8.5"));
+  await sleep(300);
+  check("the API is used when it works", ghHits.api === 2 && ghHits.feed === 1, JSON.stringify(ghHits));
+  check("the latest release and its notes are shown", (await page.textContent("body")).includes("Notes for 0.8.5") && (await page.textContent("body")).includes("something new"));
 
   // tampered package
   let r = await call("/api/updates/start", "POST", { version: "0.8.4" });
