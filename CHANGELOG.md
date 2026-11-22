@@ -2,6 +2,17 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.13.0] - 2026-11-22: new Гарт logo and look
+
+### Changed
+- **New logo**: three rising chevrons and the ГАРТ wordmark. It replaces the icon, the name and the slogan in the site header, the admin header, the projector and the player's waiting screen. The wordmark is drawn as outlines, so no web font is loaded.
+- **New favicon** (lime square with chevrons), also on the install page and in the installers.
+- **Default colours** are now lime on near-black (`#d7ff3a`, `#8fb300`, `#0b0b0c`, `#f4f4f0`). Text on buttons switches between black and white depending on the main colour. This applies to new installations; existing sites keep the colours they saved (change them in **Settings → Branding**).
+- **Branding**: a custom logo and the company name stay as options. An uploaded logo replaces the default one; the company name is shown next to it.
+
+### Removed
+- **Slogan** setting and the slogan on screens. A slogan saved earlier is ignored.
+
 ## [0.12.1] - 2026-11-22: privacy and hardening (from the security scan)
 
 ### Added
