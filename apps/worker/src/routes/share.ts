@@ -38,7 +38,7 @@ shareRoutes.get("/:pin", async (c) => {
   const origin = new URL(c.req.url).origin;
   const imageId = snap.coverImageId || branding.logoMediaId;
   const title = clip(game.quiz_title, 90);
-  const description = clip(snap.description?.trim() || branding.tagline || "", 200);
+  const description = clip(snap.description?.trim() || `Приєднуйтесь до гри: PIN ${pin}`, 200);
   const tags = [
     ["og:type", "website"],
     ["og:site_name", branding.companyName || "Gart"],

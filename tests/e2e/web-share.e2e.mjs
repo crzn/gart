@@ -65,7 +65,7 @@ try {
   const q0 = await mk("Без відліку", { countdownBeforeQuestionSec: 0, autoAdvance: true });
   const g3 = (await call("POST", "/api/games", { quizId: q0.id })).json.game;
   const h2 = await (await fetch(`${BASE}/play/${g3.pin}`)).text();
-  check("without a cover and description the slogan and a small card are used", h2.includes("Знай. Дій. Перемагай!") && h2.includes('content="summary"') && !h2.includes("og:image"), h2.slice(h2.indexOf("og:type"), h2.indexOf("og:type") + 500));
+  check("without a cover and description the PIN line and a small card are used", h2.includes("Приєднуйтесь до гри: PIN") && h2.includes('content="summary"') && !h2.includes("og:image"), h2.slice(h2.indexOf("og:type"), h2.indexOf("og:type") + 500));
   const ticket = (await call("POST", `/api/games/${g3.id}/ticket`, { role: "host" })).json.ticket;
   const log = [];
   const hostWs = new WebSocket(`${WS}/ws/${g3.pin}`);
