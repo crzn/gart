@@ -18,6 +18,6 @@ INSERT INTO quiz_templates (id, name, description, is_system, settings_json) VAL
 INSERT INTO application_settings (key, value_json) VALUES
   ('setup_completed', 'false'),
   ('locale', '{"default":"uk"}'),
-  ('branding', '{"companyName":"","primaryColor":"#4f46e5","secondaryColor":"#0ea5e9","backgroundColor":"#0f172a","accentColor":"#f59e0b","logoPlacement":"top-left","logoMediaId":null,"backgroundMediaId":null,"welcomeMessage":"","finalMessage":""}'),
+  ('branding', '{"companyName":"","primaryColor":"#d7ff3a","secondaryColor":"#8fb300","backgroundColor":"#0b0b0c","accentColor":"#f4f4f0","logoPlacement":"top-left","logoMediaId":null,"backgroundMediaId":null,"welcomeMessage":"","finalMessage":""}'),
   ('retention', '{"participantDataDays":90,"gameResultsDays":365,"auditLogDays":365}'),
   ('usage_config', '{"safeMode":false,"thresholds":{"info":50,"warning":75,"critical":90,"reached":100}}');

@@ -1,6 +1,5 @@
 {
   "app.name": "Gart",
-  "app.tagline": "Live quizzes for your team",
   "nav.join": "Join",
   "nav.admin": "Administration",
   "lang.label": "Language",
@@ -172,7 +171,6 @@
   "brand.logo": "Logo",
   "brand.backgroundImage": "Background image",
   "brand.welcome": "Welcome message",
-  "brand.tagline": "Slogan",
   "brand.final": "End-of-game message",
   "brand.lowContrast": "The background or main colour has weak contrast with the text. It may be hard to read on screens.",
   "brand.reset": "Reset colours",

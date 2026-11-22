@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Circle, Diamond, Square, Triangle, Check, X, ArrowUp, ArrowDown, Minus } from "lucide-react";
 import type { LeaderboardEntry, PublicOption, ResultsData } from "@gart/shared";
 import { mediaUrl } from "../image";
-import { useBranding } from "../branding";
+import { BrandLogo } from "../Logo";
 
 const EMOJI: Record<string, string> = {
   fox: "🦊", owl: "🦉", bear: "🐻", wolf: "🐺", lynx: "🐱", otter: "🦦", panda: "🐼", koala: "🐨",
@@ -138,19 +138,11 @@ export function QuizIntro({ cover, description, big = false, compact = false }: 
   );
 }
 
-/** The company's logo, name and slogan: a header on the projector and a signature on the player's waiting screen. */
+/** The logo: a header on the projector and a signature on the player's waiting screen. */
 export function BrandBar({ big = false }: { big?: boolean }) {
-  const { branding: b } = useBranding();
-  if (!b.logoMediaId && !b.companyName && !b.tagline) return null;
   return (
-    <div className={`flex items-center justify-center gap-4 ${big ? "" : "flex-col text-center"}`} data-testid="brand-bar">
-      {b.logoMediaId ? <img src={mediaUrl(b.logoMediaId)} alt="" className={`${big ? "h-[7vmin]" : "h-12"} w-auto max-w-[40%] object-contain`} /> : null}
-      {b.companyName || b.tagline ? (
-        <div className={big ? "text-left" : ""}>
-          {b.companyName ? <p className={`font-bold leading-tight ${big ? "text-[3.4vmin]" : "text-lg"}`}>{b.companyName}</p> : null}
-          {b.tagline ? <p className={`text-ink-muted ${big ? "text-[2.4vmin]" : "text-sm"}`}>{b.tagline}</p> : null}
-        </div>
-      ) : null}
+    <div className="flex items-center justify-center" data-testid="brand-bar">
+      <BrandLogo big={big} />
     </div>
   );
 }

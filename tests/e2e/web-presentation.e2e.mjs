@@ -160,8 +160,8 @@ try {
   await until(phone, (t) => t.includes("Ви в грі"), "joined");
   await until(screen, (t) => t.includes("Анна"), "projector lists the player");
   check("a joining player appears on the projector without animation", (await screen.locator("li").count()) >= 1 && (await screen.evaluate(() => document.getAnimations().length)) === 0);
-  check("the projector shows the default slogan", (await screen.getByText("Знай. Дій. Перемагай!").count()) >= 1);
-  check("the player waiting screen shows the slogan", (await phone.getByText("Знай. Дій. Перемагай!").count()) >= 1);
+  check("the projector shows the Гарт logo, not a slogan", (await screen.getByTestId("brand-bar").getByRole("img", { name: "Гарт" }).count()) === 1 && (await screen.getByText("Знай. Дій. Перемагай!").count()) === 0);
+  check("the player waiting screen shows the Гарт logo", (await phone.getByTestId("brand-bar").getByRole("img", { name: "Гарт" }).count()) === 1);
   check("the phone has no animations", (await phone.evaluate(() => document.getAnimations().length)) === 0);
   check("the phone never downloaded the sound engine or the QR library", !phoneRequests.some((u) => /engine-|QrCode-|ListenPage-/.test(u)), phoneRequests.filter((u) => /assets/.test(u)).join(", "));
   check("the phone has no sound switch", (await phone.getByText("Увімкнути звук").count()) === 0);

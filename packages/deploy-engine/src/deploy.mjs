@@ -140,7 +140,7 @@ export async function deploy(o) {
   }
 
   if (mode === "install" && (o.companyName || o.primaryColor)) {
-    await run("branding", async () => { await client.d1Query(accountId, db.uuid, brandingSql(o.companyName ?? "", o.primaryColor || "#4f46e5")); });
+    await run("branding", async () => { await client.d1Query(accountId, db.uuid, brandingSql(o.companyName ?? "", o.primaryColor || "#d7ff3a")); });
   } else emit({ step: "branding", status: "skipped" });
 
   await run("worker", async () => {

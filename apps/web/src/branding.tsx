@@ -1,9 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { DEFAULT_BRANDING, type Branding } from "@gart/shared";
+import { contrastRatio, DEFAULT_BRANDING, type Branding } from "@gart/shared";
 import { api } from "./api";
 
 interface Ctx { branding: Branding; reload(): Promise<void>; set(b: Branding): void }
 const BrandingCtx = createContext<Ctx | null>(null);
+
+/** Text colour (near-black or white) that reads best on top of the given colour. */
+export function onColor(hex: string): string {
+  return contrastRatio(hex, "#0b0b0c") >= contrastRatio(hex, "#ffffff") ? "#0b0b0c" : "#ffffff";
+}
 
 function apply(b: Branding): void {
   const s = document.documentElement.style;
@@ -11,8 +16,9 @@ function apply(b: Branding): void {
   s.setProperty("--brand-2", b.secondaryColor);
   s.setProperty("--bg", b.backgroundColor);
   s.setProperty("--accent", b.accentColor);
+  s.setProperty("--on-brand", onColor(b.primaryColor));
   s.setProperty("--bg-image", b.backgroundMediaId ? `url(/api/media/${encodeURIComponent(b.backgroundMediaId)})` : "none");
-  document.title = b.companyName ? `${b.companyName} · Gart` : "Gart";
+  document.title = b.companyName ? `${b.companyName} · Гарт` : "Гарт";
 }
 
 export function BrandingProvider({ children }: { children: ReactNode }) {

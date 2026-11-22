@@ -96,8 +96,6 @@ export const BrandingSchema = z.object({
   backgroundMediaId: mediaId,
   welcomeMessage: z.string().trim().max(200),
   finalMessage: z.string().trim().max(200),
-  /** Short slogan shown next to the logo on the projector and the player waiting screen. */
-  tagline: z.string().trim().max(80).default("Знай. Дій. Перемагай!"),
   /** Gart-wide sound: the intro and the join sound on the host screen and the projector. */
   soundEnabled: z.boolean().default(true),
 });
@@ -105,16 +103,15 @@ export type Branding = z.infer<typeof BrandingSchema>;
 
 export const DEFAULT_BRANDING: Branding = {
   companyName: "",
-  primaryColor: "#4f46e5",
-  secondaryColor: "#0ea5e9",
-  backgroundColor: "#0f172a",
-  accentColor: "#f59e0b",
+  primaryColor: "#d7ff3a",
+  secondaryColor: "#8fb300",
+  backgroundColor: "#0b0b0c",
+  accentColor: "#f4f4f0",
   logoPlacement: "top-left",
   logoMediaId: null,
   backgroundMediaId: null,
   welcomeMessage: "",
   finalMessage: "",
-  tagline: "Знай. Дій. Перемагай!",
   soundEnabled: true,
 };
 
