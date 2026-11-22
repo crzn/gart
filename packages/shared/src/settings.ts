@@ -16,7 +16,7 @@ export const QuizSettingsSchema = z
     nicknameMinLength: z.number().int().min(1).max(24).default(2),
     nicknameMaxLength: z.number().int().min(1).max(24).default(20),
     randomizeQuestions: z.boolean().default(false),
-    randomizeAnswers: z.boolean().default(false),
+    randomizeAnswers: z.boolean().default(true),
     leaderboardEnabled: z.boolean().default(true),
     timerEnabled: z.boolean().default(true),
     defaultTimeLimitSec: z.number().int().min(5).max(300).default(15),

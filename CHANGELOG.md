@@ -2,6 +2,13 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.14.1] - 2026-11-22: several visitor games, 20-minute limit, shuffled answers by default
+
+### Changed
+- **Several visitor games at once.** Two visitor games can run together on the deployment (was one), and an address may start 10 an hour (was 3). Administrators keep at least one of the three active places.
+- **Every game ends by itself 20 minutes after launch**, so no game can hang for days. The game ends as if the host had pressed "End".
+- **Answers are shuffled by default** for new quizzes. Quizzes that already exist keep their own setting.
+
 ## [0.14.0] - 2026-11-22: sound switch per screen, quiz showcase
 
 ### Added

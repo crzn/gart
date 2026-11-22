@@ -18,7 +18,7 @@ export const LIMITS = {
   updatesPerAdmin: { limit: 30, windowSec: 3600 },
   updateConnectPerAdmin: { limit: 10, windowSec: 3600 },
   // Visitors without an account: a few games an hour per address.
-  guestGamePerIp: { limit: 3, windowSec: 3600 },
+  guestGamePerIp: { limit: 10, windowSec: 3600 },
 } as const satisfies Record<string, Limit>;
 
 export const rlKey = {

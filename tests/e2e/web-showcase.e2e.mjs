@@ -60,7 +60,9 @@ try {
   check("a visitor starts a game without an account", s1.status === 201 && j1.game?.pin?.length === 6 && typeof j1.hostToken === "string" && j1.hostToken.length >= 30, `${s1.status} ${JSON.stringify(j1)}`);
   check("the reply says the visitor's limit is 10", j1.maxPlayers === 10);
   const s2 = await fetch(`${BASE}/api/showcase/${live.id}/start`, { method: "POST", headers: { "x-gart-csrf": "1" } });
-  check("a second visitor game waits until the first one ends", s2.status === 409 && (await s2.json()).error === "guest_busy");
+  check("a visitor can run a second game next to the first", s2.status === 201);
+  const s2b = await fetch(`${BASE}/api/showcase/${live.id}/start`, { method: "POST", headers: { "x-gart-csrf": "1" } });
+  check("the visitor games share their places: a third waits", s2b.status === 409 && (await s2b.json()).error === "guest_busy");
 
   const tk = (token) => fetch(`${BASE}/api/showcase/games/${j1.game.id}/ticket`, { method: "POST", headers: { "x-gart-csrf": "1", "x-host-token": token, "content-type": "application/json" }, body: JSON.stringify({ role: "host" }) });
   const wrong = await tk("x".repeat(30));
@@ -76,8 +78,10 @@ try {
 
   const s3 = await fetch(`${BASE}/api/showcase/${live.id}/start`, { method: "POST", headers: { "x-gart-csrf": "1" } });
   check("after the cancel the next visitor game starts", s3.status === 201, String(s3.status));
-  const s4 = await fetch(`${BASE}/api/showcase/${live.id}/start`, { method: "POST", headers: { "x-gart-csrf": "1" } });
-  check("a visitor address has a few games an hour, then is refused", s4.status === 429, String(s4.status));
+  // The third visitor game of this round is refused by the rate limit once the address has used its hourly share.
+  const burst = [];
+  for (let i = 0; i < 8; i++) burst.push((await fetch(`${BASE}/api/showcase/${live.id}/start`, { method: "POST", headers: { "x-gart-csrf": "1" } })).status);
+  check("an address that keeps starting games is refused at the hourly limit", burst.includes(429), JSON.stringify(burst));
 
   // A signed-in editor's launch is the normal admin route (no visitor limit): it still works from the same page.
   const owner = await call("POST", "/api/games", { quizId: live.id });

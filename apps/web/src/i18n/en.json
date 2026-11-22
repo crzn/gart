@@ -627,5 +627,5 @@
   "showcase.questions": "{n} questions",
   "guest.limitNote": "Game for {n} players. Unlimited after sign-in.",
   "guest.backToShowcase": "Back to the showcase",
-  "err.guest_busy": "A visitor's game is already running. Try again when it ends, or sign in to start without limits."
+  "err.guest_busy": "Visitor games are already running. Try again in a few minutes, or sign in to start without limits."
 }

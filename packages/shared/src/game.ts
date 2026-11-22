@@ -71,6 +71,8 @@ export const GAME_LIMITS = {
   /** Players may still reconnect and read final results this long after a game ends. */
   finishedGraceMs: 30 * 60 * 1000,
   ticketTtlMs: 60 * 1000,
+  /** Every game ends by itself this long after it was launched, so no game can hang for days. */
+  maxGameMs: 20 * 60 * 1000,
   topN: 10,
   /** Sockets the room accepts: players + host + projector screens + a little slack. */
   maxScreens: 5,
@@ -80,6 +82,6 @@ export const GAME_LIMITS = {
 export const GUEST_LIMITS = {
   /** Players in a game started by a visitor. */
   maxPlayers: 10,
-  /** Visitor games running at the same time on the whole deployment (the Free plan budget is shared with administrators). */
-  maxConcurrentGames: 1,
+  /** Visitor games running at the same time on the whole deployment. The Free plan budget is shared with administrators, who keep at least one place. */
+  maxConcurrentGames: 2,
 } as const;

@@ -65,7 +65,7 @@ interface Cur {
   bonusPct: number;
 }
 
-type AlarmKind = "close" | "auto" | "persist" | "cleanup" | "expire";
+type AlarmKind = "close" | "auto" | "persist" | "cleanup" | "expire" | "maxDuration";
 
 interface Core {
   gameId: string;
@@ -212,6 +212,8 @@ export class GameRoom extends DurableObject<Env> {
     this.snapshotCache = p.snapshot;
     this.run("INSERT INTO meta (k, v) VALUES ('snapshot', ?) ON CONFLICT (k) DO UPDATE SET v = excluded.v", JSON.stringify(p.snapshot));
     this.schedule("expire", now + GAME_LIMITS.idleExpiryMs);
+    // Every game ends by itself after maxGameMs from its launch, so none can run for days.
+    this.schedule("maxDuration", now + GAME_LIMITS.maxGameMs);
     this.saveCore();
     await this.armNext();
     return { ok: true };
@@ -966,6 +968,9 @@ export class GameRoom extends DurableObject<Env> {
         case "expire":
           if (now - core.lastActivity >= GAME_LIMITS.idleExpiryMs) await this.finish("END");
           else this.schedule("expire", core.lastActivity + GAME_LIMITS.idleExpiryMs);
+          break;
+        case "maxDuration":
+          if (!isTerminal(core.state)) await this.finish("END");
           break;
       }
     }
