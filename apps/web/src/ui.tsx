@@ -21,7 +21,7 @@ export function Field({ label, id, hint, ...rest }: { label: string; id: string;
   );
 }
 
-export function Button({ busy, variant = "primary", children, ...rest }: { busy?: boolean; variant?: "primary" | "ghost" | "danger" } & ButtonHTMLAttributes<HTMLButtonElement>) {
+export function Button({ busy, variant = "primary", children, className = "", ...rest }: { busy?: boolean; variant?: "primary" | "ghost" | "danger"; className?: string } & ButtonHTMLAttributes<HTMLButtonElement>) {
   const styles = {
     primary: "bg-brand text-on-brand hover:brightness-110",
     ghost: "bg-white/10 hover:bg-white/20",
@@ -31,7 +31,7 @@ export function Button({ busy, variant = "primary", children, ...rest }: { busy?
     <button
       {...rest}
       disabled={rest.disabled || busy}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${styles}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
     >
       {busy ? <Loader2 className="size-4" aria-hidden /> : null}
       {children}

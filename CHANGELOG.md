@@ -2,6 +2,12 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.14.2] - 2026-11-22: admin quiz list on phones, showcase without tags
+
+### Changed
+- **Admin quiz list** is laid out for phones: the full title, a status line with the question count and date, and the actions below it. "Start game" stretches to the free width on a phone.
+- **Showcase** no longer shows tag chips on the cards or the tag filter. Tags stay on the quizzes themselves.
+
 ## [0.14.1] - 2026-11-22: several visitor games, 20-minute limit, shuffled answers by default
 
 ### Changed

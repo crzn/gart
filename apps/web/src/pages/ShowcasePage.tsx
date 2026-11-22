@@ -1,5 +1,5 @@
 import { ArrowRight, KeyRound, LogIn, Play } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { roleAtLeast } from "@gart/shared";
 import { api } from "../api";
@@ -28,7 +28,6 @@ export function ShowcasePage() {
   const [data, setData] = useState<ShowcaseReply | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [level, setLevel] = useState<"all" | Difficulty>("all");
-  const [tag, setTag] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [launchError, setLaunchError] = useState<unknown>(null);
   const signedIn = auth.status === "authenticated" && roleAtLeast(auth.admin.role, "editor");
@@ -37,8 +36,7 @@ export function ShowcasePage() {
     api<ShowcaseReply>("/api/showcase").then(setData).catch(setError);
   }, []);
 
-  const tags = useMemo(() => [...new Set((data?.quizzes ?? []).flatMap((q) => q.tags))].sort(), [data]);
-  const shown = (data?.quizzes ?? []).filter((q) => (level === "all" || q.difficulty === level) && (!tag || q.tags.includes(tag)));
+  const shown = (data?.quizzes ?? []).filter((q) => level === "all" || q.difficulty === level);
 
   async function launch(q: ShowcaseQuiz) {
     setBusy(q.id);
@@ -87,14 +85,6 @@ export function ShowcasePage() {
               </button>
             ))}
           </div>
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((x) => (
-                <button key={x} type="button" aria-pressed={tag === x} onClick={() => setTag(tag === x ? null : x)}
-                  className={`rounded-full border px-3 py-1 text-xs ${tag === x ? "border-accent text-accent" : "border-slate-500 text-ink-muted hover:text-ink"}`}>#{x}</button>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
@@ -120,11 +110,6 @@ export function ShowcasePage() {
                 </div>
                 <h2 className="text-lg font-semibold leading-snug">{q.title}</h2>
                 {q.description && <p className="line-clamp-3 text-sm text-ink-muted">{q.description}</p>}
-                {q.tags.length > 0 && (
-                  <ul className="flex flex-wrap gap-1.5 text-xs text-ink-muted" aria-label={t("showcase.tags")}>
-                    {q.tags.map((x) => <li key={x} className="rounded-md bg-white/5 px-2 py-0.5">#{x}</li>)}
-                  </ul>
-                )}
                 <div className="mt-auto pt-2">
                   <Button className="w-full" busy={busy === q.id} disabled={busy !== null && busy !== q.id} onClick={() => void launch(q)}>
                     <Play className="size-4" aria-hidden />{t("showcase.launch")}<ArrowRight className="size-4" aria-hidden />

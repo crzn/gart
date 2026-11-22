@@ -14,7 +14,7 @@
 
 Players join from their phones with a PIN or QR code, the host runs the game, and the projector shows questions and results. All you need is a Cloudflare account and a browser. The interface is Ukrainian by default, with English included. 🇺🇦
 
-**Status: 0.14.1.** A full game with 120 simulated players runs locally. A real load test on Cloudflare is still ahead, so 120 simultaneous players on the live service are not yet confirmed. See [CHANGELOG.md](CHANGELOG.md) for what works today.
+**Status: 0.14.2.** A full game with 120 simulated players runs locally. A real load test on Cloudflare is still ahead, so 120 simultaneous players on the live service are not yet confirmed. See [CHANGELOG.md](CHANGELOG.md) for what works today.
 
 ---
 

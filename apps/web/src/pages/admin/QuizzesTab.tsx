@@ -132,18 +132,23 @@ export function QuizzesTab({ me }: { me: AdminView }) {
         {quizzes === null ? <p className="mt-4 text-sm text-ink-muted">{t("admin.loading")}</p> : quizzes.length === 0 ? <p className="mt-4 text-sm text-ink-muted">{t("quiz.empty")}</p> : (
           <><ul className="mt-4 divide-y divide-white/10">
             {paged.rows.map((q) => (
-              <li key={q.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <button type="button" onClick={() => setOpenId(q.id)} className="min-w-0 flex-1 text-left">
-                  <p className="truncate font-medium hover:underline">{q.title}</p>
-                  <p className="mt-1 text-xs text-ink-muted">
-                    {t(`status.${q.status}` as MessageKey)} · {q.questionCount} {t("quiz.questionsShort")} · {fmt(q.updatedAt)}
+              <li key={q.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <button type="button" onClick={() => setOpenId(q.id)} className="block w-full text-left">
+                    <span className="block break-words text-base font-semibold leading-snug hover:underline">{q.title}</span>
+                  </button>
+                  <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-muted">
+                    <span className={`rounded-full px-2 py-0.5 font-medium ${q.status === "active" ? "bg-emerald-500/15 text-emerald-200" : "bg-white/10 text-ink-muted"}`}>{t(`status.${q.status}` as MessageKey)}</span>
+                    <span>{q.questionCount} {t("quiz.questionsShort")}</span>
+                    <span aria-hidden>·</span>
+                    <span>{fmt(q.updatedAt)}</span>
                   </p>
-                </button>
-                <div className="flex gap-2">
-                  {q.status === "active" ? <Button aria-label={t("quiz.play")} onClick={() => void startGame(q.id)}><Play className="size-4" aria-hidden />{t("quiz.play")}</Button> : null}
-                  <Button variant="ghost" aria-label={t("quiz.duplicate")} onClick={() => void act(() => api(`/api/quizzes/${q.id}/duplicate`, { method: "POST", body: {} }))}><Copy className="size-4" aria-hidden /></Button>
+                </div>
+                <div className="flex items-center gap-2 sm:shrink-0">
+                  {q.status === "active" ? <Button className="flex-1 sm:flex-none" aria-label={t("quiz.play")} onClick={() => void startGame(q.id)}><Play className="size-4" aria-hidden />{t("quiz.play")}</Button> : null}
+                  <Button variant="ghost" className="!px-3.5" aria-label={t("quiz.duplicate")} title={t("quiz.duplicate")} onClick={() => void act(() => api(`/api/quizzes/${q.id}/duplicate`, { method: "POST", body: {} }))}><Copy className="size-4" aria-hidden /></Button>
                   {canDelete(q) ? (
-                    <Button variant="ghost" aria-label={t("quiz.delete")} onClick={() => { if (window.confirm(t("quiz.confirmDelete"))) void act(() => api(`/api/quizzes/${q.id}`, { method: "DELETE" })); }}><Trash2 className="size-4" aria-hidden /></Button>
+                    <Button variant="ghost" className="!px-3.5 hover:!bg-red-500/30" aria-label={t("quiz.delete")} title={t("quiz.delete")} onClick={() => { if (window.confirm(t("quiz.confirmDelete"))) void act(() => api(`/api/quizzes/${q.id}`, { method: "DELETE" })); }}><Trash2 className="size-4" aria-hidden /></Button>
                   ) : null}
                 </div>
               </li>
