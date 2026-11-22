@@ -81,7 +81,7 @@ export function LiveView({ state, big = false, onKick, joinUrl, fx = false }: { 
       <div className={big ? "flex min-h-[76vh] flex-col justify-center gap-[3vmin]" : "space-y-5"}>
         {paused}
         <div className={`flex items-center justify-between text-ink-muted ${big ? "text-[2.4vmin]" : ""}`}><span>{q.index + 1} / {q.total}</span><span>{t("host.answered")}: <b className="text-ink">{snap.answered ?? 0}</b> / {Math.max(connected, snap.answered ?? 0)}</span></div>
-        {toStart > 0 ? (
+        {toStart > 0 && snap.settings.countdownSec > 0 ? (
           <p key={Math.ceil(toStart)} className={`py-10 text-center font-black tabular-nums ${big ? "text-[34vmin] leading-none" : "text-8xl"}`} aria-live="polite">{Math.ceil(toStart)}</p>
         ) : (
           <>

@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { MAX_PLAYERS_PER_GAME } from "./limits";
 
+/** With automatic advance on, the correct answer and the ranking each stay on screen this long. */
+export const AUTO_ADVANCE_DELAY_SEC = 3;
+
 /**
  * Per-quiz game settings. Every field has a default, so `QuizSettingsSchema.parse({})`
  * yields a complete, valid configuration and templates only store what they change.
@@ -29,7 +32,6 @@ export const QuizSettingsSchema = z
     /** Close a question as soon as every joined player has answered. */
     closeWhenAllAnswered: z.boolean().default(true),
     autoAdvance: z.boolean().default(false),
-    autoAdvanceDelaySec: z.number().int().min(3).max(60).default(8),
     /** Music and effects on the host screen and projector; each of those screens still has to switch sound on with a click. */
     soundEnabled: z.boolean().default(true),
     showQuestionProgress: z.boolean().default(true),

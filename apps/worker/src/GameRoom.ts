@@ -5,6 +5,7 @@ import {
   utcDay,
   GAME_LIMITS,
   MAX_PLAYERS_PER_GAME,
+  AUTO_ADVANCE_DELAY_SEC,
   isAvatarId,
   isTerminal,
   parseClientMessage,
@@ -615,6 +616,7 @@ export class GameRoom extends DurableObject<Env> {
       playerCount: this.activePlayers().length,
       settings: {
         showQuestionProgress: core.s.showQuestionProgress,
+        countdownSec: core.s.countdownBeforeQuestionSec,
         soundEnabled: core.s.soundEnabled,
         showCorrectAnswer: core.s.showCorrectAnswer,
         leaderboardEnabled: core.s.leaderboardEnabled,
@@ -817,7 +819,7 @@ export class GameRoom extends DurableObject<Env> {
     this.unschedule("close");
     this.rankCache.delete(cur.idx);
     this.qAnswers = null;
-    if (core.s.autoAdvance) this.schedule("auto", Date.now() + core.s.autoAdvanceDelaySec * 1000);
+    if (core.s.autoAdvance) this.schedule("auto", Date.now() + AUTO_ADVANCE_DELAY_SEC * 1000);
     this.saveCore();
 
     const total = this.activePlayers().length;
@@ -831,7 +833,7 @@ export class GameRoom extends DurableObject<Env> {
   private enterLeaderboard(): Promise<void> {
     const core = this.core!;
     const cur = core.cur!;
-    if (core.s.autoAdvance) this.schedule("auto", Date.now() + core.s.autoAdvanceDelaySec * 1000);
+    if (core.s.autoAdvance) this.schedule("auto", Date.now() + AUTO_ADVANCE_DELAY_SEC * 1000);
     this.saveCore();
     this.sendMany(this.controllers(), { v: 1, t: "leaderboard", d: this.leaderboardData(cur.idx) });
     for (const [playerId, sockets] of this.byPlayer) this.sendMany(sockets, { v: 1, t: "leaderboard", d: this.leaderboardData(cur.idx, playerId) });

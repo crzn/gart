@@ -147,7 +147,7 @@ export interface SnapshotData {
   coverImageId?: string;
   pin: string;
   playerCount: number;
-  settings: { showQuestionProgress: boolean; soundEnabled: boolean; showCorrectAnswer: boolean; leaderboardEnabled: boolean };
+  settings: { showQuestionProgress: boolean; countdownSec: number; soundEnabled: boolean; showCorrectAnswer: boolean; leaderboardEnabled: boolean };
   you?: { playerId: string; nickname: string; avatar: string; points: number; rank: number | null };
   /** Host and projector only. */
   players?: PlayerView[];

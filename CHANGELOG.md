@@ -2,6 +2,18 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.12.2] - 2026-11-22: link preview and pauses
+
+### Added
+- **Link preview.** The join link (`/play/<PIN>`) now carries the quiz title, its description and its cover image in the page head, so a messenger such as WhatsApp shows them in the chat preview. Without a cover the logo is used; without a description, the slogan. A mistyped or finished game gets the plain page, and the tags hold only what the join page already shows publicly.
+
+### Changed
+- **Pauses with automatic advance.** The correct answer and the ranking each stay on screen for 3 seconds (before this it was 8 by default and could not be changed in the editor). The old `autoAdvanceDelaySec` value in saved quizzes is ignored.
+- Existing installations pick up the new join-link routing (`/play/*` runs through the Worker first) with the update.
+
+### Fixed
+- With the countdown before a question set to 0, a number could flash for a moment when the question started; the countdown is now not shown at all.
+
 ## [0.12.1] - 2026-11-22: privacy and hardening (from the security scan)
 
 ### Added

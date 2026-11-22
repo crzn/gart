@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowLeft, ArrowUp, Info, Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { playabilityProblems, QUIZ_LIMITS, type QuestionView, type QuizView } from "@gart/shared";
+import { AUTO_ADVANCE_DELAY_SEC, playabilityProblems, QUIZ_LIMITS, type QuestionView, type QuizView } from "@gart/shared";
 import { api, ApiError } from "../../api";
 import { errorKey } from "../../errors";
 import { useLang, type MessageKey } from "../../i18n";
@@ -173,9 +173,9 @@ export function QuizEditor({ id, onClose }: { id: string; onClose(): void }) {
               <div className="flex items-center gap-1 rounded-xl bg-white/5 pr-2">
                 <label className="flex flex-1 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm">
                   <input type="checkbox" checked={settings[key] === true} onChange={(e) => void patch({ settings: { [key]: e.target.checked } }, t("quiz.saved"))} className="size-4 shrink-0 accent-indigo-400" />
-                  {fill(t(`set.${key}` as MessageKey), key === "autoAdvance" ? Number(settings.autoAdvanceDelaySec) : 0)}
+                  {fill(t(`set.${key}` as MessageKey), key === "autoAdvance" ? AUTO_ADVANCE_DELAY_SEC : 0)}
                 </label>
-                <Help id={`h-${key}`}>{fill(t(`set.${key}.help` as MessageKey), key === "autoAdvance" ? Number(settings.autoAdvanceDelaySec) : key === "timerEnabled" ? Number(settings.defaultTimeLimitSec) : 0)}</Help>
+                <Help id={`h-${key}`}>{fill(t(`set.${key}.help` as MessageKey), key === "autoAdvance" ? AUTO_ADVANCE_DELAY_SEC : key === "timerEnabled" ? Number(settings.defaultTimeLimitSec) : 0)}</Help>
               </div>
             </li>
           ))}

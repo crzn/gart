@@ -154,7 +154,7 @@ export function PlayPage() {
       {snap.state === "QUESTION_ACTIVE" && q && (
         <div className="space-y-4">
           {snap.settings.showQuestionProgress ? <p className="text-sm text-ink-muted">{q.index + 1} / {q.total}</p> : null}
-          {toStart > 0 ? (
+          {toStart > 0 && snap.settings.countdownSec > 0 ? (
             <Card className="text-center"><p className="text-ink-muted">{t("play.getReady")}</p><p className="mt-2 text-7xl font-black tabular-nums" aria-live="polite">{Math.ceil(toStart)}</p></Card>
           ) : (
             <>

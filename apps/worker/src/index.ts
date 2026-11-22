@@ -13,6 +13,7 @@ import { joinRoutes } from "./routes/join";
 import { mediaRoutes } from "./routes/media";
 import { quizRoutes } from "./routes/quizzes";
 import { setupRoutes } from "./routes/setup";
+import { shareRoutes } from "./routes/share";
 import { wsRoutes } from "./routes/ws";
 
 export { GameRoom } from "./GameRoom";
@@ -68,6 +69,9 @@ app.use("/ws/*", async (c, next) => {
   await next();
 });
 app.route("/ws", wsRoutes);
+
+// The join link: the page itself, with the quiz title, description and cover in its head for messenger previews.
+app.route("/play", shareRoutes);
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
 

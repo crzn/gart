@@ -37,7 +37,7 @@ describe("deploy engine against a fake Cloudflare API", () => {
     expect(w.secretNames.sort()).toEqual(["SESSION_SECRET", "SETUP_TOKEN", "WS_TICKET_SECRET"]);
     expect(w.metadata.migrations.new_tag).toBe("v3");
     expect(w.metadata.migrations.steps).toEqual([{ new_sqlite_classes: ["GameRoom"] }, { new_sqlite_classes: ["RateLimiter"] }, { new_sqlite_classes: ["Updater"] }]);
-    expect(w.metadata.assets.config.run_worker_first).toEqual(["/api/*", "/ws/*"]);
+    expect(w.metadata.assets.config.run_worker_first).toEqual(["/api/*", "/ws/*", "/play/*"]);
     expect(w.workersDev).toBe(true);
     expect(w.domain).toBe("quiz.example.com");
     const db = fake.state.databases.get(r.databaseId).db;
