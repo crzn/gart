@@ -23,7 +23,7 @@ export function Field({ label, id, hint, ...rest }: { label: string; id: string;
 
 export function Button({ busy, variant = "primary", children, ...rest }: { busy?: boolean; variant?: "primary" | "ghost" | "danger" } & ButtonHTMLAttributes<HTMLButtonElement>) {
   const styles = {
-    primary: "bg-brand text-white hover:brightness-110",
+    primary: "bg-brand text-on-brand hover:brightness-110",
     ghost: "bg-white/10 hover:bg-white/20",
     danger: "bg-red-500/80 text-white hover:bg-red-500",
   }[variant];
@@ -66,7 +66,7 @@ export function Pager({ page, pages, setPage }: { page: number; pages: number; s
       <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)} className={`${btn} bg-white/10 hover:bg-white/20 disabled:opacity-40`}>{t("pager.prev")}</button>
       {nums.map((n, i) => n === "…" ? <span key={`g${i}`} className="px-1 text-ink-muted" aria-hidden>…</span> : (
         <button key={n} type="button" aria-current={n === page ? "page" : undefined} aria-label={`${t("pager.page")} ${n + 1}`} onClick={() => setPage(n)}
-          className={`${btn} ${n === page ? "bg-brand text-white" : "bg-white/10 hover:bg-white/20"}`}>{n + 1}</button>
+          className={`${btn} ${n === page ? "bg-brand text-on-brand" : "bg-white/10 hover:bg-white/20"}`}>{n + 1}</button>
       ))}
       <button type="button" disabled={page >= pages - 1} onClick={() => setPage(page + 1)} className={`${btn} bg-white/10 hover:bg-white/20 disabled:opacity-40`}>{t("pager.next")}</button>
     </nav>

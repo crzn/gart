@@ -9,7 +9,7 @@ const S = {
   screen: "welcome", busy: false, error: null,
   token: "", accounts: [], accountId: "", subdomain: null, subdomainDraft: "",
   zones: [], zonesOk: false,
-  form: { company: "", color: "#4f46e5", adminName: "", adminEmail: "", worker: "gart", db: "gart-db", zoneId: "", host: "" },
+  form: { company: "", color: "#d7ff3a", adminName: "", adminEmail: "", worker: "gart", db: "gart-db", zoneId: "", host: "" },
   pkg: null, manifest: null, run: { steps: {}, failed: null }, result: null, health: "waiting", healthVersion: "",
 };
 const t = () => TEXT[S.lang];

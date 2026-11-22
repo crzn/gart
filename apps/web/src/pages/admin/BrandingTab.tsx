@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { contrastRatio, DEFAULT_BRANDING, type Branding } from "@gart/shared";
 import { api } from "../../api";
-import { useBranding } from "../../branding";
+import { onColor, useBranding } from "../../branding";
+import { mediaUrl } from "../../image";
+import { LogoLockup } from "../../Logo";
 import { errorKey } from "../../errors";
 import { useLang } from "../../i18n";
 import { Button, Card, ErrorNote, Field } from "../../ui";
@@ -60,7 +62,6 @@ export function BrandingTab() {
           <ImageField label={t("brand.logo")} value={b.logoMediaId} maxSide={400} onChange={(id) => set({ logoMediaId: id })} />
           <ImageField label={t("brand.backgroundImage")} value={b.backgroundMediaId} maxSide={1600} onChange={(id) => set({ backgroundMediaId: id })} />
           <Field id="bw" label={t("brand.welcome")} maxLength={200} value={b.welcomeMessage} onChange={(e) => set({ welcomeMessage: e.target.value })} />
-          <Field id="bt" label={t("brand.tagline")} maxLength={80} value={b.tagline} onChange={(e) => set({ tagline: e.target.value })} />
           <Field id="bf" label={t("brand.final")} maxLength={200} value={b.finalMessage} onChange={(e) => set({ finalMessage: e.target.value })} />
         </div>
         <fieldset className="mt-5 rounded-2xl border border-surface-border p-4">
@@ -85,11 +86,14 @@ export function BrandingTab() {
       </Card>
       <div aria-label={t("brand.preview")} className="h-fit rounded-3xl border border-surface-border p-5" style={{ background: b.backgroundColor }}>
         <p className="text-xs uppercase tracking-wide" style={{ color: "#94a3b8" }}>{t("brand.preview")}</p>
-        <p className="mt-3 text-lg font-bold" style={{ color: "#f8fafc" }}>{b.companyName || "Gart"}</p>
+        <div className="mt-3 flex items-center gap-3" style={{ color: b.primaryColor }}>
+          {b.logoMediaId ? <img src={mediaUrl(b.logoMediaId)} alt="" className="h-8 w-auto max-w-full object-contain" /> : <LogoLockup className="h-8 w-auto" />}
+          {b.companyName ? <span className="border-l border-white/20 pl-3 text-base font-semibold" style={{ color: "#f8fafc" }}>{b.companyName}</span> : null}
+        </div>
         <p className="mt-1 text-sm" style={{ color: "#cbd5e1" }}>{b.welcomeMessage || t("brand.welcomeSample")}</p>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <span className="rounded-xl px-3 py-2 text-center text-sm font-semibold text-white" style={{ background: b.primaryColor }}>A</span>
-          <span className="rounded-xl px-3 py-2 text-center text-sm font-semibold text-white" style={{ background: b.secondaryColor }}>B</span>
+          <span className="rounded-xl px-3 py-2 text-center text-sm font-semibold" style={{ background: b.primaryColor, color: onColor(b.primaryColor) }}>A</span>
+          <span className="rounded-xl px-3 py-2 text-center text-sm font-semibold" style={{ background: b.secondaryColor, color: onColor(b.secondaryColor) }}>B</span>
         </div>
         <span className="mt-3 inline-block rounded-lg px-3 py-1 text-xs font-bold text-slate-900" style={{ background: b.accentColor }}>1250</span>
       </div>

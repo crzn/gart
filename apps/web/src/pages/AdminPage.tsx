@@ -5,7 +5,7 @@ import { roleAtLeast, type Branding } from "@gart/shared";
 import { api } from "../api";
 import { useAuth } from "../auth";
 import { useBranding } from "../branding";
-import { mediaUrl } from "../image";
+import { BrandLogo } from "../Logo";
 import { LanguageSwitcher } from "../LanguageSwitcher";
 import { useLang, type MessageKey } from "../i18n";
 import { AccountTab } from "./admin/AccountTab";
@@ -98,14 +98,10 @@ export function AdminPage() {
   ];
   const pill = (active: boolean) => `inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium ${active ? "bg-white/15" : "text-ink-muted hover:bg-white/10"}`;
 
-  const brand = useBranding().branding;
   return (
     <div className="w-full">
       <header className="mb-6 flex items-center gap-3 border-b border-surface-border pb-3">
-        <div className="flex shrink-0 items-center gap-2">
-          {brand.logoMediaId ? <img src={mediaUrl(brand.logoMediaId)} alt="" className="size-9 rounded-lg object-contain" /> : <div className="grid size-9 place-items-center rounded-lg bg-brand" aria-hidden><ShieldCheck className="size-5 text-white" /></div>}
-          <span className="hidden text-lg font-bold lg:inline">{brand.companyName || t("app.name")}</span>
-        </div>
+        <div className="shrink-0"><BrandLogo size="sm" /></div>
         <div role="tablist" aria-label={t("nav.admin")} className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
           {tabs.filter((x) => x.show).map(({ id, label, icon: Icon }) => (
             <button key={id} role="tab" type="button" aria-selected={tab === id} onClick={() => setTab(id)} className={`${pill(tab === id)} shrink-0`}>

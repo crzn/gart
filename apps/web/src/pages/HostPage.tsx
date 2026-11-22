@@ -112,7 +112,7 @@ export function HostPage() {
             <Button variant={snap.settings.leaderboardEnabled && !last ? "ghost" : "primary"} onClick={() => send({ t: "host.next" })}>{last ? <Flag className="size-4" aria-hidden /> : <ArrowRight className="size-4" aria-hidden />}{last ? t("host.finish") : t("host.next")}</Button>
           </>}
           {s === "LEADERBOARD" && <Button onClick={() => send({ t: "host.next" })}>{last ? <Flag className="size-4" aria-hidden /> : <ArrowRight className="size-4" aria-hidden />}{last ? t("host.finish") : t("host.next")}</Button>}
-          {s === "FINISHED" && <Link to="/admin" className="inline-flex items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white">{t("host.toAdmin")}</Link>}
+          {s === "FINISHED" && <Link to="/admin" className="inline-flex items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-on-brand">{t("host.toAdmin")}</Link>}
           {(s === "QUESTION_ACTIVE" || s === "QUESTION_RESULTS" || s === "LEADERBOARD") && (
             confirmEnd
               ? <Button variant="danger" onClick={() => { send({ t: "host.end" }); setConfirmEnd(false); }}>{t("host.confirmEnd")}</Button>

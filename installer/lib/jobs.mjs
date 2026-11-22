@@ -207,7 +207,7 @@ const STEPS = {
     if (!companyName && !primaryColor) return { skipped: true };
     const name = sanitizeCompanyName(companyName ?? "");
     if (name === null) throw new StepError("The company name contains unsupported characters or is too long.");
-    const color = primaryColor || "#4f46e5";
+    const color = primaryColor || "#d7ff3a";
     if (!isHexColor(color)) throw new StepError("The primary colour must look like #4f46e5.");
     const r = await ctx.wr(["d1", "execute", ctx.d1Name, "--remote", "-y", "--command", brandingSql(name, color), "-c", ctx.wranglerConfig], { cwd: ctx.workerDir });
     if (r.code !== 0) throw new StepError("Saving the branding failed.", { output: r.output });
