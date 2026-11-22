@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../api";
 import { useAuth } from "../auth";
+import { loadGuest, projectorHref, takeGuestFromHash, type GuestGame } from "../guest";
 import { errorKey } from "../errors";
-import { SoundControl } from "../audio/SoundControl";
-import { useHostAudio } from "../audio/useHostAudio";
+import { SoundToggle } from "../audio/SoundToggle";
+import { useGameSound } from "../audio/useGameSound";
 import { LiveView } from "../game/LiveView";
 import { BrandBar } from "../game/parts";
 import { useGameSocket } from "../game/useGameSocket";
@@ -15,18 +16,21 @@ import { Button, Card, ErrorNote } from "../ui";
 interface GameInfo { id: string; pin: string; title: string; status: string }
 
 /** Loads the game, then connects with a single-use ticket (a fresh one on every reconnect). */
-function useControlledGame(id: string, role: "host" | "screen") {
-  const [game, setGame] = useState<GameInfo | null>(null);
+function useControlledGame(id: string, role: "host" | "screen", guest: GuestGame | null) {
+  const [game, setGame] = useState<GameInfo | null>(guest ? { id, pin: guest.pin, title: guest.title, status: "LOBBY" } : null);
   const [error, setError] = useState<unknown>(null);
   useEffect(() => {
+    if (guest) return; // a visitor's game: the server answers only to the host secret, so there is nothing to load
     let alive = true;
     api<{ game: GameInfo }>(`/api/games/${id}`).then((r) => { if (alive) setGame(r.game); }).catch((e) => { if (alive) setError(e); });
     return () => { alive = false; };
-  }, [id]);
+  }, [id, guest]);
   const socket = useGameSocket({
     pin: game && !["CANCELLED"].includes(game.status) ? game.pin : null,
     firstFrame: async () => {
-      const { ticket } = await api<{ ticket: string }>(`/api/games/${id}/ticket`, { method: "POST", body: { role } });
+      const { ticket } = guest
+        ? await api<{ ticket: string }>(`/api/showcase/games/${id}/ticket`, { method: "POST", body: { role }, headers: { "x-host-token": guest.hostToken } })
+        : await api<{ ticket: string }>(`/api/games/${id}/ticket`, { method: "POST", body: { role } });
       return role === "host" ? { t: "host.auth", d: { ticket } } : { t: "screen.attach", d: { ticket } };
     },
   });
@@ -65,12 +69,13 @@ export function HostPage() {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const { state: auth } = useAuth();
-  const { game, error, state, dispatch, send } = useControlledGame(id, "host");
-  const audio = useHostAudio(state, "host");
+  const [guest] = useState<GuestGame | null>(() => loadGuest(id));
+  const { game, error, state, dispatch, send } = useControlledGame(id, "host", guest);
+  const sound = useGameSound(state);
   const [confirmEnd, setConfirmEnd] = useState(false);
 
-  if (auth.status === "anonymous") return <Navigate to="/login" replace state={{ from: `/host/${id}` }} />;
-  if (error instanceof ApiError && error.status === 401) return <Navigate to="/login" replace state={{ from: `/host/${id}` }} />;
+  if (auth.status === "anonymous" && !guest) return <Navigate to="/login" replace state={{ from: `/host/${id}` }} />;
+  if (error instanceof ApiError && error.status === 401 && !guest) return <Navigate to="/login" replace state={{ from: `/host/${id}` }} />;
   if (error) return <Notice title={t(errorKey(error))} />;
   if (!game) return <p className="m-auto text-sm text-ink-muted">{t("admin.loading")}</p>;
   if (game.status === "CANCELLED") return <Notice title={t("host.cancelled")} />;
@@ -89,10 +94,11 @@ export function HostPage() {
     <section className="w-full space-y-5 pb-24">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-ink-muted">{game.title} · PIN {game.pin}{state.conn === "reconnecting" ? ` · ${t("play.reconnecting")}` : ""}</p>
-        <a href={`/screen/${id}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20"><MonitorPlay className="size-4" aria-hidden />{t("host.projector")}</a>
+        <a href={projectorHref(guest, id)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20"><MonitorPlay className="size-4" aria-hidden />{t("host.projector")}</a>
       </div>
+      {guest ? <p className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-ink-muted">{t("guest.limitNote").replace("{n}", String(guest.maxPlayers))}</p> : null}
       <JoinLink pin={game.pin} />
-      <SoundControl audio={audio} />
+      <SoundToggle sound={sound} />
       <Card><LiveView state={state} joinUrl={joinUrl} fx onKick={s === "LOBBY" ? kick : undefined} /></Card>
       {errText ? <ErrorNote>{errText}</ErrorNote> : null}
       {snap ? (
@@ -101,7 +107,7 @@ export function HostPage() {
           {s === "LOBBY" && <>
             <Button onClick={() => send({ t: "host.start" })} disabled={snap.playerCount < 1}><Play className="size-4" aria-hidden />{t("host.start")}</Button>
             {snap.playerCount < 1 ? <span className="text-sm text-ink-muted">{t("host.needPlayer")}</span> : null}
-            <Button variant="danger" onClick={() => { if (window.confirm(t("host.confirmCancel"))) void api(`/api/games/${id}/cancel`, { method: "POST" }).then(() => navigate("/admin")); }}><XCircle className="size-4" aria-hidden />{t("host.cancel")}</Button>
+            <Button variant="danger" onClick={() => { if (window.confirm(t("host.confirmCancel"))) void (guest ? api(`/api/showcase/games/${id}/cancel`, { method: "POST", headers: { "x-host-token": guest.hostToken } }) : api(`/api/games/${id}/cancel`, { method: "POST" })).then(() => navigate(guest ? "/showcase" : "/admin")); }}><XCircle className="size-4" aria-hidden />{t("host.cancel")}</Button>
           </>}
           {s === "QUESTION_ACTIVE" && <>
             <Button onClick={() => send({ t: "host.closeQuestion" })}><Square className="size-4" aria-hidden />{t("host.close")}</Button>
@@ -112,7 +118,7 @@ export function HostPage() {
             <Button variant={snap.settings.leaderboardEnabled && !last ? "ghost" : "primary"} onClick={() => send({ t: "host.next" })}>{last ? <Flag className="size-4" aria-hidden /> : <ArrowRight className="size-4" aria-hidden />}{last ? t("host.finish") : t("host.next")}</Button>
           </>}
           {s === "LEADERBOARD" && <Button onClick={() => send({ t: "host.next" })}>{last ? <Flag className="size-4" aria-hidden /> : <ArrowRight className="size-4" aria-hidden />}{last ? t("host.finish") : t("host.next")}</Button>}
-          {s === "FINISHED" && <Link to="/admin" className="inline-flex items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-on-brand">{t("host.toAdmin")}</Link>}
+          {s === "FINISHED" && <Link to={guest ? "/showcase" : "/admin"} className="inline-flex items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-on-brand">{guest ? t("guest.backToShowcase") : t("host.toAdmin")}</Link>}
           {(s === "QUESTION_ACTIVE" || s === "QUESTION_RESULTS" || s === "LEADERBOARD") && (
             confirmEnd
               ? <Button variant="danger" onClick={() => { send({ t: "host.end" }); setConfirmEnd(false); }}>{t("host.confirmEnd")}</Button>
@@ -129,9 +135,10 @@ export function ScreenPage() {
   const { t } = useLang();
   const { id = "" } = useParams();
   const { state: auth } = useAuth();
-  const { game, error, state } = useControlledGame(id, "screen");
-  const audio = useHostAudio(state, "screen");
-  if (auth.status === "anonymous" || (error instanceof ApiError && error.status === 401)) return <Navigate to="/login" replace state={{ from: `/screen/${id}` }} />;
+  const [guest] = useState<GuestGame | null>(() => takeGuestFromHash(id));
+  const { game, error, state } = useControlledGame(id, "screen", guest);
+  const sound = useGameSound(state);
+  if (!guest && (auth.status === "anonymous" || (error instanceof ApiError && error.status === 401))) return <Navigate to="/login" replace state={{ from: `/screen/${id}` }} />;
   if (error) return <Notice title={t(errorKey(error))} />;
   if (!game) return <p className="m-auto text-sm text-ink-muted">{t("admin.loading")}</p>;
   if (state.error === "replaced") return <Notice title={t("host.replaced")} />;
@@ -140,7 +147,7 @@ export function ScreenPage() {
       {state.snap && state.snap.state !== "LOBBY" ? <p className="mb-4 text-right text-[2.2vmin] text-ink-muted">{t("host.joinAt")} {location.host} · PIN <b className="font-mono text-ink">{game.pin}</b></p> : null}
       <div className="mb-4"><BrandBar big /></div>
       <LiveView state={state} big fx joinUrl={location.host} />
-      <div className="fixed bottom-4 right-4 opacity-60 hover:opacity-100 focus-within:opacity-100"><SoundControl audio={audio} /></div>
+      <div className="fixed bottom-4 right-4 opacity-60 hover:opacity-100 focus-within:opacity-100"><SoundToggle sound={sound} /></div>
     </section>
   );
 }

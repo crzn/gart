@@ -1,10 +1,8 @@
-import { BookOpenCheck, ChevronDown, DownloadCloud, KeyRound, LogOut, Gauge, Palette, Radio, Server, Settings, ShieldCheck, Users, Volume2, VolumeX } from "lucide-react";
+import { BookOpenCheck, ChevronDown, DownloadCloud, KeyRound, LogOut, Gauge, Palette, Radio, Server, Settings, ShieldCheck, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { roleAtLeast, type Branding } from "@gart/shared";
-import { api } from "../api";
+import { roleAtLeast } from "@gart/shared";
 import { useAuth } from "../auth";
-import { useBranding } from "../branding";
 import { BrandLogo } from "../Logo";
 import { LanguageSwitcher } from "../LanguageSwitcher";
 import { useLang, type MessageKey } from "../i18n";
@@ -21,12 +19,10 @@ import { AdminStatusPage } from "./AdminStatusPage";
 type Tab = "quizzes" | "games" | "settings" | "account";
 type Sub = "status" | "updates" | "admins" | "usage" | "branding" | "privacy";
 
-/** Everything about "me" in one menu: the Gart-wide sound switch (anyone may use it), language, sign out. */
+/** Everything about "me" in one menu: language and sign out. */
 function UserMenu({ name, role, onLogout }: { name: string; role: string; onLogout: () => void }) {
   const { t } = useLang();
-  const { branding, set } = useBranding();
   const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -36,30 +32,16 @@ function UserMenu({ name, role, onLogout }: { name: string; role: string; onLogo
     document.addEventListener("keydown", esc);
     return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", esc); };
   }, [open]);
-  async function toggle() {
-    setBusy(true);
-    try {
-      const { branding: b } = await api<{ branding: Branding }>("/api/branding/sound", { method: "PUT", body: { soundEnabled: !branding.soundEnabled } });
-      set(b);
-    } catch { /* the switch stays as it was */ } finally { setBusy(false); }
-  }
-  const on = branding.soundEnabled;
   return (
     <div className="relative" ref={ref}>
       <button type="button" aria-haspopup="true" aria-expanded={open} data-testid="user-menu" onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20">
-        {on ? <Volume2 className="size-4 text-accent" aria-label={`${t("sound.gart")}: ${t("sound.gartOn")}`} /> : <VolumeX className="size-4 text-ink-muted" aria-label={`${t("sound.gart")}: ${t("sound.gartOff")}`} />}
         <span className="hidden max-w-40 truncate sm:inline">{name}</span>
         <ChevronDown className="size-4" aria-hidden />
       </button>
       {open ? (
         <div role="menu" className="absolute right-0 z-20 mt-2 w-72 space-y-3 rounded-2xl border border-slate-600 bg-slate-900 p-4 text-sm shadow-2xl">
           <div><p className="font-semibold">{name}</p><p className="text-ink-muted">{role}</p></div>
-          <button type="button" role="menuitem" onClick={() => void toggle()} disabled={busy} aria-pressed={on} data-testid="gart-sound" title={t("brand.soundHint")}
-            className="flex w-full items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-left hover:bg-white/20 disabled:opacity-60">
-            {on ? <Volume2 className="size-4" aria-hidden /> : <VolumeX className="size-4" aria-hidden />}
-            {t("sound.gart")}: {on ? t("sound.gartOn") : t("sound.gartOff")}
-          </button>
           <LanguageSwitcher />
           <button type="button" role="menuitem" onClick={onLogout} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left hover:bg-white/10">
             <LogOut className="size-4" aria-hidden />{t("auth.logout")}

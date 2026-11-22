@@ -17,6 +17,8 @@ export const LIMITS = {
   pinLookupPerIp: { limit: 600, windowSec: 600 },
   updatesPerAdmin: { limit: 30, windowSec: 3600 },
   updateConnectPerAdmin: { limit: 10, windowSec: 3600 },
+  // Visitors without an account: a few games an hour per address.
+  guestGamePerIp: { limit: 3, windowSec: 3600 },
 } as const satisfies Record<string, Limit>;
 
 export const rlKey = {
@@ -30,6 +32,7 @@ export const rlKey = {
   pinLookupIp: (ip: string) => `pin:ip:${ip}`,
   updates: (adminId: string) => `updates:${adminId}`,
   updateConnect: (adminId: string) => `updates:connect:${adminId}`,
+  guestGameIp: (ip: string) => `guest:game:ip:${ip}`,
 };
 
 /** Pure fixed-window decision used by the Durable Object and unit tests. */

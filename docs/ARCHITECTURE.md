@@ -207,10 +207,9 @@ Admin panel (owner) ── /api/updates/* ──► Worker ──► Updater Dur
 
 ## 7c. Presentation layer (0.9.0)
 
-- **Only host and projector.** `LiveView` takes an `fx` flag: QR code and animation classes appear only when it is set (host and projector pass it, phones never do). Sound lives in `apps/web/src/audio/`: `music.ts` (score, pure), `engine.ts` (Web Audio, dynamic import), `useHostAudio.ts` (small hook that follows the game state: lobby, countdown, question, closed, results, leaderboard, finished), `SoundControl.tsx`.
-- **Chunks:** `index` (main), `QrCode`, `engine`, `ListenPage`. A test asserts that a phone requests none of the last three.
-- **Autoplay rule:** the audio context is created inside the click on "Enable sound"; the choice of music and volume are remembered per browser and per screen type (`gart.sound.host`, `gart.sound.screen`), the "on" state never is.
-- **Quiz setting** `soundEnabled` (default on) decides whether a game offers sound at all.
+- **Sound on three screens, one switch each.** `LiveView` takes an `fx` flag: QR code and animation classes appear only when it is set (host and projector pass it, phones never do). Sound lives in `apps/web/src/audio/`: `music.ts` (score, pure), `presets.ts` (the sound scheme; only Carpathians), `engine.ts` (Web Audio, dynamic import), `useGameSound.ts` (hook that follows the game state on the host screen, the projector and the phone), `SoundToggle.tsx` (the switch: small on the host screen and projector, large on the phone).
+- **Chunks:** `index` (main), `QrCode`, `engine`, `ListenPage`. The phone downloads `engine` only after a player switches the sound on (test: `web-presentation`).
+- **Autoplay rule:** the audio context is created inside the click on the switch. Sound is always off at the start and nothing is remembered: no per-browser choice, no Gart-wide setting, no quiz setting.
 
 ## 8. Usage Monitor methodology
 

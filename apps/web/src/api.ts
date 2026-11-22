@@ -10,7 +10,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function api<T>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+export async function api<T>(path: string, init: { method?: string; body?: unknown; headers?: Record<string, string> } = {}): Promise<T> {
   let res: Response;
   try {
     res = await fetch(path, {
@@ -20,6 +20,7 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
         Accept: "application/json",
         "x-gart-csrf": "1",
         ...(init.body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...init.headers,
       },
       ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
     });

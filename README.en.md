@@ -14,7 +14,7 @@
 
 Players join from their phones with a PIN or QR code, the host runs the game, and the projector shows questions and results. All you need is a Cloudflare account and a browser. The interface is Ukrainian by default, with English included. 🇺🇦
 
-**Status: 0.13.1.** A full game with 120 simulated players runs locally. A real load test on Cloudflare is still ahead, so 120 simultaneous players on the live service are not yet confirmed. See [CHANGELOG.md](CHANGELOG.md) for what works today.
+**Status: 0.14.0.** A full game with 120 simulated players runs locally. A real load test on Cloudflare is still ahead, so 120 simultaneous players on the live service are not yet confirmed. See [CHANGELOG.md](CHANGELOG.md) for what works today.
 
 ---
 
@@ -23,7 +23,7 @@ Players join from their phones with a PIN or QR code, the host runs the game, an
 - 📱 **Join from a phone**: PIN or QR code, nickname and avatar. No accounts or apps for players.
 - 🖥️ **Projector screen**: big question, options, answer chart, leaderboard and podium; everything scales to the screen, no animations.
 - 🎛️ **Host console**: start, pause, close a question, leaderboard, finish; buttons in a bottom bar within reach.
-- 🎵 **Built-in music and effects**: synthesized in the browser, in three styles (Sopilka, Cymbals, Hopak), with a `/listen` preview page. Sound plays only on the host and projector screens; phones stay silent.
+- 🎵 **Built-in music and effects**: synthesized in the browser (no audio files), off until someone switches it on. The host screen, the projector and each player's phone have their own switch; a `/listen` page previews the music.
 - 🧠 **Quiz editor**: templates, questions with images, game settings (time, points, speed bonus), cover and description.
 - 🤖 **AI-made quizzes**: upload up to 5 `gart.json` files at once; a template with comments for AI downloads in one click.
 - 🎨 **Branding**: logo, company name, slogan, colors, background, welcome and final messages.

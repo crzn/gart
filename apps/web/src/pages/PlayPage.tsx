@@ -10,6 +10,8 @@ import { mediaUrl } from "../image";
 import { Button, Card, ErrorNote } from "../ui";
 import { usePinCheck } from "../game/usePinCheck";
 import { useNow } from "../game/useNow";
+import { SoundToggle } from "../audio/SoundToggle";
+import { useGameSound } from "../audio/useGameSound";
 
 const tokenKey = (pin: string) => `gart.player.${pin}`;
 const readToken = (pin: string): string | null => { try { return localStorage.getItem(tokenKey(pin)); } catch { return null; } };
@@ -36,6 +38,7 @@ export function PlayPage() {
     },
     fatal: (c) => FATAL.has(c),
   });
+  const sound = useGameSound(state);
   const now = useNow(state.snap?.state === "QUESTION_ACTIVE" ? 200 : 1000);
   const snap = state.snap;
   const me = snap?.you;
@@ -124,13 +127,17 @@ export function PlayPage() {
     );
   }
 
+  // The sound switch sits in the top-right corner through the whole game; the points moved next to the name.
   const header = (
     <div className="mb-4 flex items-center justify-between gap-3">
       <div className="flex min-w-0 items-center gap-3">
         <Avatar id={me.avatar} />
-        <div className="min-w-0"><p className="truncate font-semibold">{me.nickname}</p>{me.rank ? <p className="text-xs text-ink-muted">#{me.rank}</p> : null}</div>
+        <div className="min-w-0">
+          <p className="truncate font-semibold">{me.nickname}</p>
+          <p className="text-sm text-ink-muted"><span className="font-mono text-lg font-bold tabular-nums text-ink">{me.points}</span>{me.rank ? ` · #${me.rank}` : ""}</p>
+        </div>
       </div>
-      <p className="font-mono text-xl font-bold tabular-nums">{me.points}</p>
+      <SoundToggle sound={sound} size="lg" />
     </div>
   );
   const banner = state.conn === "reconnecting" ? <p role="status" className="mb-3 flex items-center gap-2 rounded-xl bg-amber-500/20 p-3 text-sm"><WifiOff className="size-4" aria-hidden />{t("play.reconnecting")}</p> : null;

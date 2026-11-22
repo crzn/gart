@@ -104,14 +104,7 @@ try {
   check("an editor has no Settings menu", (await ed.getByRole("tab", { name: "Налаштування" }).count()) === 0);
   check("an editor still sees My account", (await ed.getByRole("tab", { name: "Мій акаунт" }).count()) === 1);
   await ed.getByTestId("user-menu").click();
-  const ind = ed.getByTestId("gart-sound");
-  check("an editor sees whether Gart sound is on (icon and menu)", (await ind.innerText()).includes("увімкнено") && (await ed.getByTestId("user-menu").locator("svg").first().getAttribute("aria-label"))?.includes("увімкнено"));
-  await ind.click();
-  await ed.waitForFunction(() => document.querySelector("[data-testid=gart-sound]")?.textContent?.includes("вимкнено"));
-  check("an editor can switch Gart sound off", true);
-  await ind.click();
-  await ed.waitForFunction(() => document.querySelector("[data-testid=gart-sound]")?.textContent?.includes("увімкнено"));
-  check("and on again", true);
+  check("the header menu has no Gart sound switch any more", (await ed.getByTestId("gart-sound").count()) === 0);
   check("no uncaught page errors", errors.length === 0, errors.join(" | "));
 } catch (e) { bad++; console.log("  FAIL (exception)", e instanceof Error ? e.message : e); }
 finally {

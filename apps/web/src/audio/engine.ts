@@ -1,7 +1,8 @@
 // Sound for the host screen and the projector, made entirely with the Web Audio API.
 // This module is loaded on demand (dynamic import) and only on those two screens: a participant's phone never downloads it.
 import { waitingBar, WAITING_BPM } from "./waiting";
-import { BEATS_PER_BAR, barNotes, bpmFor, fanfare, midiToHz, type Mood, type Note, type Variant } from "./music";
+import { BEATS_PER_BAR, barNotes, bpmFor, midiToHz, type Mood, type Note, type Variant } from "./music";
+import { PRESETS, type Fx, type PresetId } from "./presets";
 
 export type SfxName = "join" | "tick" | "go" | "timeup" | "reveal" | "rank";
 
@@ -90,6 +91,148 @@ export function tick(ctx: BaseAudioContext, dest: AudioNode, t: number, vel: num
   o.connect(g); o.start(t); o.stop(t + 0.08);
 }
 
+/* ---------------------------------------------------------------- voices of the other presets */
+
+/** Warm synth pad: three detuned saws behind a slowly opening low-pass, plus a sine an octave below. */
+export function pad(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.085 * vel, 0.9, Math.max(0.02, dur - 1.2), 0.9);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = 0.8;
+  lp.frequency.setValueAtTime(500, t); lp.frequency.linearRampToValueAtTime(1700, t + Math.min(dur, 2.4)); lp.connect(g);
+  for (const detune of [-11, 0, 11]) { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = hz; o.detune.value = detune; o.connect(lp); o.start(t); o.stop(t + dur + 0.9); }
+  const sub = ctx.createOscillator(); sub.type = "sine"; sub.frequency.value = hz / 2;
+  const sg = ctx.createGain(); sg.gain.value = 0.5; sub.connect(sg); sg.connect(g); sub.start(t); sub.stop(t + dur + 0.9);
+}
+
+/** Synth lead: saw and square behind an opening filter, late vibrato. */
+export function lead(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.15 * vel, 0.02, Math.max(0.02, dur - 0.12), 0.2);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = 3;
+  lp.frequency.setValueAtTime(700, t); lp.frequency.exponentialRampToValueAtTime(3200, t + 0.25); lp.connect(g);
+  const o1 = ctx.createOscillator(); o1.type = "sawtooth"; o1.frequency.value = hz;
+  const o2 = ctx.createOscillator(); o2.type = "square"; o2.frequency.value = hz; o2.detune.value = 7;
+  const g2 = ctx.createGain(); g2.gain.value = 0.45;
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 5.5;
+  const depth = ctx.createGain(); depth.gain.setValueAtTime(0, t); depth.gain.linearRampToValueAtTime(hz * 0.004, t + 0.4);
+  lfo.connect(depth); depth.connect(o1.frequency); depth.connect(o2.frequency);
+  o1.connect(lp); o2.connect(g2); g2.connect(lp);
+  const end = t + dur + 0.3;
+  for (const o of [o1, o2, lfo]) { o.start(t); o.stop(end); }
+}
+
+/** Analog-sequencer pluck: a saw with a quickly closing filter. */
+export function arp(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, dur: number, vel: number) {
+  const ring = Math.min(0.28, dur + 0.1);
+  const g = env(ctx, dest, t, 0.15 * vel, 0.003, 0, ring);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = 4;
+  lp.frequency.setValueAtTime(3500, t); lp.frequency.exponentialRampToValueAtTime(500, t + ring); lp.connect(g);
+  const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = hz; o.connect(lp); o.start(t); o.stop(t + ring + 0.1);
+}
+
+export function synbass(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.3 * vel, 0.008, Math.max(0.02, dur * 0.5), Math.max(0.08, dur * 0.5));
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.Q.value = 2;
+  lp.frequency.setValueAtTime(900, t); lp.frequency.exponentialRampToValueAtTime(250, t + Math.max(0.15, dur)); lp.connect(g);
+  const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = hz; o.connect(lp);
+  const s = ctx.createOscillator(); s.type = "sine"; s.frequency.value = hz; s.connect(g);
+  for (const x of [o, s]) { x.start(t); x.stop(t + dur + 0.4); }
+}
+
+export function clap(ctx: BaseAudioContext, dest: AudioNode, t: number, vel: number) {
+  for (const [dt, k] of [[0, 1], [0.011, 0.7], [0.023, 0.5]] as const) {
+    const src = ctx.createBufferSource(); src.buffer = noiseBuffer(ctx);
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1700; bp.Q.value = 0.9;
+    const g = env(ctx, dest, t + dt, 0.2 * vel * k, 0.002, 0.012, dt === 0.023 ? 0.14 : 0.03);
+    src.connect(bp); bp.connect(g); src.start(t + dt, 0.4, 0.2);
+  }
+}
+
+export function tom(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, vel: number) {
+  const g = env(ctx, dest, t, 0.4 * vel, 0.002, 0.02, 0.22);
+  const o = ctx.createOscillator(); o.type = "sine";
+  o.frequency.setValueAtTime(hz * 1.6, t); o.frequency.exponentialRampToValueAtTime(hz * 0.8, t + 0.2);
+  o.connect(g); o.start(t); o.stop(t + 0.3);
+}
+
+/** Glass bell: two-operator FM with a modulation that dies away, so the tone starts bright and ends pure. */
+export function bell(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, dur: number, vel: number) {
+  const ring = Math.min(3.2, 1 + dur * 1.2);
+  const g = env(ctx, dest, t, 0.19 * vel, 0.003, 0, ring);
+  const car = ctx.createOscillator(); car.type = "sine"; car.frequency.value = hz;
+  const mod = ctx.createOscillator(); mod.type = "sine"; mod.frequency.value = hz * 3.5;
+  const mg = ctx.createGain(); mg.gain.setValueAtTime(hz * 2.2, t); mg.gain.exponentialRampToValueAtTime(0.5, t + ring * 0.6);
+  mod.connect(mg); mg.connect(car.frequency); car.connect(g);
+  const up = ctx.createOscillator(); up.type = "sine"; up.frequency.value = hz * 2;
+  const ug = ctx.createGain(); ug.gain.value = 0.12; up.connect(ug); ug.connect(g);
+  for (const o of [car, mod, up]) { o.start(t); o.stop(t + ring + 0.1); }
+}
+
+/** Music box: a sine with a bright third partial and a short ring. */
+export function musicbox(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, _dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.2 * vel, 0.002, 0, 0.7);
+  const a = ctx.createOscillator(); a.type = "sine"; a.frequency.value = hz; a.connect(g);
+  const b = ctx.createOscillator(); b.type = "sine"; b.frequency.value = hz * 3;
+  const bg = ctx.createGain(); bg.gain.setValueAtTime(0.28, t); bg.gain.exponentialRampToValueAtTime(0.001, t + 0.25); b.connect(bg); bg.connect(g);
+  for (const o of [a, b]) { o.start(t); o.stop(t + 0.8); }
+}
+
+/** Marimba: a sine plus a short "knock" four times higher. */
+export function marimba(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, _dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.26 * vel, 0.003, 0, 0.38);
+  const a = ctx.createOscillator(); a.type = "sine"; a.frequency.value = hz; a.connect(g);
+  const b = ctx.createOscillator(); b.type = "sine"; b.frequency.value = hz * 4;
+  const bg = ctx.createGain(); bg.gain.setValueAtTime(0.3, t); bg.gain.exponentialRampToValueAtTime(0.001, t + 0.07); b.connect(bg); bg.connect(g);
+  for (const o of [a, b]) { o.start(t); o.stop(t + 0.5); }
+}
+
+/** Glockenspiel: bright, inharmonic partial, medium ring. */
+export function glock(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, _dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.15 * vel, 0.002, 0, 0.55);
+  const a = ctx.createOscillator(); a.type = "sine"; a.frequency.value = hz; a.connect(g);
+  const b = ctx.createOscillator(); b.type = "sine"; b.frequency.value = hz * 2.76;
+  const bg = ctx.createGain(); bg.gain.setValueAtTime(0.3, t); bg.gain.exponentialRampToValueAtTime(0.001, t + 0.2); b.connect(bg); bg.connect(g);
+  for (const o of [a, b]) { o.start(t); o.stop(t + 0.65); }
+}
+
+/** Plucked bass for the cheerful preset: a triangle with a quickly falling filter. */
+export function pizz(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, _dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.3 * vel, 0.004, 0, 0.22);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass";
+  lp.frequency.setValueAtTime(1300, t); lp.frequency.exponentialRampToValueAtTime(300, t + 0.2); lp.connect(g);
+  const o = ctx.createOscillator(); o.type = "triangle"; o.frequency.value = hz; o.connect(lp); o.start(t); o.stop(t + 0.35);
+}
+
+/** Choir-like pad: detuned saws through vowel-like band-pass filters, slow attack and a faint vibrato. */
+export function choir(ctx: BaseAudioContext, dest: AudioNode, t: number, hz: number, dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.12 * vel, 0.9, Math.max(0.02, dur - 1.3), 1);
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 4.6;
+  const depth = ctx.createGain(); depth.gain.setValueAtTime(0, t); depth.gain.linearRampToValueAtTime(hz * 0.005, t + 1.2); lfo.connect(depth);
+  const formants: [number, number, number][] = [[620, 6, 2.2], [1050, 8, 1.6], [2500, 8, 0.6]];
+  const bank = ctx.createGain(); bank.connect(g);
+  for (const [f, q, gain] of formants) {
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = q;
+    const fg = ctx.createGain(); fg.gain.value = gain; bp.connect(fg); fg.connect(bank);
+    for (const detune of [-8, 8]) { const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = hz; o.detune.value = detune; depth.connect(o.frequency); o.connect(bp); o.start(t); o.stop(t + dur + 1); }
+  }
+  lfo.start(t); lfo.stop(t + dur + 1);
+}
+
+/** A swell of breathy noise that opens up and then falls away. */
+export function swell(ctx: BaseAudioContext, dest: AudioNode, t: number, dur: number, vel: number) {
+  const g = env(ctx, dest, t, 0.2 * vel, dur * 0.8, 0, dur * 0.2 + 0.05);
+  const src = ctx.createBufferSource(); src.buffer = noiseBuffer(ctx); src.loop = true;
+  const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = 1.2;
+  bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(2400, t + dur);
+  src.connect(bp); bp.connect(g); src.start(t); src.stop(t + dur + 0.1);
+}
+
+/** A soft low thump, used in pairs for a heartbeat. */
+export function heart(ctx: BaseAudioContext, dest: AudioNode, t: number, vel: number) {
+  const g = env(ctx, dest, t, 0.55 * vel, 0.004, 0.01, 0.24);
+  const o = ctx.createOscillator(); o.type = "sine";
+  o.frequency.setValueAtTime(72, t); o.frequency.exponentialRampToValueAtTime(44, t + 0.16);
+  o.connect(g); o.start(t); o.stop(t + 0.35);
+}
+
 /** Plays notes whose time is given in beats, starting at `t0`. */
 export function scheduleNotes(ctx: BaseAudioContext, dest: AudioNode, notes: Note[], t0: number, secondsPerBeat: number) {
   for (const n of notes) {
@@ -102,16 +245,57 @@ export function scheduleNotes(ctx: BaseAudioContext, dest: AudioNode, notes: Not
       case "kick": kick(ctx, dest, t, n.vel); break;
       case "shaker": shaker(ctx, dest, t, n.vel); break;
       case "tick": tick(ctx, dest, t, n.vel, 1100); break;
+      case "pad": pad(ctx, dest, t, hz, dur, n.vel); break;
+      case "lead": lead(ctx, dest, t, hz, dur, n.vel); break;
+      case "arp": arp(ctx, dest, t, hz, dur, n.vel); break;
+      case "synbass": synbass(ctx, dest, t, hz, dur, n.vel); break;
+      case "clap": clap(ctx, dest, t, n.vel); break;
+      case "tom": tom(ctx, dest, t, hz, n.vel); break;
+      case "bell": bell(ctx, dest, t, hz, dur, n.vel); break;
+      case "musicbox": musicbox(ctx, dest, t, hz, dur, n.vel); break;
+      case "marimba": marimba(ctx, dest, t, hz, dur, n.vel); break;
+      case "glock": glock(ctx, dest, t, hz, dur, n.vel); break;
+      case "pizz": pizz(ctx, dest, t, hz, dur, n.vel); break;
+      case "choir": choir(ctx, dest, t, hz, dur, n.vel); break;
+      case "swell": swell(ctx, dest, t, dur, n.vel); break;
+      case "heart": heart(ctx, dest, t, n.vel); break;
     }
   }
 }
 
-function masterChain(ctx: BaseAudioContext): { input: GainNode } {
+/** A short hall: exponentially decaying stereo noise of the given length. */
+function hallImpulse(ctx: BaseAudioContext, seconds: number): AudioBuffer {
+  const len = Math.max(1, Math.floor(ctx.sampleRate * seconds)), buf = ctx.createBuffer(2, len, ctx.sampleRate);
+  let seed = 424242;
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < len; i++) { seed = (seed * 1664525 + 1013904223) >>> 0; d[i] = ((seed / 0xffffffff) * 2 - 1) * Math.exp(-5 * (i / len)); }
+  }
+  return buf;
+}
+
+/** Everything goes through a compressor. A preset can add a tape-like echo and a hall; with none, the sound is dry. */
+function masterChain(ctx: BaseAudioContext, fx: Fx | null = null): { input: GainNode; setFx(fx: Fx | null): void } {
   const input = ctx.createGain();
   const comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -16; comp.knee.value = 20; comp.ratio.value = 5; comp.attack.value = 0.005; comp.release.value = 0.2;
-  input.connect(comp); comp.connect(ctx.destination);
-  return { input };
+  comp.connect(ctx.destination);
+  input.connect(comp);
+  const delay = ctx.createDelay(2), feedback = ctx.createGain(), tone = ctx.createBiquadFilter(), echo = ctx.createGain();
+  tone.type = "lowpass"; tone.frequency.value = 2600;
+  input.connect(delay); delay.connect(tone); tone.connect(feedback); feedback.connect(delay); tone.connect(echo); echo.connect(comp);
+  const hall = ctx.createConvolver(), hallMix = ctx.createGain();
+  input.connect(hall); hall.connect(hallMix); hallMix.connect(comp);
+  echo.gain.value = 0; hallMix.gain.value = 0; feedback.gain.value = 0;
+  const setFx = (f: Fx | null) => {
+    const t = ctx.currentTime;
+    echo.gain.setTargetAtTime(f?.delayMix ?? 0, t, 0.05);
+    hallMix.gain.setTargetAtTime(f?.reverbMix ?? 0, t, 0.05);
+    feedback.gain.setTargetAtTime(f?.delayFeedback ?? 0, t, 0.05);
+    if (f) { delay.delayTime.setTargetAtTime(f.delaySec, t, 0.05); hall.buffer = hallImpulse(ctx, f.reverbSec); }
+  };
+  setFx(fx);
+  return { input, setFx };
 }
 
 /** Renders a few bars of a variant to a buffer (used by the "save a sample" button and by tests). */
@@ -135,6 +319,52 @@ export async function renderWaiting(bars: number, players: number, sampleRate = 
   return ctx.startRendering();
 }
 
+/** A preset's music in one mood, or a demo of all of it: lobby, question and hurry music, then both fanfares. Used by the listening page and by tests. */
+export async function renderPresetDemo(id: PresetId, sampleRate = 22050, variant?: Variant): Promise<AudioBuffer> {
+  const p = PRESETS[id];
+  const parts: { mood: Mood; bars: number }[] = [{ mood: "lobby", bars: 4 }, { mood: "question", bars: 8 }, { mood: "hurry", bars: 4 }];
+  let seconds = 1;
+  for (const part of parts) seconds += part.bars * BEATS_PER_BAR * (60 / p.bpm(part.mood, variant));
+  seconds += 4 + 5;
+  const ctx = new OfflineAudioContext(1, Math.ceil(seconds * sampleRate), sampleRate);
+  const { input } = masterChain(ctx, p.fx);
+  input.gain.value = 0.8;
+  let t = 0.1;
+  for (const part of parts) {
+    const spb = 60 / p.bpm(part.mood, variant);
+    for (let b = 0; b < part.bars; b++) scheduleNotes(ctx, input, p.bar(part.mood, b, variant), t + b * BEATS_PER_BAR * spb, spb);
+    t += part.bars * BEATS_PER_BAR * spb;
+  }
+  for (const kind of ["short", "podium"] as const) {
+    const f = p.fanfare(kind);
+    scheduleNotes(ctx, input, f.notes, t + 0.3, f.spb);
+    t += 4;
+  }
+  return ctx.startRendering();
+}
+
+/** A preset's waiting theme from the first bar. */
+export async function renderPresetWaiting(id: PresetId, bars: number, players: number, sampleRate = 22050): Promise<AudioBuffer> {
+  const p = PRESETS[id];
+  const spb = 60 / p.waitingBpm;
+  const ctx = new OfflineAudioContext(1, Math.ceil((bars * BEATS_PER_BAR * spb + 2) * sampleRate), sampleRate);
+  const { input } = masterChain(ctx, p.fx);
+  input.gain.value = 0.8;
+  for (let b = 0; b < bars; b++) scheduleNotes(ctx, input, p.waitingBar(b, players), b * BEATS_PER_BAR * spb, spb);
+  return ctx.startRendering();
+}
+
+/** A preset's opening sting (the Carpathians use the original intro in jingle.ts). */
+export async function renderPresetIntro(id: PresetId, sampleRate = 22050): Promise<AudioBuffer | null> {
+  const p = PRESETS[id];
+  if (!p.intro) return null;
+  const ctx = new OfflineAudioContext(1, Math.ceil(p.intro.seconds * sampleRate), sampleRate);
+  const { input } = masterChain(ctx, p.fx);
+  input.gain.value = 0.8;
+  scheduleNotes(ctx, input, p.intro.notes, 0.05, p.intro.spb);
+  return ctx.startRendering();
+}
+
 export function encodeWav(buffer: AudioBuffer): Blob {
   const ch = buffer.numberOfChannels, n = buffer.length, bytes = n * ch * 2;
   const chans = Array.from({ length: ch }, (_, c) => buffer.getChannelData(c));
@@ -151,6 +381,8 @@ export interface AudioEngine {
   resume(): Promise<void>;
   setVolume(v: number): void;
   setMuted(m: boolean): void;
+  /** Switches the whole sound to a preset (music, waiting theme, effects, fanfares). The original sound is "carpathians". */
+  setPreset(id: PresetId): void;
   /** Starts (or switches to) background music. A new mood of the same variant takes effect at the next bar. */
   playMusic(variant: Variant, mood: Mood, opts?: { restart?: boolean }): void;
   /** The lobby waiting theme: a monotone pulse that builds while players join. */
@@ -169,7 +401,7 @@ export interface AudioEngine {
 export function createEngine(): AudioEngine {
   const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new Ctor();
-  const { input: master } = masterChain(ctx);
+  const { input: master, setFx } = masterChain(ctx);
   let volume = 0.7, muted = false;
   const apply = () => master.gain.setTargetAtTime(muted ? 0 : volume, ctx.currentTime, 0.03);
   apply();
@@ -177,12 +409,13 @@ export function createEngine(): AudioEngine {
   let bus: GainNode | null = null;
   let buffer: AudioBufferSourceNode | null = null;
   let timer: ReturnType<typeof setInterval> | null = null;
-  const song = { variant: "sopilka" as Variant, mood: "lobby" as Mood, bar: 0, next: 0, waiting: false, players: 0 };
+  const song = { preset: "carpathians" as PresetId, variant: "sopilka" as Variant, mood: "lobby" as Mood, bar: 0, next: 0, waiting: false, players: 0 };
 
   function pump() {
     while (bus && song.next < ctx.currentTime + 0.3) {
-      const spb = 60 / (song.waiting ? WAITING_BPM : bpmFor(song.variant, song.mood));
-      scheduleNotes(ctx, bus, song.waiting ? waitingBar(song.bar, song.players) : barNotes(song.variant, song.mood, song.bar), song.next, spb);
+      const preset = PRESETS[song.preset];
+      const spb = 60 / (song.waiting ? preset.waitingBpm : preset.bpm(song.mood, song.variant));
+      scheduleNotes(ctx, bus, song.waiting ? preset.waitingBar(song.bar, song.players) : preset.bar(song.mood, song.bar, song.variant), song.next, spb);
       song.bar++;
       song.next += BEATS_PER_BAR * spb;
     }
@@ -205,6 +438,12 @@ export function createEngine(): AudioEngine {
     resume: () => ctx.resume(),
     setVolume(v) { volume = Math.max(0, Math.min(1, v)); apply(); },
     setMuted(m) { muted = m; apply(); },
+    setPreset(id) {
+      if (String(song.preset) === id) return;
+      song.preset = id;
+      setFx(PRESETS[id].fx);
+      if (bus) { const was = song.waiting, mood = song.mood, players = song.players; stopMusic(); if (was) this.playWaiting(players); else this.playMusic(song.variant, mood, { restart: true }); }
+    },
     playMusic(variant, mood, opts) {
       const restart = opts?.restart || !bus || song.variant !== variant;
       song.variant = variant; song.mood = mood;
@@ -234,6 +473,8 @@ export function createEngine(): AudioEngine {
     },
     stopBuffer() { try { buffer?.stop(); } catch { /* already finished */ } buffer = null; },
     sfx(name) {
+      const custom = PRESETS[song.preset].sfx;
+      if (custom) { fx((d, t) => scheduleNotes(ctx, d, custom(name), t, 1)); return; }
       fx((d, t) => {
         switch (name) {
           case "join": tick(ctx, d, t, 0.9, 880); tick(ctx, d, t + 0.09, 0.9, 1320); break;
@@ -253,7 +494,7 @@ export function createEngine(): AudioEngine {
         }
       });
     },
-    fanfare(kind) { fx((d, t) => scheduleNotes(ctx, d, fanfare(kind), t, 0.3)); },
+    fanfare(kind) { const f = PRESETS[song.preset].fanfare(kind); fx((d, t) => scheduleNotes(ctx, d, f.notes, t, f.spb)); },
     dispose() { stopMusic(); try { buffer?.stop(); } catch { /* done */ } void ctx.close(); },
   };
 }

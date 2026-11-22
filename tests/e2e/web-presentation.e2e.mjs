@@ -74,7 +74,7 @@ try {
     return quiz;
   }
   const quiz = await makeQuiz("З музикою", {});
-  const quietQuiz = await makeQuiz("Без звуку", { soundEnabled: false });
+  const quietQuiz = await makeQuiz("Без звуку", {});
   const startGame = async (quizId) => { const r = await call("POST", "/api/games", { quizId, acknowledgeQuota: true }); return r.json.game; };
 
   // ---------- host + projector
@@ -151,8 +151,8 @@ try {
   check("turning sound off silences it", silent < 0.002, String(silent));
   await screen.getByRole("button", { name: "Увімкнути звук" }).click();
   await screen.getByRole("button", { name: "Вимкнути звук" }).waitFor();
-  check("the choice of music is offered", (await screen.locator("select option").count()) === 3);
-  check("sound has the 'listen' link", (await screen.getByRole("link", { name: "Послухати варіанти" }).count()) === 1);
+  check("the projector has no music choice and no volume slider", (await screen.locator("select, input[type=range]").count()) === 0);
+  check("the projector has no link to the listening page", (await screen.getByRole("link", { name: "Послухати варіанти" }).count()) === 0);
 
   // Animation classes on the projector, none on the phone.
   // (a player joins so the lobby has an avatar)
@@ -164,7 +164,14 @@ try {
   check("the player waiting screen shows the Гарт logo", (await phone.getByTestId("brand-bar").getByRole("img", { name: "Гарт" }).count()) === 1);
   check("the phone has no animations", (await phone.evaluate(() => document.getAnimations().length)) === 0);
   check("the phone never downloaded the sound engine or the QR library", !phoneRequests.some((u) => /engine-|QrCode-|ListenPage-/.test(u)), phoneRequests.filter((u) => /assets/.test(u)).join(", "));
-  check("the phone has no sound switch", (await phone.getByText("Увімкнути звук").count()) === 0);
+  check("the phone has the big sound switch from the waiting screen", (await phone.getByTestId("sound-toggle").count()) === 1);
+  await phone.getByTestId("sound-toggle").click();
+  await phone.locator('[data-testid=sound-toggle][aria-pressed="true"]').waitFor();
+  check("the phone's switch turns the sound on", true);
+  check("the phone downloads the sound engine only after the click", phoneRequests.some((u) => /engine-/.test(u)));
+  await phone.getByTestId("sound-toggle").click();
+  await phone.locator('[data-testid=sound-toggle][aria-pressed="false"]').waitFor();
+  check("and off again", true);
 
   // Projector design: the lobby and the question must fit the screen without scrolling, at both common sizes.
   const fits = (p) => p.evaluate(() => ({ h: document.documentElement.scrollHeight - innerHeight, w: document.documentElement.scrollWidth - innerWidth }));
@@ -202,31 +209,10 @@ try {
   await until(screen, (t) => t.includes("Гру завершено"), "final");
   check("the podium shows on the projector", (await screen.locator("[data-testid=screen]").count()) === 1 && (await screen.evaluate(() => document.getAnimations().length)) === 0);
 
-  // A quiz carrying the old "music off" setting behaves like any other: only the Gart sound setting counts.
   const quiet = await startGame(quietQuiz.id);
-  const q = await hostCtx.newPage(); q.on("pageerror", (e) => errors.push(`quiet: ${e.message}`));
-  await q.goto(`${BASE}/screen/${quiet.id}`);
-  await until(q, (t) => t.includes(quiet.pin), "quiet projector");
-  check("the old per-quiz music setting no longer hides the sound control", (await q.getByTestId("sound-control").count()) === 1);
-  await q.getByRole("button", { name: "Увімкнути звук" }).click();
-  await q.getByRole("button", { name: "Вимкнути звук" }).waitFor();
-  check("the intro plays", (await q.evaluate(() => window.__peakOver(3500))) > 0.05);
-  await q.close();
 
   // The loud quiz: the waiting theme builds with the players.
   check("the waiting theme plays in the lobby after the intro", (await screen.evaluate(() => window.__peakOver(1500))) > 0.02);
-
-  // Gart sound switched off in the settings: nothing is offered anywhere.
-  const brand = (await call("GET", "/api/branding")).json.branding;
-  await call("PUT", "/api/branding", { ...brand, soundEnabled: false });
-  const offCtx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
-  await offCtx.addCookies([{ name: cookie.v.split("=")[0], value: cookie.v.split("=")[1], url: BASE }]);
-  const off = await offCtx.newPage();
-  await off.goto(`${BASE}/screen/${game.id}`);
-  await until(off, (t) => t.includes(game.pin), "projector with Gart sound off");
-  check("with Gart sound switched off there is no sound control", (await off.getByTestId("sound-control").count()) === 0);
-  await call("PUT", "/api/branding", { ...brand, soundEnabled: true });
-  await off.context().close();
 
   // Reduced motion: animations collapse.
   const rm = await browser.newContext({ viewport: { width: 1280, height: 720 }, reducedMotion: "reduce" });
@@ -252,7 +238,8 @@ try {
     let peak = 0, sum = 0; for (const v of s) { peak = Math.max(peak, Math.abs(v)); sum += v * v; }
     const rms = Math.sqrt(sum / s.length);
     const win = Math.floor(rate * 0.25); let quiet = 0, total = 0;
-    for (let i = 0; i + win < s.length - rate; i += win) { let m = 0; for (let j = i; j < i + win; j++) m = Math.max(m, Math.abs(s[j])); total++; if (m < 0.01) quiet++; }
+    // The demo ends with a silent tail for the reverb (about nine seconds after the fanfares): only the music counts.
+    for (let i = 0; i + win < s.length - rate * 10; i += win) { let m = 0; for (let j = i; j < i + win; j++) m = Math.max(m, Math.abs(s[j])); total++; if (m < 0.01) quiet++; }
     check(`${id}: the sample is ${(s.length / rate).toFixed(1)} s long, level rms ${rms.toFixed(3)} peak ${peak.toFixed(2)}`, s.length / rate > 10 && rms > 0.02 && rms < 0.4 && peak < 0.99);
     check(`${id}: no gaps of silence inside the music`, quiet / total < 0.05, `${quiet}/${total}`);
   }

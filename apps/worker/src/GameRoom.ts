@@ -617,7 +617,6 @@ export class GameRoom extends DurableObject<Env> {
       settings: {
         showQuestionProgress: core.s.showQuestionProgress,
         countdownSec: core.s.countdownBeforeQuestionSec,
-        soundEnabled: core.s.soundEnabled,
         showCorrectAnswer: core.s.showCorrectAnswer,
         leaderboardEnabled: core.s.leaderboardEnabled,
       },

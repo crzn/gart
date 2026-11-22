@@ -5,7 +5,7 @@ const KNOWN = new Set([
   "invalid_credentials", "rate_limited", "network", "forbidden", "forbidden_self", "email_taken", "invalid_email",
   "invalid_display_name", "weak_password", "last_owner", "not_found", "unauthorized", "server_misconfigured",
   "limit_reached", "unknown_media", "unsupported_image", "image_too_large", "media_quota", "invalid_settings", "unknown_template", "not_playable", "invalid_order",
-  "too_many_games", "invalid_thresholds", "quota_risk", "quiz_not_active", "game_over", "csrf_rejected", "invalid_request", "invalid_json", "payload_too_large",
+  "too_many_games", "guest_busy", "invalid_thresholds", "quota_risk", "quiz_not_active", "game_over", "csrf_rejected", "invalid_request", "invalid_json", "payload_too_large",
   "token_rejected", "cloudflare_unreachable", "token_missing_rights", "database_not_found", "token_no_account", "worker_not_found", "not_connected", "already_running", "same_version", "unknown_version", "github_unavailable",
 ]);
 

@@ -1,6 +1,7 @@
 import { ShieldCheck, Users } from "lucide-react";
 import { Suspense, lazy } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useBranding } from "./branding";
 import { BrandLogo } from "./Logo";
 import { useLang } from "./i18n";
@@ -9,6 +10,7 @@ import { AdminPage } from "./pages/AdminPage";
 import { LoginPage } from "./pages/LoginPage";
 import { SetupPage } from "./pages/SetupPage";
 import { JoinPage } from "./pages/JoinPage";
+import { ShowcasePage } from "./pages/ShowcasePage";
 import { PlayPage } from "./pages/PlayPage";
 import { HostPage, ScreenPage } from "./pages/HostPage";
 import { PrivacyPage } from "./pages/PrivacyPage";
@@ -36,7 +38,9 @@ export function App() {
     <div className="app-backdrop flex min-h-dvh flex-col">
       {projector || admin ? null : <header className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <div className={`flex w-full items-center gap-3 sm:w-auto sm:flex-1 ${align}`}>
-          <BrandLogo />
+          <Link to="/showcase" aria-label={t("showcase.title")} className="rounded-xl hover:opacity-90">
+            <BrandLogo />
+          </Link>
         </div>
         <nav className="flex items-center gap-1" aria-label="Main">
           <NavLink to="/" end className={navClass}>
@@ -54,6 +58,7 @@ export function App() {
       <main className={`mx-auto flex w-full flex-1 pb-10 ${path.startsWith("/screen/") ? "max-w-none px-[3vw] pt-4" : `px-4 sm:px-6 ${projector ? "max-w-5xl pt-4" : admin || path.startsWith("/host/") ? "max-w-6xl pt-4" : "max-w-5xl"}`}`}>
         <Routes>
           <Route path="/" element={<JoinPage />} />
+          <Route path="/showcase" element={<ShowcasePage />} />
           <Route path="/play/:pin" element={<PlayPage />} />
           <Route path="/host/:id" element={<HostPage />} />
           <Route path="/screen/:id" element={<ScreenPage />} />

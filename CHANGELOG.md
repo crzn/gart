@@ -2,6 +2,21 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.14.0] - 2026-11-22: sound switch per screen, quiz showcase
+
+### Added
+- **Quiz showcase** (`/showcase`). The Gart logo opens it. Every quiz that is ready to play is shown as a card with its cover, title, description, category, tags, difficulty, question count and language, and filters by difficulty and tag. The public list never includes questions or answers.
+- **Start a game without an account.** A visitor presses "Start" and gets a game for up to **10 players**. One visitor game runs at a time on the whole deployment, and an address may start 3 an hour. The visitor's host screen works like the administrator's, through a secret that the server keeps only as a hash and that lives in the browser tab. Cancelling frees the slot.
+- A signed-in editor starts from the same page with no player limit, as before.
+- The join-by-code dialog and the sign-in stay on the main page.
+
+### Changed
+- **One sound switch per screen.** The host screen and the projector have a single "Sound: off / On" button; it is off until clicked and nothing is remembered. Every player's phone gets the same sound with a large round switch in the top-right corner, from the waiting screen to the end of the game (the points moved next to the name). Each screen switches its own sound.
+- **One sound scheme:** Carpathians. The choice of music (Sopilka, Tsymbaly, Hopak), the volume slider and the "Listen to the variants" link are gone from the game screens; `/listen` still previews the music.
+
+### Removed
+- The **Gart sound** setting (Branding tab, header menu "Gart sound: on/off", `PUT /api/branding/sound`) and the quiz setting "Music and sound effects". Old saved values are ignored.
+
 ## [0.13.1] - 2026-11-22: link preview and pauses
 
 ### Added

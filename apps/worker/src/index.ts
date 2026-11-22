@@ -14,6 +14,7 @@ import { mediaRoutes } from "./routes/media";
 import { quizRoutes } from "./routes/quizzes";
 import { setupRoutes } from "./routes/setup";
 import { shareRoutes } from "./routes/share";
+import { showcaseRoutes } from "./routes/showcase";
 import { wsRoutes } from "./routes/ws";
 
 export { GameRoom } from "./GameRoom";
@@ -62,6 +63,7 @@ app.route("/api/join", joinRoutes);
 app.route("/api/usage", usageRoutes);
 app.route("/api/updates", updateRoutes);
 app.route("/api/media", mediaRoutes);
+app.route("/api/showcase", showcaseRoutes);
 
 // Live games. The route applies the client IP (normally set by the /api security middleware).
 app.use("/ws/*", async (c, next) => {

@@ -4,7 +4,7 @@ import { gameReducer, initialGameState, secondsLeft, secondsUntilStart, type Gam
 
 const base: SnapshotData = {
   serverTime: 10_000, role: "player", state: "LOBBY", paused: false, title: "T", pin: "123456", playerCount: 1,
-  settings: { showQuestionProgress: true, countdownSec: 3, soundEnabled: false, showCorrectAnswer: true, leaderboardEnabled: true },
+  settings: { showQuestionProgress: true, countdownSec: 3, showCorrectAnswer: true, leaderboardEnabled: true },
   you: { playerId: "p1", nickname: "Ann", avatar: "fox", points: 0, rank: null },
 };
 const q = { index: 0, total: 2, text: "Q", options: [{ id: "a", text: "A" }, { id: "b", text: "B" }], startsAt: 20_000, endsAt: 30_000 };

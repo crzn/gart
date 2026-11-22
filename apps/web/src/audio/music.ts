@@ -6,7 +6,10 @@
 
 export type Variant = "sopilka" | "tsymbaly" | "hopak";
 export type Mood = "lobby" | "question" | "hurry";
-export type Voice = "flute" | "pluck" | "bass" | "drone" | "kick" | "shaker" | "tick";
+export type Voice =
+  | "flute" | "pluck" | "bass" | "drone" | "kick" | "shaker" | "tick"
+  // Voices of the other sound presets (see presets.ts).
+  | "pad" | "lead" | "arp" | "synbass" | "clap" | "tom" | "bell" | "musicbox" | "marimba" | "glock" | "pizz" | "choir" | "swell" | "heart";
 export interface Note { beat: number; dur: number; midi: number; voice: Voice; vel: number }
 
 export const VARIANTS: Variant[] = ["sopilka", "tsymbaly", "hopak"];

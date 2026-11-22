@@ -14,8 +14,6 @@ export async function loadBranding(db: D1Database) {
   return parsed.success ? parsed.data : DEFAULT_BRANDING;
 }
 
-const SoundSchema = BrandingSchema.pick({ soundEnabled: true });
-
 export const brandingRoutes = new Hono<AppEnv>();
 
 /** Public: the sign-in page and the player screens need the colours before anyone signs in. */
@@ -34,17 +32,4 @@ brandingRoutes.put("/", requireAuth, requireRole("admin"), async (c) => {
   ).bind(JSON.stringify(body.data), new Date().toISOString()).run();
   await writeAudit(c.env.DB, { adminId: c.get("auth").adminId, action: "branding.updated", entity: "settings", entityId: "branding" });
   return c.json({ branding: body.data });
-});
-
-/** Any signed-in user, editors included, can switch the Gart-wide sound on or off. */
-brandingRoutes.put("/sound", requireAuth, requireRole("editor"), async (c) => {
-  const body = await readJson(c, SoundSchema);
-  if (!body.ok) return body.res;
-  const next = { ...(await loadBranding(c.env.DB)), soundEnabled: body.data.soundEnabled };
-  await c.env.DB.prepare(
-    `INSERT INTO application_settings (key, value_json, updated_at) VALUES ('branding', ?, ?)
-     ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json, updated_at = excluded.updated_at`,
-  ).bind(JSON.stringify(next), new Date().toISOString()).run();
-  await writeAudit(c.env.DB, { adminId: c.get("auth").adminId, action: "branding.sound", entity: "settings", entityId: "branding" });
-  return c.json({ branding: next });
 });

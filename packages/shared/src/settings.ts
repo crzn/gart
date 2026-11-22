@@ -32,8 +32,6 @@ export const QuizSettingsSchema = z
     /** Close a question as soon as every joined player has answered. */
     closeWhenAllAnswered: z.boolean().default(true),
     autoAdvance: z.boolean().default(false),
-    /** Music and effects on the host screen and projector; each of those screens still has to switch sound on with a click. */
-    soundEnabled: z.boolean().default(true),
     showQuestionProgress: z.boolean().default(true),
     countdownBeforeQuestionSec: z.number().int().min(0).max(10).default(3),
   })

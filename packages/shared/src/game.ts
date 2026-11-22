@@ -75,3 +75,11 @@ export const GAME_LIMITS = {
   /** Sockets the room accepts: players + host + projector screens + a little slack. */
   maxScreens: 5,
 } as const;
+
+/** Limits for a visitor who starts a game without signing in. A signed-in administrator has none of them. */
+export const GUEST_LIMITS = {
+  /** Players in a game started by a visitor. */
+  maxPlayers: 10,
+  /** Visitor games running at the same time on the whole deployment (the Free plan budget is shared with administrators). */
+  maxConcurrentGames: 1,
+} as const;
