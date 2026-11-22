@@ -1,7 +1,6 @@
 import { ShieldCheck, Users } from "lucide-react";
 import { Suspense, lazy } from "react";
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { useBranding } from "./branding";
 import { BrandLogo } from "./Logo";
 import { useLang } from "./i18n";
@@ -38,9 +37,7 @@ export function App() {
     <div className="app-backdrop flex min-h-dvh flex-col">
       {projector || admin ? null : <header className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <div className={`flex w-full items-center gap-3 sm:w-auto sm:flex-1 ${align}`}>
-          <Link to="/showcase" aria-label={t("showcase.title")} className="rounded-xl hover:opacity-90">
-            <BrandLogo />
-          </Link>
+          <BrandLogo to="/showcase" />
         </div>
         <nav className="flex items-center gap-1" aria-label="Main">
           <NavLink to="/" end className={navClass}>

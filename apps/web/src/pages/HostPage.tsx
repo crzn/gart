@@ -145,7 +145,7 @@ export function ScreenPage() {
   return (
     <section className="w-full" data-testid="screen">
       {state.snap && state.snap.state !== "LOBBY" ? <p className="mb-4 text-right text-[2.2vmin] text-ink-muted">{t("host.joinAt")} {location.host} · PIN <b className="font-mono text-ink">{game.pin}</b></p> : null}
-      <div className="mb-4"><BrandBar big /></div>
+      <div className="mb-4"><BrandBar big to="/showcase" newTab /></div>
       <LiveView state={state} big fx joinUrl={location.host} />
       <div className="fixed bottom-4 right-4 opacity-60 hover:opacity-100 focus-within:opacity-100"><SoundToggle sound={sound} /></div>
     </section>

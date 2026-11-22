@@ -1,4 +1,6 @@
+import { Link } from "react-router-dom";
 import { useBranding } from "./branding";
+import { useLang } from "./i18n";
 import { mediaUrl } from "./image";
 
 /** "ГАРТ" in Unbounded Black, converted to outlines so no web font has to be loaded (the CSP only allows our own fonts). */
@@ -41,10 +43,11 @@ export function LogoLockup({ className = "" }: { className?: string }) {
  * The brand shown in headers and on the projector. By default the Гарт logo; an uploaded custom logo
  * (Settings → Branding) replaces it. The optional company name sits next to either one.
  */
-export function BrandLogo({ size = "md", big = false }: { size?: "sm" | "md"; big?: boolean }) {
+export function BrandLogo({ size = "md", big = false, to, newTab = false }: { size?: "sm" | "md"; big?: boolean; to?: string | undefined; newTab?: boolean }) {
   const { branding: b } = useBranding();
+  const { t } = useLang();
   const h = big ? "h-[7vmin]" : size === "sm" ? "h-8" : "h-10";
-  return (
+  const body = (
     <div className="flex items-center gap-3">
       {b.logoMediaId
         ? <img src={mediaUrl(b.logoMediaId)} alt={b.companyName || "Гарт"} className={`${h} w-auto max-w-[60vw] object-contain`} />
@@ -53,5 +56,12 @@ export function BrandLogo({ size = "md", big = false }: { size?: "sm" | "md"; bi
         <span className={`border-l border-surface-border pl-3 font-semibold ${big ? "text-[3.2vmin]" : "text-base"}`}>{b.companyName}</span>
       ) : null}
     </div>
+  );
+  // A link to the showcase: on every screen where the logo is shown to an administrator or an editor.
+  if (!to) return body;
+  return (
+    <Link to={to} target={newTab ? "_blank" : undefined} rel={newTab ? "noopener" : undefined} aria-label={t("showcase.title")} className="rounded-xl hover:opacity-90">
+      {body}
+    </Link>
   );
 }

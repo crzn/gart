@@ -1,6 +1,6 @@
-import { ArrowRight, KeyRound, LogIn, Play } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { roleAtLeast } from "@gart/shared";
 import { api } from "../api";
 import { useAuth } from "../auth";
@@ -69,10 +69,6 @@ export function ShowcasePage() {
         ) : (
           <p className="text-sm" data-testid="showcase-limit">{(t("showcase.guestLimit") as string).replace("{n}", String(data?.guestMaxPlayers ?? 10))}</p>
         )}
-        <div className="flex flex-wrap gap-2">
-          {!signedIn && <Link to="/admin" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20"><LogIn className="size-4" aria-hidden />{t("showcase.login")}</Link>}
-          <Link to="/" className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm hover:bg-white/20"><KeyRound className="size-4" aria-hidden />{t("showcase.joinCode")}</Link>
-        </div>
       </Card>
 
       {data && data.quizzes.length > 0 && (

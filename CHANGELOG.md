@@ -2,6 +2,12 @@
 
 All notable changes. Format based on Keep a Changelog; versions follow SemVer.
 
+## [0.14.3] - 2026-11-22: logo opens the showcase everywhere, sign-in only in the menu
+
+### Changed
+- **The logo opens the showcase** on the top menu (visitors, editors, administrators), in the admin header, and on the host's screen (in a new tab, so a running game is not interrupted). Projector and player screens have no link.
+- **Showcase** has no sign-in button in the content; sign-in stays in the menu. The "join with a code" button is gone as well, since the top menu has it.
+
 ## [0.14.2] - 2026-11-22: admin quiz list on phones, showcase without tags
 
 ### Changed

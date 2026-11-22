@@ -446,7 +446,7 @@ export function adoptLegacyStateDir(repoRoot) {
   return false;
 }
 
-export async function runJob({ action, params = {}, repoRoot, emit, version = "0.14.2" }) {
+export async function runJob({ action, params = {}, repoRoot, emit, version = "0.14.3" }) {
   const pipeline = PIPELINES[action];
   if (!pipeline) throw new Error(`Unknown action: ${action}`);
 

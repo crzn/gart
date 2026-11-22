@@ -83,7 +83,7 @@ export function AdminPage() {
   return (
     <div className="w-full">
       <header className="mb-6 flex items-center gap-3 border-b border-surface-border pb-3">
-        <div className="shrink-0"><BrandLogo size="sm" /></div>
+        <div className="shrink-0"><BrandLogo size="sm" to="/showcase" /></div>
         <div role="tablist" aria-label={t("nav.admin")} className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
           {tabs.filter((x) => x.show).map(({ id, label, icon: Icon }) => (
             <button key={id} role="tab" type="button" aria-selected={tab === id} onClick={() => setTab(id)} className={`${pill(tab === id)} shrink-0`}>

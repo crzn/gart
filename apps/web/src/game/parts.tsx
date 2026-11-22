@@ -139,10 +139,10 @@ export function QuizIntro({ cover, description, big = false, compact = false }: 
 }
 
 /** The logo: a header on the projector and a signature on the player's waiting screen. */
-export function BrandBar({ big = false }: { big?: boolean }) {
+export function BrandBar({ big = false, to, newTab = false }: { big?: boolean; to?: string | undefined; newTab?: boolean }) {
   return (
     <div className="flex items-center justify-center" data-testid="brand-bar">
-      <BrandLogo big={big} />
+      <BrandLogo big={big} to={to} newTab={newTab} />
     </div>
   );
 }
